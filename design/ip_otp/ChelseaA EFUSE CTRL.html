@@ -1,0 +1,596 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+
+<link href='https://fonts.loli.net/css?family=Open+Sans:400italic,700italic,700,400&subset=latin,latin-ext' rel='stylesheet' type='text/css' /><style type='text/css'>html {overflow-x: initial !important;}:root { --bg-color:#ffffff; --text-color:#333333; --select-text-bg-color:#B5D6FC; --select-text-font-color:auto; --monospace:"Lucida Console",Consolas,"Courier",monospace; --title-bar-height:20px; }
+.mac-os-11 { --title-bar-height:28px; }
+html { font-size: 14px; background-color: var(--bg-color); color: var(--text-color); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0px; padding: 0px; height: auto; inset: 0px; font-size: 1rem; line-height: 1.42857; overflow-x: hidden; background: inherit; tab-size: 4; }
+iframe { margin: auto; }
+a.url { word-break: break-all; }
+a:active, a:hover { outline: 0px; }
+.in-text-selection, ::selection { text-shadow: none; background: var(--select-text-bg-color); color: var(--select-text-font-color); }
+#write { margin: 0px auto; height: auto; width: inherit; word-break: normal; overflow-wrap: break-word; position: relative; white-space: normal; overflow-x: visible; padding-top: 36px; }
+#write.first-line-indent p { text-indent: 2em; }
+#write.first-line-indent li p, #write.first-line-indent p * { text-indent: 0px; }
+#write.first-line-indent li { margin-left: 2em; }
+.for-image #write { padding-left: 8px; padding-right: 8px; }
+body.typora-export { padding-left: 30px; padding-right: 30px; }
+.typora-export .footnote-line, .typora-export li, .typora-export p { white-space: pre-wrap; }
+.typora-export .task-list-item input { pointer-events: none; }
+@media screen and (max-width: 500px) {
+  body.typora-export { padding-left: 0px; padding-right: 0px; }
+  #write { padding-left: 20px; padding-right: 20px; }
+}
+#write li > figure:last-child { margin-bottom: 0.5rem; }
+#write ol, #write ul { position: relative; }
+img { max-width: 100%; vertical-align: middle; image-orientation: from-image; }
+button, input, select, textarea { color: inherit; font: inherit; }
+input[type="checkbox"], input[type="radio"] { line-height: normal; padding: 0px; }
+*, ::after, ::before { box-sizing: border-box; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p, #write pre { width: inherit; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p { position: relative; }
+p { line-height: inherit; }
+h1, h2, h3, h4, h5, h6 { break-after: avoid-page; break-inside: avoid; orphans: 4; }
+p { orphans: 4; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1rem; }
+.md-math-block, .md-rawblock, h1, h2, h3, h4, h5, h6, p { margin-top: 1rem; margin-bottom: 1rem; }
+.hidden { display: none; }
+.md-blockmeta { color: rgb(204, 204, 204); font-weight: 700; font-style: italic; }
+a { cursor: pointer; }
+sup.md-footnote { padding: 2px 4px; background-color: rgba(238, 238, 238, 0.7); color: rgb(85, 85, 85); border-radius: 4px; cursor: pointer; }
+sup.md-footnote a, sup.md-footnote a:hover { color: inherit; text-transform: inherit; text-decoration: inherit; }
+#write input[type="checkbox"] { cursor: pointer; width: inherit; height: inherit; }
+figure { overflow-x: auto; margin: 1.2em 0px; max-width: calc(100% + 16px); padding: 0px; }
+figure > table { margin: 0px; }
+thead, tr { break-inside: avoid; break-after: auto; }
+thead { display: table-header-group; }
+table { border-collapse: collapse; border-spacing: 0px; width: 100%; overflow: auto; break-inside: auto; text-align: left; }
+table.md-table td { min-width: 32px; }
+.CodeMirror-gutters { border-right: 0px; background-color: inherit; }
+.CodeMirror-linenumber { user-select: none; }
+.CodeMirror { text-align: left; }
+.CodeMirror-placeholder { opacity: 0.3; }
+.CodeMirror pre { padding: 0px 4px; }
+.CodeMirror-lines { padding: 0px; }
+div.hr:focus { cursor: none; }
+#write pre { white-space: pre-wrap; }
+#write.fences-no-line-wrapping pre { white-space: pre; }
+#write pre.ty-contain-cm { white-space: normal; }
+.CodeMirror-gutters { margin-right: 4px; }
+.md-fences { font-size: 0.9rem; display: block; break-inside: avoid; text-align: left; overflow: visible; white-space: pre; background: inherit; position: relative !important; }
+.md-fences-adv-panel { width: 100%; margin-top: 10px; text-align: center; padding-top: 0px; padding-bottom: 8px; overflow-x: auto; }
+#write .md-fences.mock-cm { white-space: pre-wrap; }
+.md-fences.md-fences-with-lineno { padding-left: 0px; }
+#write.fences-no-line-wrapping .md-fences.mock-cm { white-space: pre; overflow-x: auto; }
+.md-fences.mock-cm.md-fences-with-lineno { padding-left: 8px; }
+.CodeMirror-line, twitterwidget { break-inside: avoid; }
+svg { break-inside: avoid; }
+.footnotes { opacity: 0.8; font-size: 0.9rem; margin-top: 1em; margin-bottom: 1em; }
+.footnotes + .footnotes { margin-top: 0px; }
+.md-reset { margin: 0px; padding: 0px; border: 0px; outline: 0px; vertical-align: top; background: 0px 0px; text-decoration: none; text-shadow: none; float: none; position: static; width: auto; height: auto; white-space: nowrap; cursor: inherit; -webkit-tap-highlight-color: transparent; line-height: normal; font-weight: 400; text-align: left; box-sizing: content-box; direction: ltr; }
+li div { padding-top: 0px; }
+blockquote { margin: 1rem 0px; }
+li .mathjax-block, li p { margin: 0.5rem 0px; }
+li blockquote { margin: 1rem 0px; }
+li { margin: 0px; position: relative; }
+blockquote > :last-child { margin-bottom: 0px; }
+blockquote > :first-child, li > :first-child { margin-top: 0px; }
+.footnotes-area { color: rgb(136, 136, 136); margin-top: 0.714rem; padding-bottom: 0.143rem; white-space: normal; }
+#write .footnote-line { white-space: pre-wrap; }
+@media print {
+  body, html { border: 1px solid transparent; height: 99%; break-after: avoid; break-before: avoid; font-variant-ligatures: no-common-ligatures; }
+  #write { margin-top: 0px; padding-top: 0px; border-color: transparent !important; padding-bottom: 0px !important; }
+  .typora-export * { -webkit-print-color-adjust: exact; }
+  .typora-export #write { break-after: avoid; }
+  .typora-export #write::after { height: 0px; }
+  .is-mac table { break-inside: avoid; }
+  .typora-export-show-outline .typora-export-sidebar { display: none; }
+}
+.footnote-line { margin-top: 0.714em; font-size: 0.7em; }
+a img, img a { cursor: pointer; }
+pre.md-meta-block { font-size: 0.8rem; min-height: 0.8rem; white-space: pre-wrap; background: rgb(204, 204, 204); display: block; overflow-x: hidden; }
+p > .md-image:only-child:not(.md-img-error) img, p > img:only-child { display: block; margin: auto; }
+#write.first-line-indent p > .md-image:only-child:not(.md-img-error) img { left: -2em; position: relative; }
+p > .md-image:only-child { display: inline-block; width: 100%; }
+#write .MathJax_Display { margin: 0.8em 0px 0px; }
+.md-math-block { width: 100%; }
+.md-math-block:not(:empty)::after { display: none; }
+.MathJax_ref { fill: currentcolor; }
+[contenteditable="true"]:active, [contenteditable="true"]:focus, [contenteditable="false"]:active, [contenteditable="false"]:focus { outline: 0px; box-shadow: none; }
+.md-task-list-item { position: relative; list-style-type: none; }
+.task-list-item.md-task-list-item { padding-left: 0px; }
+.md-task-list-item > input { position: absolute; top: 0px; left: 0px; margin-left: -1.2em; margin-top: calc(1em - 10px); border: none; }
+.math { font-size: 1rem; }
+.md-toc { min-height: 3.58rem; position: relative; font-size: 0.9rem; border-radius: 10px; }
+.md-toc-content { position: relative; margin-left: 0px; }
+.md-toc-content::after, .md-toc::after { display: none; }
+.md-toc-item { display: block; color: rgb(65, 131, 196); }
+.md-toc-item a { text-decoration: none; }
+.md-toc-inner:hover { text-decoration: underline; }
+.md-toc-inner { display: inline-block; cursor: pointer; }
+.md-toc-h1 .md-toc-inner { margin-left: 0px; font-weight: 700; }
+.md-toc-h2 .md-toc-inner { margin-left: 2em; }
+.md-toc-h3 .md-toc-inner { margin-left: 4em; }
+.md-toc-h4 .md-toc-inner { margin-left: 6em; }
+.md-toc-h5 .md-toc-inner { margin-left: 8em; }
+.md-toc-h6 .md-toc-inner { margin-left: 10em; }
+@media screen and (max-width: 48em) {
+  .md-toc-h3 .md-toc-inner { margin-left: 3.5em; }
+  .md-toc-h4 .md-toc-inner { margin-left: 5em; }
+  .md-toc-h5 .md-toc-inner { margin-left: 6.5em; }
+  .md-toc-h6 .md-toc-inner { margin-left: 8em; }
+}
+a.md-toc-inner { font-size: inherit; font-style: inherit; font-weight: inherit; line-height: inherit; }
+.footnote-line a:not(.reversefootnote) { color: inherit; }
+.reversefootnote { font-family: ui-monospace, sans-serif; }
+.md-attr { display: none; }
+.md-fn-count::after { content: "."; }
+code, pre, samp, tt { font-family: var(--monospace); }
+kbd { margin: 0px 0.1em; padding: 0.1em 0.6em; font-size: 0.8em; color: rgb(36, 39, 41); background: rgb(255, 255, 255); border: 1px solid rgb(173, 179, 185); border-radius: 3px; box-shadow: rgba(12, 13, 14, 0.2) 0px 1px 0px, rgb(255, 255, 255) 0px 0px 0px 2px inset; white-space: nowrap; vertical-align: middle; }
+.md-comment { color: rgb(162, 127, 3); opacity: 0.6; font-family: var(--monospace); }
+code { text-align: left; vertical-align: initial; }
+a.md-print-anchor { white-space: pre !important; border-width: initial !important; border-style: none !important; border-color: initial !important; display: inline-block !important; position: absolute !important; width: 1px !important; right: 0px !important; outline: 0px !important; background: 0px 0px !important; text-decoration: initial !important; text-shadow: initial !important; }
+.os-windows.monocolor-emoji .md-emoji { font-family: "Segoe UI Symbol", sans-serif; }
+.md-diagram-panel > svg { max-width: 100%; }
+[lang="flow"] svg, [lang="mermaid"] svg { max-width: 100%; height: auto; }
+[lang="mermaid"] .node text { font-size: 1rem; }
+table tr th { border-bottom: 0px; }
+video { max-width: 100%; display: block; margin: 0px auto; }
+iframe { max-width: 100%; width: 100%; border: none; }
+.highlight td, .highlight tr { border: 0px; }
+mark { background: rgb(255, 255, 0); color: rgb(0, 0, 0); }
+.md-html-inline .md-plain, .md-html-inline strong, mark .md-inline-math, mark strong { color: inherit; }
+.md-expand mark .md-meta { opacity: 0.3 !important; }
+mark .md-meta { color: rgb(0, 0, 0); }
+@media print {
+  .typora-export h1, .typora-export h2, .typora-export h3, .typora-export h4, .typora-export h5, .typora-export h6 { break-inside: avoid; }
+}
+.md-diagram-panel .messageText { stroke: none !important; }
+.md-diagram-panel .start-state { fill: var(--node-fill); }
+.md-diagram-panel .edgeLabel rect { opacity: 1 !important; }
+.md-fences.md-fences-math { font-size: 1em; }
+.md-fences-advanced:not(.md-focus) { padding: 0px; white-space: nowrap; border: 0px; }
+.md-fences-advanced:not(.md-focus) { background: inherit; }
+.typora-export-show-outline .typora-export-content { max-width: 1440px; margin: auto; display: flex; flex-direction: row; }
+.typora-export-sidebar { width: 300px; font-size: 0.8rem; margin-top: 80px; margin-right: 18px; }
+.typora-export-show-outline #write { --webkit-flex:2; flex: 2 1 0%; }
+.typora-export-sidebar .outline-content { position: fixed; top: 0px; max-height: 100%; overflow: hidden auto; padding-bottom: 30px; padding-top: 60px; width: 300px; }
+@media screen and (max-width: 1024px) {
+  .typora-export-sidebar, .typora-export-sidebar .outline-content { width: 240px; }
+}
+@media screen and (max-width: 800px) {
+  .typora-export-sidebar { display: none; }
+}
+.outline-content li, .outline-content ul { margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px; list-style: none; }
+.outline-content ul { margin-top: 0px; margin-bottom: 0px; }
+.outline-content strong { font-weight: 400; }
+.outline-expander { width: 1rem; height: 1.42857rem; position: relative; display: table-cell; vertical-align: middle; cursor: pointer; padding-left: 4px; }
+.outline-expander::before { content: ""; position: relative; font-family: Ionicons; display: inline-block; font-size: 8px; vertical-align: middle; }
+.outline-item { padding-top: 3px; padding-bottom: 3px; cursor: pointer; }
+.outline-expander:hover::before { content: ""; }
+.outline-h1 > .outline-item { padding-left: 0px; }
+.outline-h2 > .outline-item { padding-left: 1em; }
+.outline-h3 > .outline-item { padding-left: 2em; }
+.outline-h4 > .outline-item { padding-left: 3em; }
+.outline-h5 > .outline-item { padding-left: 4em; }
+.outline-h6 > .outline-item { padding-left: 5em; }
+.outline-label { cursor: pointer; display: table-cell; vertical-align: middle; text-decoration: none; color: inherit; }
+.outline-label:hover { text-decoration: underline; }
+.outline-item:hover { border-color: rgb(245, 245, 245); background-color: var(--item-hover-bg-color); }
+.outline-item:hover { margin-left: -28px; margin-right: -28px; border-left: 28px solid transparent; border-right: 28px solid transparent; }
+.outline-item-single .outline-expander::before, .outline-item-single .outline-expander:hover::before { display: none; }
+.outline-item-open > .outline-item > .outline-expander::before { content: ""; }
+.outline-children { display: none; }
+.info-panel-tab-wrapper { display: none; }
+.outline-item-open > .outline-children { display: block; }
+.typora-export .outline-item { padding-top: 1px; padding-bottom: 1px; }
+.typora-export .outline-item:hover { margin-right: -8px; border-right: 8px solid transparent; }
+.typora-export .outline-expander::before { content: "+"; font-family: inherit; top: -1px; }
+.typora-export .outline-expander:hover::before, .typora-export .outline-item-open > .outline-item > .outline-expander::before { content: "−"; }
+.typora-export-collapse-outline .outline-children { display: none; }
+.typora-export-collapse-outline .outline-item-open > .outline-children, .typora-export-no-collapse-outline .outline-children { display: block; }
+.typora-export-no-collapse-outline .outline-expander::before { content: "" !important; }
+.typora-export-show-outline .outline-item-active > .outline-item .outline-label { font-weight: 700; }
+.md-inline-math-container mjx-container { zoom: 0.95; }
+mjx-container { break-inside: avoid; }
+
+
+:root {
+    --side-bar-bg-color: #fafafa;
+    --control-text-color: #777;
+}
+
+@include-when-export url(https://fonts.loli.net/css?family=Open+Sans:400italic,700italic,700,400&subset=latin,latin-ext);
+
+/* open-sans-regular - latin-ext_latin */
+  /* open-sans-italic - latin-ext_latin */
+    /* open-sans-700 - latin-ext_latin */
+    /* open-sans-700italic - latin-ext_latin */
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: "Open Sans","Clear Sans", "Helvetica Neue", Helvetica, Arial, 'Segoe UI Emoji', sans-serif;
+    color: rgb(51, 51, 51);
+    line-height: 1.6;
+}
+
+#write {
+    max-width: 860px;
+  	margin: 0 auto;
+  	padding: 30px;
+    padding-bottom: 100px;
+}
+
+@media only screen and (min-width: 1400px) {
+	#write {
+		max-width: 1024px;
+	}
+}
+
+@media only screen and (min-width: 1800px) {
+	#write {
+		max-width: 1200px;
+	}
+}
+
+#write > ul:first-child,
+#write > ol:first-child{
+    margin-top: 30px;
+}
+
+a {
+    color: #4183C4;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    position: relative;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    line-height: 1.4;
+    cursor: text;
+}
+h1:hover a.anchor,
+h2:hover a.anchor,
+h3:hover a.anchor,
+h4:hover a.anchor,
+h5:hover a.anchor,
+h6:hover a.anchor {
+    text-decoration: none;
+}
+h1 tt,
+h1 code {
+    font-size: inherit;
+}
+h2 tt,
+h2 code {
+    font-size: inherit;
+}
+h3 tt,
+h3 code {
+    font-size: inherit;
+}
+h4 tt,
+h4 code {
+    font-size: inherit;
+}
+h5 tt,
+h5 code {
+    font-size: inherit;
+}
+h6 tt,
+h6 code {
+    font-size: inherit;
+}
+h1 {
+    font-size: 2.25em;
+    line-height: 1.2;
+    border-bottom: 1px solid #eee;
+}
+h2 {
+    font-size: 1.75em;
+    line-height: 1.225;
+    border-bottom: 1px solid #eee;
+}
+
+/*@media print {
+    .typora-export h1,
+    .typora-export h2 {
+        border-bottom: none;
+        padding-bottom: initial;
+    }
+
+    .typora-export h1::after,
+    .typora-export h2::after {
+        content: "";
+        display: block;
+        height: 100px;
+        margin-top: -96px;
+        border-top: 1px solid #eee;
+    }
+}*/
+
+h3 {
+    font-size: 1.5em;
+    line-height: 1.43;
+}
+h4 {
+    font-size: 1.25em;
+}
+h5 {
+    font-size: 1em;
+}
+h6 {
+   font-size: 1em;
+    color: #777;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table{
+    margin: 0.8em 0;
+}
+li>ol,
+li>ul {
+    margin: 0 0;
+}
+hr {
+    height: 2px;
+    padding: 0;
+    margin: 16px 0;
+    background-color: #e7e7e7;
+    border: 0 none;
+    overflow: hidden;
+    box-sizing: content-box;
+}
+
+li p.first {
+    display: inline-block;
+}
+ul,
+ol {
+    padding-left: 30px;
+}
+ul:first-child,
+ol:first-child {
+    margin-top: 0;
+}
+ul:last-child,
+ol:last-child {
+    margin-bottom: 0;
+}
+blockquote {
+    border-left: 4px solid #dfe2e5;
+    padding: 0 15px;
+    color: #777777;
+}
+blockquote blockquote {
+    padding-right: 0;
+}
+table {
+    padding: 0;
+    word-break: initial;
+}
+table tr {
+    border: 1px solid #dfe2e5;
+    margin: 0;
+    padding: 0;
+}
+table tr:nth-child(2n),
+thead {
+    background-color: #f8f8f8;
+}
+table th {
+    font-weight: bold;
+    border: 1px solid #dfe2e5;
+    border-bottom: 0;
+    margin: 0;
+    padding: 6px 13px;
+}
+table td {
+    border: 1px solid #dfe2e5;
+    margin: 0;
+    padding: 6px 13px;
+}
+table th:first-child,
+table td:first-child {
+    margin-top: 0;
+}
+table th:last-child,
+table td:last-child {
+    margin-bottom: 0;
+}
+
+.CodeMirror-lines {
+    padding-left: 4px;
+}
+
+.code-tooltip {
+    box-shadow: 0 1px 1px 0 rgba(0,28,36,.3);
+    border-top: 1px solid #eef2f2;
+}
+
+.md-fences,
+code,
+tt {
+    border: 1px solid #e7eaed;
+    background-color: #f8f8f8;
+    border-radius: 3px;
+    padding: 0;
+    padding: 2px 4px 0px 4px;
+    font-size: 0.9em;
+}
+
+code {
+    background-color: #f3f4f4;
+    padding: 0 2px 0 2px;
+}
+
+.md-fences {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    padding-top: 8px;
+    padding-bottom: 6px;
+}
+
+
+.md-task-list-item > input {
+  margin-left: -1.3em;
+}
+
+@media print {
+    html {
+        font-size: 13px;
+    }
+    pre {
+        page-break-inside: avoid;
+        word-wrap: break-word;
+    }
+}
+
+.md-fences {
+	background-color: #f8f8f8;
+}
+#write pre.md-meta-block {
+	padding: 1rem;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f7f7f7;
+    border: 0;
+    border-radius: 3px;
+    color: #777777;
+    margin-top: 0 !important;
+}
+
+.mathjax-block>.code-tooltip {
+	bottom: .375rem;
+}
+
+.md-mathjax-midline {
+    background: #fafafa;
+}
+
+#write>h3.md-focus:before{
+	left: -1.5625rem;
+	top: .375rem;
+}
+#write>h4.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+#write>h5.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+#write>h6.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+.md-image>.md-meta {
+    /*border: 1px solid #ddd;*/
+    border-radius: 3px;
+    padding: 2px 0px 0px 4px;
+    font-size: 0.9em;
+    color: inherit;
+}
+
+.md-tag {
+    color: #a7a7a7;
+    opacity: 1;
+}
+
+.md-toc { 
+    margin-top:20px;
+    padding-bottom:20px;
+}
+
+.sidebar-tabs {
+    border-bottom: none;
+}
+
+#typora-quick-open {
+    border: 1px solid #ddd;
+    background-color: #f8f8f8;
+}
+
+#typora-quick-open-item {
+    background-color: #FAFAFA;
+    border-color: #FEFEFE #e5e5e5 #e5e5e5 #eee;
+    border-style: solid;
+    border-width: 1px;
+}
+
+/** focus mode */
+.on-focus-mode blockquote {
+    border-left-color: rgba(85, 85, 85, 0.12);
+}
+
+header, .context-menu, .megamenu-content, footer{
+    font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+.file-node-content:hover .file-node-icon,
+.file-node-content:hover .file-node-open-state{
+    visibility: visible;
+}
+
+.mac-seamless-mode #typora-sidebar {
+    background-color: #fafafa;
+    background-color: var(--side-bar-bg-color);
+}
+
+.md-lang {
+    color: #b4654d;
+}
+
+/*.html-for-mac {
+    --item-hover-bg-color: #E6F0FE;
+}*/
+
+#md-notification .btn {
+    border: 0;
+}
+
+.dropdown-menu .divider {
+    border-color: #e5e5e5;
+    opacity: 0.4;
+}
+
+.ty-preferences .window-content {
+    background-color: #fafafa;
+}
+
+.ty-preferences .nav-group-item.active {
+    color: white;
+    background: #999;
+}
+
+.menu-item-container a.menu-style-btn {
+    background-color: #f5f8fa;
+    background-image: linear-gradient( 180deg , hsla(0, 0%, 100%, 0.8), hsla(0, 0%, 100%, 0)); 
+}
+
+
+
+</style><title>ChelseaA EFUSE CTRL</title>
+</head>
+<body class='typora-export os-windows'><div class='typora-export-content'>
+<div id='write'  class=''><h1 id='chelseaa-efusectrl-设计文档'><span>Chelsea_A efuse_ctrl 设计文档</span></h1><h2 id='1模块概述'><span>1.模块概述</span></h2><p><span>	</span><span>efuse_ctrl用于控制EFUSE器件在正常工作模式下的读写接口时序，本项目采用一颗256bit的EFUSE Macro IP（S018BCDEFUSE_PIPO256B4M），该EFUSE IP采用SMIC 0.18um工艺，工作在5V标准DVDD下，AVDD要求低于DVDD且在烧录操作时必须为高。该EFUSE IP有三种工作模式，分别是PGM、READ、Inactive mode，对应模式的引脚描述和时序详见datasheet。</span><br><span>	</span><span>该EFUSE IP支持单次1bit的烧录操作和单次8bit的读操作，读操作的地址映射关系详见datasheet。</span><br><span>	</span><span>该EFUSE IP的电学特性详见datasheet。</span></p><h2 id='2-功能描述'><span>2. 功能描述</span></h2><ul><li><p><span>该模块工作在always-on domain的6.5M时钟下，该时钟受到pmu和rg_efuse_clk_en的gate。</span></p></li><li><p><span>该模块支持Autoload、硬件64bit读写、寄存器模式读写、空片检查操作：</span></p><ul><li><p><span>Autoload：</span></p><ul><li><span>芯片刚上电完成后，PMU产生pmu_efuse_start脉冲，efuse_ctrl自动进入AUTOLOAD模式，将EFUSE IP中默认选中的64bit数据（根据片选寄存器rg_efuse_sel的默认值）读出并存入rg_efuse_rdata[63:0]，并拉高autoload_done。</span></li></ul></li><li><p><span>硬件64bit连续写：</span></p><ul><li><span>autoload结束后，系统可以将efuse配置为64bit连续写模式。系统将待写的64bit存入rg_efuse_wdata[63:0]，并配置rg_efuse_mode为1，配置片选寄存器rg_efuse_sel，启动rg_efuse_start后，efuse_ctrl会逐位判断写数据是否为0，为0则跳过不烧录，为1才进行烧录操作。如果64bit全为0，则不会开启写操作。当64bit数据烧录完成后返回1bit的rg_efuse_write_manual_done信号。</span></li><li><span>写操作支持写保护寄存器，仅当rg_efuse_password配置为0x66AA时，才能进行写操作，否则只能进行读操作。</span></li><li><span>支持写操作AEN高电平时间可配。</span></li></ul></li><li><p><span>硬件64bit连续读：</span></p><ul><li><span>autoload结束后，系统可以将efuse配置为64bit连续读模式。系统配置rg_efuse_mode为0，配置片选寄存器rg_efuse_sel，启动rg_efuse_start后，efuse_ctrl会逐字节读出EFUSE IP中的数据，并存放到rg_efuse_rdata[63:0]中，并返回1bit的rg_efuse_read_manual_done信号。</span></li><li><span>支持读操作AEN高电平时间可配。</span></li></ul></li><li><p><span>寄存器模式写：</span></p><ul><li><span>除了PGM模式下的AEN信号由硬件控制外，其余接口信号都完全接受寄存器控制（由于SPI/IIC配置无法实现datasheet中要求的9~11us的Tpgm时间），当需要对相应地址烧录1时，用户对rg_efuse_refresh=W1C时，硬件会自动产生一个符合rg_efuse_tpgm配置的高电平AEN信号。</span></li></ul></li><li><p><span>寄存器模式读：</span></p><ul><li><span>接口信号全都完全收到寄存器的控制，用户在读操作后合适的时间节点可以读出EFUSE返回的8bit数据。</span></li></ul></li></ul></li></ul><h2 id='3-整体设计'><span>3. 整体设计</span></h2><h3 id='31-整体架构'><span>3.1 整体架构</span></h3><p><img src="C:\Users\微软\AppData\Roaming\Typora\typora-user-images\image-20240505152127350.png" referrerpolicy="no-referrer" alt="image-20240505152127350"></p><h3 id='32-顶层接口列表'><span>3.2 顶层接口列表</span></h3><figure><table><thead><tr><th><span>signal name</span></th><th><span>direction</span></th><th><span>width</span></th><th><span>comment</span></th></tr></thead><tbody><tr><td><span>clk</span></td><td><span>input</span></td><td><span>1</span></td><td><span>6.5M</span></td></tr><tr><td><span>rst_n</span></td><td><span>input</span></td><td><span>1</span></td><td>&nbsp;</td></tr><tr><td><span>scan_mode</span></td><td><span>input</span></td><td><span>1</span></td><td>&nbsp;</td></tr><tr><td><span>pmu_efuse_start</span></td><td><span>input</span></td><td><span>1</span></td><td><span>上电完成后，pmu给出efuse可以开始autoload流程的使能信号</span></td></tr><tr><td><span>ad_pd_5v</span></td><td><span>input</span></td><td><span>1</span></td><td><span>Level shifter相关</span></td></tr><tr><td><span>rg_efuse_mode</span></td><td><span>input</span></td><td><span>1</span></td><td><span>efuse控制模式，0：多bit读，1：多bit写</span></td></tr><tr><td><span>rg_efuse_start</span></td><td><span>input</span></td><td><span>1</span></td><td><span>硬件读写efuse启动信号，WC</span></td></tr><tr><td><span>rg_efuse_refresh</span></td><td><span>input</span></td><td><span>1</span></td><td><span>纯寄存器模式下的刷新信号，WC</span></td></tr><tr><td><span>rg_efuse_blank_en</span></td><td><span>input</span></td><td><span>1</span></td><td><span>空片检测使能，WC</span></td></tr><tr><td><span>rg_efuse_password</span></td><td><span>input</span></td><td><span>16</span></td><td><span>写保护，为0x66AA时才能进行硬件写</span></td></tr><tr><td><span>rg_efuse_wdata</span></td><td><span>input</span></td><td><span>64</span></td><td><span>64bit硬件写模式的写数据</span></td></tr><tr><td><span>rg_efuse_trd</span></td><td><span>input</span></td><td><span>5</span></td><td><span>读操作AEN高电平时间，单位为cycle，配置范围{9~31}</span></td></tr><tr><td><span>rg_efuse_tpgm</span></td><td><span>input</span></td><td><span>7→4</span></td><td><span>写操作AEN高电平时间，单位为cycle，配置范围{59~71}→{0,12}+59【0504新增，RTL TODO】</span></td></tr><tr><td><span>rg_efuse_reg_mode</span></td><td><span>input</span></td><td><span>1</span></td><td><span>是否由寄存器直接控制efuse读写，高有效</span></td></tr><tr><td><span>rg_efuse_sel</span></td><td><span>input</span></td><td><span>2</span></td><td><span>硬件读写256bit中哪64bit</span></td></tr><tr><td><span>rg_efuse_pgmen</span></td><td><span>input</span></td><td><span>1</span></td><td><span>纯寄存器下PGMEN</span></td></tr><tr><td><span>rg_efuse_rden</span></td><td><span>input</span></td><td><span>1</span></td><td><span>纯寄存器下RDEN</span></td></tr><tr><td><span>rg_efuse_aen</span></td><td><span>input</span></td><td><span>1</span></td><td><span>纯寄存器下AEN（仅读操作有效）</span></td></tr><tr><td><span>rg_efuse_addr</span></td><td><span>input</span></td><td><span>8</span></td><td><span>纯寄存器下读写地址</span></td></tr><tr><td><span>rg_efuse_d</span></td><td><span>output</span></td><td><span>8</span></td><td><span>纯寄存器下EFUSE返回的读数据</span></td></tr><tr><td><span>rg_efuse_rdata</span></td><td><span>output</span></td><td><span>64</span></td><td><span>64bit硬件读模式的数据</span></td></tr><tr><td><span>rg_efuse_read_done_manual</span></td><td><span>output</span></td><td><span>1</span></td><td><span>64bit硬件读模式完成，RO</span></td></tr><tr><td><span>rg_efuse_write_done_manual</span></td><td><span>output</span></td><td><span>1</span></td><td><span>64bit硬件写模式完成，RO</span></td></tr><tr><td><span>rg_efuse_blank_done</span></td><td><span>output</span></td><td><span>1</span></td><td><span>空片检查模式完成，RO【0504新增，RTL TODO】</span></td></tr><tr><td><span>rg_efuse_no_blank</span></td><td><span>output</span></td><td><span>1</span></td><td><span>efuse是否为空片，1：非空</span></td></tr><tr><td><span>rg_efuse_aen_done</span></td><td><span>output</span></td><td><span>1</span></td><td><span>纯寄存器模式写操作写，完成一次写返回done</span></td></tr><tr><td><span>efuse_autoload_done</span></td><td><span>output</span></td><td><span>1</span></td><td><span>上电后efuse完成autoload标志，电平，有时钟就会一定能拉高</span></td></tr><tr><td><span>efuse_autoload_vld</span></td><td><span>output</span></td><td><span>1</span></td><td><span>上电后efuse完成autoload的有效标志，脉冲，控制reg_ctrl刷新对应autoload的寄存器</span></td></tr><tr><td><span>efuse_busy</span></td><td><span>output</span></td><td><span>1</span></td><td><span>efuse处于读写状态标志，1：忙碌</span></td></tr></tbody></table></figure><h2 id='4-详细设计'><span>4. 详细设计</span></h2><h3 id='41-efuserwctrl模块设计'><span>4.1 efuse_rw_ctrl模块设计</span></h3><p><span>	</span><span>本项目的设计需求中，硬件需要实现上电后自动Autoload、支持连续64bit读写、支持空片检查的时序控制，因此efuse_ctrl顶层的控制状态分为如下：STANDBY、AUTOLOAD、READ、WRITE和BLANK_CHK。可以看到，各个功能模式之间都被STANBY模式隔离开，保证了读写之间有足够的时间间隔，且保证了产生的PGMEN和RDEN不会进入两个都为HIGH的禁用模式。</span><br><span>	</span><span>其中AUTOLOAD是芯片上电复位后，收到PMU发出的pmu_efuse_start脉冲后，efuse_ctrl从STANDBY进入AUTOLOAD，直到加载完成；其余几个功能状态都必须是完成AUTOLOAD上电后才能进行，且各个功能相互独立，无法同时进行。</span></p><p><img src="C:\Users\微软\AppData\Roaming\Typora\typora-user-images\image-20240430150815521.png" referrerpolicy="no-referrer" alt="image-20240430150815521"></p><h3 id='42-efuserwtiming模块设计'><span>4.2 efuse_rw_timing模块设计</span></h3><p><span>	</span><span>由于读写控制逻辑类似，只在一些状态跳转条件上有区别，因此为了减小efuse_ctrl电路的面积，本设计复用了读写时序控制状态机，如下。</span></p><h4 id='421-read-timing-fsm'><span>4.2.1 READ timing FSM</span></h4><p><img src="C:\Users\微软\AppData\Roaming\Typora\typora-user-images\image-20240430150835308.png" referrerpolicy="no-referrer" alt="image-20240430150835308"></p><h4 id='422-write-timing-fsm'><span>4.2.2 WRITE timing FSM</span></h4><p><img src="C:\Users\微软\AppData\Roaming\Typora\typora-user-images\image-20240430150848145.png" referrerpolicy="no-referrer" alt="image-20240430150848145"></p><h3 id='43-efuseaengen模块设计'><span>4.3 efuse_aen_gen模块设计</span></h3><p><span>	</span><span>当电路处于纯寄存器写操作时，由于ChelseaA中AEN的高电平脉宽在burning写时必须满足9~11us，该时序无法通过SPI/IIC配置寄存器产生，因此该信号通过硬件自己产生(即efuse_aen_gen模块)。</span><br><span>	</span><span>该模块旨在当rg_efuse_refresh W1C时，产生一个符合rg_efuse_tpgm配置的脉宽的高电平信号，用作寄存器写操作下的AEN信号。(在寄存器读模式下该子模块不工作)。</span></p><h3 id='44-efusemux模块设计'><span>4.4 efuse_mux模块设计</span></h3><p><span>	</span><span>该子模块用于根据硬件读写状态和寄存器读写模式，选择对应的接口信号送到EFUSE。</span></p><h2 id='5-工作流程'><span>5. 工作流程</span></h2><h4 id='51-上电autoload流程'><span>5.1 上电Autoload流程</span></h4><ol><li><p><span>上电复位时，信号全初始化到Inactive状态；</span></p></li><li><p><span>复位后，PMU产生pmu_efuse_start，此时EFUSE进入autoload流程</span></p><ul><li><span>is_autoload拉高，直到autoload结束</span></li><li><span>复位释放后efuse_busy拉高，直到autoload结束</span></li><li><span>产生内部read_start</span></li></ul></li><li><p><span>模块按照时序产生EFUSE控制信号给器件，开始autoload，读出根据rg_efuse_sel默认值选中的64-bit数据，收到read_done后数据加载到efuse_autoload_data寄存器；</span></p></li><li><p><span>当EFUSE中数据load完后，产生efuse_load_vld脉冲，给reg_ctrl更新相关寄存器，并拉高efuse_autoload_done标志；</span></p></li><li><p><span>Autoload完后信号都恢复到Inactive状态；</span></p></li></ol><h4 id='52-硬件写流程64bit'><span>5.2 硬件写流程(64bit)</span></h4><ul><li><span>写操作对电压有要求，上下电时需要保证电压满足datasheet要求</span></li></ul><ol><li><span>上电完成autoload流程后，用户配置写保护寄存器rg_efuse_password（0x66AA）；配置操作模式：rg_efuse_mode=1（写入）；</span></li><li><span>配置要写入的位置和64bit数据：rg_efuse_sel、rg_efuse_wr_data；</span></li><li><span>启动写操作：rg_efuse_start（W1C）；</span></li><li><span>查询rg_efuse_write_done拉高后表示64bit写操作完成；</span></li><li><span>如果继续burn，重复&lt;2-4&gt;；</span></li><li><span>burn结束后所有信号恢复Inactive状态；</span></li></ol><h4 id='53-硬件读流程64bit'><span>5.3 硬件读流程(64bit)</span></h4><ol><li><span>上电完成autoload流程后，配置读操作模式：rg_efuse_mode=0；</span></li><li><span>配置要读出数据的位置：rg_efuse_sel；</span></li><li><span>启动读操作：rg_efuse_start（W1C）；</span></li><li><span>查询rg_efuse_read_done拉高后表示64bit读操作完成，获得64bit读数据rg_efuse_rd_data；</span></li><li><span>如果继续读，重复&lt;2-4&gt;；</span></li><li><span>读结束后所有信号恢复Inactive状态；</span></li></ol><h4 id='54-寄存器下的写操作'><span>5.4 寄存器下的写操作</span></h4><ul><li><span>即所有PGMEN/RDEN/AEN/A[7:0]都直接用寄存器控制，要写入的数据为1时AEN才会拉高；</span></li><li><span>由于ChelseaA中AEN的高电平脉宽在burning写时必须满足9~11us，该时序无法通过SPI/IIC配置寄存器产生，因此该信号通过硬件自己产生(即efuse_aen_gen模块)</span></li><li><span>写操作对电压有要求，上下电时需要保证电压满足datasheet要求</span></li></ul><ol><li><span>上电完成autoload流程后，配置寄存器操作模式：rg_efuse_reg_mode=1；</span></li><li><span>配置寄存器rg_efuse_pgmen=1（配置保证rg_efuse_rden=0）</span></li><li><span>配置寄存器rg_efuse_addr[7:0]为所需burning的地址（即要写1的地址）</span></li><li><span>配置寄存器rg_efuse_refresh=W1C，此时硬件自动产生一个和rg_efuse_tpgm对应脉宽的AEN电平信号，送给EFUSE IP；（其余几个控制信号都是直接根据寄存器配置得到，无需硬件产生）</span></li><li><span>如果要继续写操作，重复&lt;3-4&gt;；如果无需继续写入，配置rg_efuse_pgmen=0（配置保证rg_efuse_rden=0），结束写操作，回到Inactive状态；</span></li><li><span>配置rg_efuse_reg_mode=0，退出寄存器模式；</span></li></ol><h4 id='55-寄存器下的读操作'><span>5.5 寄存器下的读操作</span></h4><ul><li><span>即所有PGMEN/RDEN/AEN/A[7:0]都直接用寄存器控制，读出的D[7:0]也直接送给RO寄存器；</span></li></ul><ol><li><span>上电完成autoload流程后，配置寄存器操作模式：rg_efuse_reg_mode=1；</span></li><li><span>配置寄存器rg_efuse_pgmen=1（配置保证rg_efuse_rden=0）</span></li><li><span>配置寄存器rg_efuse_addr[7:0]为要读数据的地址（地址仅低5位有效）</span></li><li><span>配置寄存器rg_efuse_aen=1，间隔合适的时间后（保证AEN高电平脉宽满足&gt;Trd），配置寄存器rg_efuse_aen=0（此时efuse_aen_gen不工作，rg_efuse_refresh无效）</span></li><li><span>等待TSQ时间后，读取数据输出到rg_efuse_rdata；</span></li><li><span>如要读取下一个8bit，重复&lt;3-5&gt;；如果无需读取，配置rg_efuse_pgmen=0，（配置保证rg_efuse_rden=0），结束读操作，回到Inactive状态；</span></li><li><span>配置rg_efuse_reg_mode=0，退出寄存器模式；</span></li></ol><h4 id='56-空片检查'><span>5.6 空片检查</span></h4><ul><li><span>开启空片检查使能后，efuse_ctrl才会启动空片检查功能，检查EFUSE IP内部256bit数据是否全为0，如果全为0，回写rg_efuse_no_blank为0，表示该EFUSE为空片，否则写1。</span></li></ul><ol><li><span>上电完成autoload流程后，如果要进行空片检查，配置寄存器rg_efuse_blank_en=WC；</span></li><li><span>查询rg_efuse_blank_done拉高后表示空片检查完成，获得空片检查结果rg_efuse_no_blank；【0504新增信号：空片检查完成信号rg_efuse_blank_done】</span></li></ol><h2 id='6-软件使用说明与约束'><span>6. 软件使用说明与约束</span></h2><h3 id='61-寄存器列表'><span>6.1 寄存器列表</span></h3><figure><table><thead><tr><th><span>signal name</span></th><th><span>direction</span></th><th><span>width</span></th><th><span>comment</span></th></tr></thead><tbody><tr><td><span>rg_efuse_mode</span></td><td><span>input</span></td><td><span>1</span></td><td><span>efuse控制模式，0：多bit读，1：多bit写</span></td></tr><tr><td><span>rg_efuse_start</span></td><td><span>input</span></td><td><span>1</span></td><td><span>硬件读写efuse启动信号，WC</span></td></tr><tr><td><span>rg_efuse_refresh</span></td><td><span>input</span></td><td><span>1</span></td><td><span>寄存器模式下的刷新信号，WC</span></td></tr><tr><td><span>rg_efuse_blank_en</span></td><td><span>input</span></td><td><span>1</span></td><td><span>空片检测使能，WC</span></td></tr><tr><td><span>rg_efuse_password</span></td><td><span>input</span></td><td><span>16</span></td><td><span>写保护，为0x66AA时才能进行硬件写</span></td></tr><tr><td><span>rg_efuse_wdata</span></td><td><span>input</span></td><td><span>64</span></td><td><span>64bit硬件写模式的写数据</span></td></tr><tr><td><span>rg_efuse_trd</span></td><td><span>input</span></td><td><span>5</span></td><td><span>读操作AEN高电平时间，单位为cycle，配置范围{9~31}</span></td></tr><tr><td><span>rg_efuse_tpgm</span></td><td><span>input</span></td><td><span>7→4</span></td><td><span>写操作AEN高电平时间，单位为cycle，配置范围{59~71}→{0,12}+59【0504新增，RTL TODO】</span></td></tr><tr><td><span>rg_efuse_reg_mode</span></td><td><span>input</span></td><td><span>1</span></td><td><span>是否由寄存器直接控制efuse读写，高有效</span></td></tr><tr><td><span>rg_efuse_sel</span></td><td><span>input</span></td><td><span>2</span></td><td><span>硬件读写256bit中哪64bit</span></td></tr><tr><td><span>rg_efuse_pgmen</span></td><td><span>input</span></td><td><span>1</span></td><td><span>纯寄存器下PGMEN</span></td></tr><tr><td><span>rg_efuse_rden</span></td><td><span>input</span></td><td><span>1</span></td><td><span>纯寄存器下RDEN</span></td></tr><tr><td><span>rg_efuse_aen</span></td><td><span>input</span></td><td><span>1</span></td><td><span>纯寄存器下AEN（仅读操作有效）</span></td></tr><tr><td><span>rg_efuse_addr</span></td><td><span>input</span></td><td><span>8</span></td><td><span>纯寄存器下读写地址</span></td></tr><tr><td><span>rg_efuse_d</span></td><td><span>output</span></td><td><span>8</span></td><td><span>纯寄存器下EFUSE返回的读数据</span></td></tr><tr><td><span>rg_efuse_rdata</span></td><td><span>output</span></td><td><span>64</span></td><td><span>64bit硬件读模式的数据</span></td></tr><tr><td><span>rg_efuse_read_done_manual</span></td><td><span>output</span></td><td><span>1</span></td><td><span>64bit硬件读模式完成，RO</span></td></tr><tr><td><span>rg_efuse_write_done_manual</span></td><td><span>output</span></td><td><span>1</span></td><td><span>64bit硬件写模式完成，RO</span></td></tr><tr><td><span>rg_efuse_blank_done</span></td><td><span>output</span></td><td><span>1</span></td><td><span>空片检查模式完成，RO【0504新增，RTL TODO】</span></td></tr><tr><td><span>rg_efuse_no_blank</span></td><td><span>output</span></td><td><span>1</span></td><td><span>efuse是否为空片，1：非空</span></td></tr><tr><td><span>rg_efuse_aen_done</span></td><td><span>output</span></td><td><span>1</span></td><td><span>纯寄存器模式写操作写，完成一次写返回done</span></td></tr></tbody></table></figure><h3 id='62-操作约束'><span>6.2 操作约束</span></h3><ul><li><span>用户配置寄存器的过程，需要根据《5.工作流程》中描述的进行；</span></li></ul><h3 id='63-验证点列表'><span>6.3 验证点列表</span></h3><ul><li><p><span>电路层级上</span></p><ul><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>上下电and读写时DVDD/AVDD/DVSS的供电状态；</span></p></li><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>Level Shifter的工作</span></p></li></ul></li><li><p><span>RTL功能层级上</span></p><ul><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>上电后autoload功能是否正确</span></p></li><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>硬件连续读写功能是否正确</span></p></li><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>寄存器读写功能是否正确</span></p></li><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>空片检查功能是否正常</span></p></li><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>读操作、写操作的时序是否符合EFUSE datasheet要求</span></p></li><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>读写操作的切换的时序是否满足EFUSE datasheet要求</span></p></li><li class='md-task-list-item task-list-item task-list-not-done' ><input type='checkbox' /><p><span>时序的配置是否符合本datasheet描述</span></p></li></ul></li></ul></div></div>
+</body>
+</html>
