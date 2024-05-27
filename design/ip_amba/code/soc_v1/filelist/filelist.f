@@ -1,0 +1,10 @@
+../sim/soc_top_tb.sv
+../rtl/soc_top.sv
+../rtl/core_v0.sv
+../rtl/arbiter.sv
+../rtl/ahb_m2s_mux.sv
+../rtl/ahb_s2m_mux.sv
+../rtl/ahb_sram.sv
+../rtl/ahb2apb_bridge.sv
+../rtl/apb_sram.sv
+../rtl/apb_uart.sv
