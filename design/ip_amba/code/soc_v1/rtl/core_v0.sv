@@ -92,7 +92,7 @@ end
 
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
-        haddr <= 32'h20000000;
+        haddr <= 32'h40030000;
     else
         haddr <= haddr+'d4;
 end
@@ -103,6 +103,12 @@ always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hwrite <= 1'b0;
     else
-        hwrite <= haddr[4];
+        hwrite <= haddr[6];
+end
+always_ff@(posedge hclk or negedge hresetn) begin
+    if(~hresetn)
+        hwdata <= 'd0;
+    else
+        hwdata <= hwdata+'d1;
 end
 endmodule

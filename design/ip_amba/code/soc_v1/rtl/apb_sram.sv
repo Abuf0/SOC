@@ -37,6 +37,7 @@ always_ff @( posedge pclk or negedge presetn ) begin
         memory[paddr[5:0]] <= (pwdata & memory[paddr[5:0]]) | 
                          (~strb_ext & ~pwdata & memory[paddr[5:0]]) | 
                          (strb_ext & pwdata & ~memory[paddr[5:0]]);
+        //memory[paddr[5:0]] <= pwdata;
     end
 end
 // output

@@ -3,8 +3,8 @@ module ahb2apb_bridge #(
     parameter PADDR_WIDTH   = 16    ,
     parameter DATA_WIDTH    = 32    ,  // 8,16,32
     parameter HBURST_WIDTH  = 3     ,   // 0,3
-    parameter SLV_NUM       = 5     ,
-    parameter SLV_LEN       = 32
+    parameter PSLV_NUM      = 5     ,
+    parameter PSLV_LEN      = 32
 )
 (
     // with AHB
@@ -27,13 +27,13 @@ module ahb2apb_bridge #(
     input                           pclk                    ,   // From APB
     input                           presetn                 ,   // From APB
     output logic [PADDR_WIDTH-1:0]  paddr                   ,   // To APB
-    output logic [SLV_NUM-1:0]      psel                    ,   // To APB
+    output logic [PSLV_NUM-1:0]     psel                    ,   // To APB
     output logic                    penable                 ,   // To APB
     output logic                    pwrite                  ,   // To APB
     output logic [DATA_WIDTH-1:0]   pwdata                  ,   // To APB
     output logic [DATA_WIDTH/8-1:0] pstrb                   ,   // To APB
-    input                           pready_i [0:SLV_LEN-1]  ,   // From APBs
-    input [DATA_WIDTH-1:0]          prdata_i [0:SLV_LEN-1]      // From APBs
+    input                           pready_i [0:PSLV_LEN-1] ,   // From APBs
+    input [DATA_WIDTH-1:0]          prdata_i [0:PSLV_LEN-1]      // From APBs
 );
 
 /* APB Slave List */
@@ -43,6 +43,18 @@ module ahb2apb_bridge #(
 // 3. Memory                             0x40030000~0x4003ffff  
 // 4. LED                                0x40040000~0x4004ffff   
 // Reserved
+
+logic [PSLV_NUM-1:0] psel_tmp;
+always@(*) begin
+    case(haddr[PADDR_WIDTH+15:PADDR_WIDTH])
+        16'h0:  psel_tmp = 'b1;
+        16'h1:  psel_tmp = 'b10;
+        16'h2:  psel_tmp = 'b100;
+        16'h3:  psel_tmp = 'b1000;
+        16'h4:  psel_tmp = 'b10000;
+        default:psel_tmp = 'b0;
+    endcase
+end
 
 typedef enum logic [1:0] {IDLE,SETUP,ACCESS} state_t;
 state_t state_c,state_n;
@@ -81,7 +93,8 @@ always_ff@(posedge pclk or negedge presetn) begin
     end
     else if(state_c == SETUP)  begin    // Lock AHB information
         paddr <= haddr[PADDR_WIDTH-1:0];
-        psel <= ({{(SLV_NUM-1){1'b0}},1'b1} << haddr[PADDR_WIDTH]);
+        //psel <= ({{(PSLV_NUM-1){1'b0}},1'b1} << haddr[PADDR_WIDTH+3:PADDR_WIDTH]);
+        psel <= psel_tmp;
         penable <= 1'b1;
         pwrite <= hwrite;
         pwdata <= hwdata;

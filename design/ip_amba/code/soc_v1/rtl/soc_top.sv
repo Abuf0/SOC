@@ -11,6 +11,8 @@ module soc_top#(
     parameter HMAS_NUM = 5      ,
     parameter HMAS_LEN = 32     ,
     parameter HBURST_WIDTH = 3  ,
+    parameter HPROT_WIDTH = 1   ,
+    parameter HMASTER_WIDTH = 8 ,
     parameter IRQ_LEN = 16
 )
 (
@@ -44,8 +46,8 @@ module soc_top#(
 // Reserved
 
 // ahb2apb_bridge Inputs
-logic                       hclk                        ;
-logic                       hresetn                     ;
+//logic                       hclk                        ;
+//logic                       hresetn                     ;
 logic [HSLV_NUM-1:0]        req                         ;
 logic [HSLV_NUM-1:0]        hsel                        ;
 logic [HMAS_NUM-1:0]        grant                       ;
@@ -54,8 +56,8 @@ logic                       hresp_mux                   ;
 logic                       hexokay_mux                 ;
 logic [DATA_WIDTH-1:0]      hrdata_mux                  ;
 
-logic                       pclk                        ;
-logic                       presetn                     ;
+//logic                       pclk                        ;
+//logic                       presetn                     ;
 logic                       pready_s2m [0:PSLV_LEN-1]   ;
 logic [DATA_WIDTH-1:0]      prdata_s2m [0:PSLV_LEN-1]   ;
 
@@ -151,9 +153,16 @@ ahb_m2s_mux_inst (
 /* according to haddr --> pick hsel */
 assign hsel[0] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h0);
 assign hsel[1] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h2);
-assign hsel[2] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h6);
+assign hsel[2] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h4);
 assign hsel[3] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]>=4'h6 && haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]<=4'h9);
 assign hsel[4] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h5);
+
+assign req[0] = 0;
+assign req[1] = 0;
+assign req[2] = 1;
+assign req[3] = 0;
+assign req[4] = 0;
+
 
 ahb_s2m_mux #(
     .DATA_WIDTH ( DATA_WIDTH ),
@@ -189,7 +198,7 @@ ahb_sram
     .hprot         ( hprot         ),
     .hsize         ( hsize         ),
     .hnonsec       ( hnonsec       ),
-    .hmaster       ( hmaster       ),
+    .hmaster       (               ),
     .htrans        ( htrans        ),
     .hwdata        ( hwdata        ),
     .hwstrb        ( hwstrb        ),
@@ -197,7 +206,7 @@ ahb_sram
     .hsel          ( hsel[0]       ),
     .hready        ( hready_mux    ),
     .hrdata        ( hrdata_s2m[1] ),   // bin(1)-->onehot(0)
-    .hreadyout     ( hreadyout_s2m[1]),
+    .hreadyout     ( hready_s2m[1]),
     .hresp         ( hresp_s2m[1]  ),
     .hexokay       ( hexokay_s2m[1])
 );
@@ -220,7 +229,7 @@ ahb_sram
     .hprot         ( hprot         ),
     .hsize         ( hsize         ),
     .hnonsec       ( hnonsec       ),
-    .hmaster       ( hmaster       ),
+    .hmaster       (               ),
     .htrans        ( htrans        ),
     .hwdata        ( hwdata        ),
     .hwstrb        ( hwstrb        ),
@@ -228,7 +237,7 @@ ahb_sram
     .hsel          ( hsel[1]       ),   
     .hready        ( hready_mux    ),
     .hrdata        ( hrdata_s2m[2] ),   // bin(2)-->onehot(1)
-    .hreadyout     ( hreadyout_s2m[2]),
+    .hreadyout     ( hready_s2m[2]),
     .hresp         ( hresp_s2m[2]  ),
     .hexokay       ( hexokay_s2m[2])
 );

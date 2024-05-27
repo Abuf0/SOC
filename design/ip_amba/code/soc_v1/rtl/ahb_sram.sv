@@ -57,7 +57,7 @@ logic [DATA_WIDTH-1:0] mem_wdata;
 logic [DATA_WIDTH-1:0] mem_rdata;
 
 logic [DATA_WIDTH-1:0] strb_ext;
-logic [DATA_WIDTH-1:0] mem_itcm [0:MEM_DEEPTH-1];
+logic [DATA_WIDTH-1:0] memory [0:MEM_DEEPTH-1];
 logic ready_timeout;
 logic error_flag;
 
@@ -74,13 +74,14 @@ endgenerate
 always_ff @( posedge hclk or negedge hresetn ) begin
     if(~hresetn) begin
         for(j=0;j<MEM_DEEPTH;j=j+1) begin
-            mem_itcm[j] <= 'd0;
+            memory[j] <= 'd0;
         end
     end
     else if(mem_ce && mem_wr) begin
-        mem_itcm[mem_addr[MEM_ADDR_LEN-1:0]] <= (mem_wdata & mem_itcm[mem_addr[MEM_ADDR_LEN-1:0]]) | 
-                         (~strb_ext & ~mem_wdata & mem_itcm[mem_addr[MEM_ADDR_LEN-1:0]]) | 
-                         (strb_ext & mem_wdata & ~mem_itcm[mem_addr[MEM_ADDR_LEN-1:0]]);
+        memory[mem_addr[MEM_ADDR_LEN-1:0]] <= (mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:0]]) | 
+                         (~strb_ext & ~mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:0]]) | 
+                         (strb_ext & mem_wdata & ~memory[mem_addr[MEM_ADDR_LEN-1:0]]);
+        //memory[mem_addr[MEM_ADDR_LEN-1:0]] <= mem_wdata;
     end
 end
 // output
@@ -89,7 +90,7 @@ always_ff @( posedge hclk or negedge hresetn ) begin
     if(~hresetn) 
         mem_rdata <= 'd0;
     else if(mem_ce && ~mem_wr)
-        mem_rdata <= mem_itcm[mem_addr[MEM_ADDR_LEN-1:0]];
+        mem_rdata <= memory[mem_addr[MEM_ADDR_LEN-1:0]];
 end
 
 
@@ -115,10 +116,10 @@ always@(*) begin
                           IDLE;
             end
             MEM_W: begin
-                state_n = htrans[1]?    MEM_W : IDLE;
+                state_n = htrans[1]?    (hwrite? MEM_W:MEM_R) : IDLE;
             end
             MEM_R: begin
-                state_n = htrans[1]?    MEM_R : IDLE;
+                state_n = htrans[1]?    (hwrite? MEM_W:MEM_R) : IDLE;
             end
             default:    state_n = IDLE;
         endcase
