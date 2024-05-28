@@ -36,7 +36,6 @@ begin
     #(HCLK_PERIOD*20) 
     div_factor = 'd10;
     hresetn  =  1;
-    presetn  =  1;
     repeat(3000) begin
         @(posedge hclk);
     end

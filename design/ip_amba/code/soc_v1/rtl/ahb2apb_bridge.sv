@@ -131,7 +131,7 @@ always_ff@(posedge hclk or negedge hresetn) begin
         hready_o <= 1'b1;
 end
 */
-assign hready_o = pready_i[psel];
+assign hready_o = pclken & pready_i[psel];
 
 assign hresp_o   = 1'b0;
 assign hexokay_o = 1'b1;

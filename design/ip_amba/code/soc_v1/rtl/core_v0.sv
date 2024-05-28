@@ -93,7 +93,7 @@ end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         haddr <= 32'h40030000;
-    else
+    else if(state_c == BUSY && hready)
         haddr <= haddr+'d4;
 end
 
@@ -102,13 +102,13 @@ assign htrans = state_c;
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hwrite <= 1'b0;
-    else
+    else if(state_c == BUSY && hready)
         hwrite <= haddr[6];
 end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hwdata <= 'd0;
-    else
+    else if(state_c == BUSY && hready)
         hwdata <= hwdata+'d1;
 end
 endmodule
