@@ -29,7 +29,15 @@ always_ff@(posedge hclk or negedge hresetn) begin
         clk_div <= 1'b1;
 end
 assign pclk = clk_div;
-assign pclken = pclk;
+
+always_ff@(posedge hclk or negedge hresetn) begin
+    if(~hresetn)    
+        pclken <= 1'b0;
+    else if(div_cnt == (div_factor>>1))   
+        pclken <= 1'b1;
+    else    
+        pclken <= 1'b0;
+end
 
 // sync_reset TODO // 
 logic presetn_tmp;
