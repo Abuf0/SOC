@@ -77,6 +77,7 @@ always@(*) begin
         default:state_n = IDLE;
     endcase
 end
+/*
 always_ff@(posedge pclk or negedge presetn) begin
     if(~presetn) begin
         paddr <= 'd0;
@@ -104,14 +105,24 @@ always_ff@(posedge pclk or negedge presetn) begin
         pstrb <= hwstrb;
     end
 end
-
+*/
+assign paddr = haddr[PADDR_WIDTH-1:0];
+assign psel = (state_c == SETUP)? ({{(PSLV_NUM-1){1'b0}},1'b1} << haddr[PADDR_WIDTH+11:PADDR_WIDTH]) : 'd0;
+//assign psel = psel_tmp;
+assign penable = (state_c != IDLE);
+assign pwrite = hwrite;
+assign pwdata = hwdata;
+assign pstrb = hwstrb;
+/*
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hrdata_o <= 'd0;
     else if(state_c == ACCESS)
         hrdata_o <= prdata_i[psel];
 end
-
+*/
+/*
+assign hrdata_o = prdata_i[psel];
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hready_o <= 1'b1;
@@ -120,6 +131,8 @@ always_ff@(posedge hclk or negedge hresetn) begin
     else 
         hready_o <= 1'b1;
 end
+*/
+assign hready_o = pready_i[psel];
 
 assign hresp_o   = 1'b0;
 assign hexokay_o = 1'b1;
