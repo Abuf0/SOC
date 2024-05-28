@@ -5,7 +5,7 @@ module soc_top_tb;
 // soc_top Parameters        
 parameter HCLK_PERIOD   = 10;
 parameter PCLK_PERIOD   = 50;
-
+parameter DIV_WID       = 4 ;
 parameter HADDR_WIDTH   = 32;
 parameter PADDR_WIDTH   = 16;
 parameter DATA_WIDTH    = 32;
@@ -23,28 +23,28 @@ parameter IRQ_LEN       = 16;
 // soc_top Inputs
 logic   hclk                                 = 0 ;
 logic   hresetn                              = 0 ;
-logic   pclk                                 = 0 ;
-logic   presetn                              = 0 ;
+logic [DIV_WID-1:0] div_factor ;
 
 // soc_top Outputs
 
 
 always #(HCLK_PERIOD/2)  hclk=~hclk;
-always #(PCLK_PERIOD/2)  pclk=~pclk;
 
 
 initial
 begin
-    #(PCLK_PERIOD*2) 
+    #(HCLK_PERIOD*20) 
+    div_factor = 'd10;
     hresetn  =  1;
     presetn  =  1;
-    repeat(1000) begin
-        @(posedge pclk);
+    repeat(3000) begin
+        @(posedge hclk);
     end
     $finish(2);
 end
 
 soc_top #(
+    .DIV_WID      ( DIV_WID      ),
     .HADDR_WIDTH  ( HADDR_WIDTH  ),
     .PADDR_WIDTH  ( PADDR_WIDTH  ),
     .DATA_WIDTH   ( DATA_WIDTH   ),
@@ -61,8 +61,7 @@ soc_top #(
  u_soc_top (
     .hclk         ( hclk         ),
     .hresetn      ( hresetn      ),
-    .pclk         ( pclk         ),
-    .presetn      ( presetn      )
+    .div_factor   ( div_factor   )
 );
 
 initial begin

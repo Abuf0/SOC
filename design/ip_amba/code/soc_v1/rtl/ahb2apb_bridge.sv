@@ -26,6 +26,7 @@ module ahb2apb_bridge #(
     // with APB         
     input                           pclk                    ,   // From APB
     input                           presetn                 ,   // From APB
+    input                           pclken                  ,
     output logic [PADDR_WIDTH-1:0]  paddr                   ,   // To APB
     output logic [PSLV_NUM-1:0]     psel                    ,   // To APB
     output logic                    penable                 ,   // To APB
@@ -56,8 +57,6 @@ always@(*) begin
     endcase
 end
 */
-logic pclken;
-assign pclken = pclk;
 typedef enum logic [1:0] {IDLE,SETUP,ACCESS} state_t;
 state_t state_c,state_n;
 always_ff@(posedge hclk or negedge hresetn) begin
@@ -107,7 +106,7 @@ always_ff@(posedge pclk or negedge presetn) begin
 end
 */
 assign paddr = haddr[PADDR_WIDTH-1:0];
-assign psel = (state_c == SETUP)? ({{(PSLV_NUM-1){1'b0}},1'b1} << haddr[PADDR_WIDTH+11:PADDR_WIDTH]) : 'd0;
+assign psel = hsel_i? ({{(PSLV_NUM-1){1'b0}},1'b1} << haddr[PADDR_WIDTH+11:PADDR_WIDTH]) : 'd0;
 //assign psel = psel_tmp;
 assign penable = (state_c != IDLE);
 assign pwrite = hwrite;

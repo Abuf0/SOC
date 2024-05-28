@@ -1,4 +1,5 @@
 module soc_top#(
+    parameter DIV_WID = 4       ,
     parameter HADDR_WIDTH = 32  ,   
     parameter PADDR_WIDTH = 16  ,
     parameter DATA_WIDTH = 32   ,   
@@ -16,10 +17,9 @@ module soc_top#(
     parameter IRQ_LEN = 16
 )
 (
-    input hclk      ,
-    input hresetn   ,
-    input pclk      ,
-    input presetn
+    input               hclk        ,
+    input               hresetn     ,
+    input [DIV_WID-1:0] div_factor
 );
 /* AHB Master List */
 // 0. ICODE                             0x00000000~0x1fffffff
@@ -56,8 +56,9 @@ logic                       hresp_mux                   ;
 logic                       hexokay_mux                 ;
 logic [DATA_WIDTH-1:0]      hrdata_mux                  ;
 
-//logic                       pclk                        ;
-//logic                       presetn                     ;
+logic                       pclk                        ;
+logic                       presetn                     ;
+logic                       pclken                      ;
 logic                       pready_s2m [0:PSLV_LEN-1]   ;
 logic [DATA_WIDTH-1:0]      prdata_s2m [0:PSLV_LEN-1]   ;
 
@@ -89,6 +90,16 @@ logic [DATA_WIDTH-1:0]      hwdata_i  [0:HSLV_LEN-1]    ;
 logic [DATA_WIDTH/8-1:0]    hwstrb_i  [0:HSLV_LEN-1]    ;
 logic                       hwrite_i  [0:HSLV_LEN-1]    ;
 
+crgu #(
+    .DIV_WID ( DIV_WID ))
+crgu_inst (
+    .hclk        ( hclk          ),
+    .hresetn     ( hresetn       ),
+    .div_factor  ( div_factor    ),
+    .pclk        ( pclk          ),
+    .presetn     ( presetn       ),
+    .pclken      ( pclken        )
+);
 
 core_v0 #(
     .HADDR_WIDTH  ( HADDR_WIDTH  ),
@@ -262,9 +273,10 @@ ahb2apb_bridge #(
     .hwstrb       ( hwstrb       ),
     .hwrite       ( hwrite       ),
     .hsel_i       ( hsel[2]      ),
-    .hready_i     ( hready_mux     ),
+    .hready_i     ( hready_mux   ),
     .pclk         ( pclk         ),
     .presetn      ( presetn      ),
+    .pclken       ( pclken       ),
     .pready_i     ( pready_s2m   ),
     .prdata_i     ( prdata_s2m   ),
     .hready_o     ( hready_s2m[4] ),    // bin(4)-->onehot(2)
@@ -306,8 +318,8 @@ apb_sram #(
     .pwrite       ( pwrite       ),
     .pwdata       ( pwdata       ),
     .pstrb        ( pstrb        ),
-    .pready_o     ( pready_s2m[16]),
-    .prdata_o     ( prdata_s2m[16])
+    .pready_o     ( pready_s2m[8]),
+    .prdata_o     ( prdata_s2m[8])
 );
 
 endmodule
