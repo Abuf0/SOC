@@ -301,7 +301,7 @@ apb_sram #(
     .pclk         ( pclk         ),
     .presetn      ( presetn      ),
     .paddr        ( paddr        ),
-    .psel         ( psel[4]      ),
+    .psel         ( psel[3]      ),
     .penable      ( penable      ),
     .pwrite       ( pwrite       ),
     .pwdata       ( pwdata       ),

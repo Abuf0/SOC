@@ -43,19 +43,21 @@ module ahb2apb_bridge #(
 // 3. Memory                             0x40030000~0x4003ffff  
 // 4. LED                                0x40040000~0x4004ffff   
 // Reserved
-
+/*
 logic [PSLV_NUM-1:0] psel_tmp;
 always@(*) begin
-    case(haddr[PADDR_WIDTH+15:PADDR_WIDTH])
-        16'h0:  psel_tmp = 'b1;
-        16'h1:  psel_tmp = 'b10;
-        16'h2:  psel_tmp = 'b100;
-        16'h3:  psel_tmp = 'b1000;
-        16'h4:  psel_tmp = 'b10000;
+    case(haddr[PADDR_WIDTH+11:PADDR_WIDTH])
+        12'h0:  psel_tmp = 'b1;
+        12'h1:  psel_tmp = 'b10;
+        12'h2:  psel_tmp = 'b100;
+        12'h3:  psel_tmp = 'b1000;
+        12'h4:  psel_tmp = 'b10000;
         default:psel_tmp = 'b0;
     endcase
 end
-
+*/
+logic pclken;
+assign pclken = pclk;
 typedef enum logic [1:0] {IDLE,SETUP,ACCESS} state_t;
 state_t state_c,state_n;
 always_ff@(posedge hclk or negedge hresetn) begin
@@ -69,8 +71,9 @@ always@(*) begin
     state_n = IDLE;
     case(state_c)
         IDLE:   state_n = hsel_i?   SETUP:IDLE;
-        SETUP:  state_n = hready_i? ACCESS:SETUP;
-        ACCESS: state_n = hsel_i?   ACCESS:IDLE;
+        SETUP:  state_n = pclken? ACCESS:SETUP;
+        //ACCESS: state_n = (hsel_i)?   ACCESS:IDLE;
+        ACCESS: state_n = hsel_i?   ((hready_o && pclken)?   SETUP:ACCESS):IDLE;
         default:state_n = IDLE;
     endcase
 end
@@ -93,8 +96,8 @@ always_ff@(posedge pclk or negedge presetn) begin
     end
     else if(state_c == SETUP)  begin    // Lock AHB information
         paddr <= haddr[PADDR_WIDTH-1:0];
-        //psel <= ({{(PSLV_NUM-1){1'b0}},1'b1} << haddr[PADDR_WIDTH+3:PADDR_WIDTH]);
-        psel <= psel_tmp;
+        psel <= ({{(PSLV_NUM-1){1'b0}},1'b1} << haddr[PADDR_WIDTH+11:PADDR_WIDTH]);
+        //psel <= psel_tmp;
         penable <= 1'b1;
         pwrite <= hwrite;
         pwdata <= hwdata;
