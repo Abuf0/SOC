@@ -31,6 +31,9 @@ logic           rx_flag         ;
 logic           uart_rx_busy    ;
 logic           rx_err_flag     ;
 logic [15:0]    rx_data         ;   
+logic           setup_done      ;
+
+assign setup_done = 1'b1;
 
 typedef enum logic [1:0] {IDLE,SETUP,WORK} state_t;
 state_t state_c,state_n;
@@ -46,8 +49,8 @@ always@(*) begin
     state_n = IDLE;
     case(state_c)
         IDLE:   state_n = (psel && penable)?  SETUP:IDLE;
-        SETUP:  state_n = (psel && penable)?  (setup_done?  WORK:SETUP):IDLE;
-        WORK:   state_n = (psel && penable)?  WORK:IDLE;
+        SETUP:  state_n = (psel)?  (setup_done?  WORK:SETUP):IDLE;
+        WORK:   state_n = (psel)?  WORK:IDLE;
         default:state_n = IDLE;
     endcase
 end
@@ -55,7 +58,7 @@ end
 always_ff @( posedge pclk or negedge presetn ) begin
     if(~presetn) 
         prdata_o <= 'd0;
-    else if(~pwrite && (state_c == WORK))
+    else if(~pwrite && (state_c == WORK) && penable)
         prdata_o <= {{(DATA_WIDTH-16){1'b0}},rx_data};
 end
 
@@ -64,7 +67,7 @@ assign uart_din = (state_c == WORK)?  pwdata : 'd0; // TODO: pstrb
 assign pready_o = ~(uart_tx_busy | uart_rx_busy);
 
 always_ff@(posedge pclk or negedge presetn) begin
-    if(~pready)
+    if(~presetn)
         uart_en <= 1'b0;
     else if(state_c == SETUP && setup_done)
         uart_en <= 1'b1;
@@ -73,7 +76,7 @@ always_ff@(posedge pclk or negedge presetn) begin
 end
 
 always_ff@(posedge pclk or negedge presetn) begin
-    if(~pready)
+    if(~presetn)
         {bps_mode,data_num,check_mode,stop_num} <= {3'd0,4'd7,2'd1,2'd0};
     else if(state_c == SETUP)
         {bps_mode,data_num,check_mode,stop_num} <= pwdata[10:0];

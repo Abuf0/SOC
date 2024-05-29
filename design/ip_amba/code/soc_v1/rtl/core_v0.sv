@@ -92,7 +92,7 @@ end
 
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
-        haddr <= 32'h40030000;
+        haddr <= 32'h40000000;
     else if(state_c == BUSY && hready)
         haddr <= haddr+'d4;
 end
@@ -103,11 +103,13 @@ always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hwrite <= 1'b0;
     else if(state_c == BUSY && hready)
-        hwrite <= haddr[6];
+        //hwrite <= haddr[6];
+        hwrite <= 1'b1;
 end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
-        hwdata <= 'd0;
+        //hwdata <= 'd0;
+        hwdata <= {8'd6,4'd7,2'd1,2'd0};
     else if(state_c == BUSY && hready)
         hwdata <= hwdata+'d1;
 end

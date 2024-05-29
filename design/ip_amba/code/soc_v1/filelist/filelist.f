@@ -9,3 +9,5 @@
 ../rtl/ahb2apb_bridge.sv
 ../rtl/apb_sram.sv
 ../rtl/apb_uart.sv
+../rtl/uart_send.sv
+../rtl/uart_recv.sv

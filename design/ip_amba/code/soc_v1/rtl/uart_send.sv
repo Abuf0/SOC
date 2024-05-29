@@ -72,9 +72,9 @@ assign bps_en = (tcnt == bps_cnt);
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         bcnt <= 'd0;
-    else if(state_c != state_n)
+    else if((state_c != state_n) && bps_en)
         bcnt <= 'd0;
-    else
+    else if(bps_en)
         bcnt <= bcnt+1'b1;
 end
 
@@ -133,7 +133,7 @@ assign data_mask = (16'b1 << (data_num)) - 1'b1;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         tx_data_shift <= 'd0;
-    else if(state_c == TRANS)
+    else if(state_c == START)
         tx_data_shift <= (tx_data<<(4'd15-data_num));
     else if((state_c == TRANS) && bps_en)
         tx_data_shift <= {tx_data_shift[14:0],1'b0};
@@ -145,6 +145,16 @@ assign check_done = 1'b1;
 assign stop_done = (bcnt == stop_num);
 
 assign tx_flag = (state_c!=IDLE);
-assign uart_tx_busy = (state_c!=IDLE);
+
+//assign uart_tx_busy = (state_c!=IDLE);
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        uart_tx_busy <= 1'b0;
+    else if(uart_en)
+        uart_tx_busy <= 1'b1;
+    else if(state_c == IDLE)
+        uart_tx_busy <= 1'b0;
+end
 
 endmodule
