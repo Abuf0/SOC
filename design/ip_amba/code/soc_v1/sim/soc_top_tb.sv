@@ -4,7 +4,6 @@ module soc_top_tb;
 
 // soc_top Parameters        
 parameter HCLK_PERIOD   = 10;
-parameter PCLK_PERIOD   = 50;
 parameter DIV_WID       = 4 ;
 parameter HADDR_WIDTH   = 32;
 parameter PADDR_WIDTH   = 16;
@@ -24,6 +23,8 @@ parameter IRQ_LEN       = 16;
 logic   hclk                                 = 0 ;
 logic   hresetn                              = 0 ;
 logic [DIV_WID-1:0] div_factor ;
+logic   uart_txd                                 ;
+logic   uart_rxd                             = 0 ;
 
 // soc_top Outputs
 
@@ -57,10 +58,12 @@ soc_top #(
     .HMAS_LEN     ( HMAS_LEN     ),
     .HBURST_WIDTH ( HBURST_WIDTH ),
     .IRQ_LEN      ( IRQ_LEN      ))
- u_soc_top (
+ soc_top_inst (
     .hclk         ( hclk         ),
     .hresetn      ( hresetn      ),
-    .div_factor   ( div_factor   )
+    .div_factor   ( div_factor   ),
+    .uart_txd     ( uart_txd     ),
+    .uart_rxd     ( uart_rxd     )
 );
 
 initial begin

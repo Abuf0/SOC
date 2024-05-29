@@ -19,7 +19,9 @@ module soc_top#(
 (
     input               hclk        ,
     input               hresetn     ,
-    input [DIV_WID-1:0] div_factor
+    input [DIV_WID-1:0] div_factor  ,
+    input               uart_rxd    ,
+    output logic        uart_txd
 );
 /* AHB Master List */
 // 0. ICODE                             0x00000000~0x1fffffff
@@ -304,7 +306,9 @@ apb_uart #(
     .pwdata       ( pwdata       ),
     .pstrb        ( pstrb        ),
     .pready_o     ( pready_s2m[1]),
-    .prdata_o     ( prdata_s2m[1])
+    .prdata_o     ( prdata_s2m[1]),
+    .uart_txd     ( uart_txd     ),
+    .uart_rxd     ( uart_rxd     )
 );
 apb_sram #(
     .PADDR_WIDTH ( PADDR_WIDTH ),
