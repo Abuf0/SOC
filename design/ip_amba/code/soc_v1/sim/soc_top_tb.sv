@@ -4,6 +4,7 @@ module soc_top_tb;
 
 // soc_top Parameters        
 parameter HCLK_PERIOD   = 10;
+parameter CLK_FREQ      = 10000000;
 parameter DIV_WID       = 4 ;
 parameter HADDR_WIDTH   = 32;
 parameter PADDR_WIDTH   = 16;
@@ -44,6 +45,7 @@ begin
 end
 
 soc_top #(
+    .CLK_FREQ     ( CLK_FREQ    ),
     .DIV_WID      ( DIV_WID      ),
     .HADDR_WIDTH  ( HADDR_WIDTH  ),
     .PADDR_WIDTH  ( PADDR_WIDTH  ),

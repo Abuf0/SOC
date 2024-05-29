@@ -1,4 +1,5 @@
 module soc_top#(
+    parameter CLK_FREQ = 20000000,
     parameter DIV_WID = 4       ,
     parameter HADDR_WIDTH = 32  ,   
     parameter PADDR_WIDTH = 16  ,
@@ -294,6 +295,7 @@ ahb2apb_bridge #(
 );
 // APB Slaves
 apb_uart #(
+    .CLK_FREQ    ( CLK_FREQ    ),
     .PADDR_WIDTH ( PADDR_WIDTH ),
     .DATA_WIDTH  ( DATA_WIDTH  ))
  apb_uart_inst (
