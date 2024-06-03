@@ -1,0 +1,799 @@
+
+========================================================================
+
+** ELF Header Information
+
+    File Name: .\Objects\soc_cm3_prj.axf
+
+    Machine class: ELFCLASS32 (32-bit)
+    Data encoding: ELFDATA2LSB (Little endian)
+    Header version: EV_CURRENT (Current version)
+    Operating System ABI: none
+    ABI Version: 0
+    File Type: ET_EXEC (Executable) (2)
+    Machine: EM_ARM (ARM)
+
+    Image Entry point: 0x00000401
+    Flags: EF_ARM_HASENTRY + EF_ARM_ABI_FLOAT_SOFT (0x05000202)
+
+    ARM ELF revision: 5 (ABI version 2)
+
+    Conforms to Soft float procedure-call standard
+
+    Built with
+    Component: Arm Compiler for Embedded 6.22 Tool: armlink [5ee90200]
+
+    Header size: 52 bytes (0x34)
+    Program header entry size: 32 bytes (0x20)
+    Section header entry size: 40 bytes (0x28)
+
+    Program header entries: 1
+    Section header entries: 17
+
+    Program header offset: 10140 (0x0000279c)
+    Section header offset: 10172 (0x000027bc)
+
+    Section header string table index: 16
+
+========================================================================
+
+** Program header #0
+
+    Type          : PT_LOAD (1)
+    File Offset   : 52 (0x34)
+    Virtual Addr  : 0x00000000
+    Physical Addr : 0x00000000
+    Size in file  : 1348 bytes (0x544)
+    Size in memory: 4932 bytes (0x1344)
+    Flags         : PF_X + PF_W + PF_R + PF_ARM_ENTRY (0x80000007)
+    Alignment     : 4
+
+
+========================================================================
+
+** Section #1
+
+    Name        : ER_ROM
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : SHF_ALLOC + SHF_EXECINSTR (0x00000006)
+    Addr        : 0x00000000
+    File Offset : 52 (0x34)
+    Size        : 1340 bytes (0x53c)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 4
+    Entry Size  : 0
+
+    $d.realdata
+    __tagsym$$used.0
+    __Vectors
+        0x00000000:    20040000    ...     DCD    537133056
+        0x00000004:    0000044d    M...    DCD    1101
+        0x00000008:    00000445    E...    DCD    1093
+        0x0000000c:    00000449    I...    DCD    1097
+        0x00000010:    00000445    E...    DCD    1093
+        0x00000014:    00000445    E...    DCD    1093
+        0x00000018:    00000445    E...    DCD    1093
+        0x0000001c:    00000000    ....    DCD    0
+        0x00000020:    00000000    ....    DCD    0
+        0x00000024:    00000000    ....    DCD    0
+        0x00000028:    00000000    ....    DCD    0
+        0x0000002c:    00000445    E...    DCD    1093
+        0x00000030:    00000445    E...    DCD    1093
+        0x00000034:    00000000    ....    DCD    0
+        0x00000038:    00000445    E...    DCD    1093
+        0x0000003c:    00000445    E...    DCD    1093
+        0x00000040:    00000445    E...    DCD    1093
+        0x00000044:    00000445    E...    DCD    1093
+        0x00000048:    00000445    E...    DCD    1093
+        0x0000004c:    00000445    E...    DCD    1093
+        0x00000050:    00000445    E...    DCD    1093
+        0x00000054:    00000445    E...    DCD    1093
+        0x00000058:    00000445    E...    DCD    1093
+        0x0000005c:    00000445    E...    DCD    1093
+        0x00000060:    00000445    E...    DCD    1093
+        0x00000064:    00000445    E...    DCD    1093
+        0x00000068:    00000445    E...    DCD    1093
+        0x0000006c:    00000445    E...    DCD    1093
+        0x00000070:    00000445    E...    DCD    1093
+        0x00000074:    00000445    E...    DCD    1093
+        0x00000078:    00000445    E...    DCD    1093
+        0x0000007c:    00000445    E...    DCD    1093
+        0x00000080:    00000445    E...    DCD    1093
+        0x00000084:    00000445    E...    DCD    1093
+        0x00000088:    00000445    E...    DCD    1093
+        0x0000008c:    00000445    E...    DCD    1093
+        0x00000090:    00000445    E...    DCD    1093
+        0x00000094:    00000445    E...    DCD    1093
+        0x00000098:    00000445    E...    DCD    1093
+        0x0000009c:    00000445    E...    DCD    1093
+        0x000000a0:    00000445    E...    DCD    1093
+        0x000000a4:    00000445    E...    DCD    1093
+        0x000000a8:    00000445    E...    DCD    1093
+        0x000000ac:    00000445    E...    DCD    1093
+        0x000000b0:    00000445    E...    DCD    1093
+        0x000000b4:    00000445    E...    DCD    1093
+        0x000000b8:    00000445    E...    DCD    1093
+        0x000000bc:    00000445    E...    DCD    1093
+        0x000000c0:    00000000    ....    DCD    0
+        0x000000c4:    00000000    ....    DCD    0
+        0x000000c8:    00000000    ....    DCD    0
+        0x000000cc:    00000000    ....    DCD    0
+        0x000000d0:    00000000    ....    DCD    0
+        0x000000d4:    00000000    ....    DCD    0
+        0x000000d8:    00000000    ....    DCD    0
+        0x000000dc:    00000000    ....    DCD    0
+        0x000000e0:    00000000    ....    DCD    0
+        0x000000e4:    00000000    ....    DCD    0
+        0x000000e8:    00000000    ....    DCD    0
+        0x000000ec:    00000000    ....    DCD    0
+        0x000000f0:    00000000    ....    DCD    0
+        0x000000f4:    00000000    ....    DCD    0
+        0x000000f8:    00000000    ....    DCD    0
+        0x000000fc:    00000000    ....    DCD    0
+        0x00000100:    00000000    ....    DCD    0
+        0x00000104:    00000000    ....    DCD    0
+        0x00000108:    00000000    ....    DCD    0
+        0x0000010c:    00000000    ....    DCD    0
+        0x00000110:    00000000    ....    DCD    0
+        0x00000114:    00000000    ....    DCD    0
+        0x00000118:    00000000    ....    DCD    0
+        0x0000011c:    00000000    ....    DCD    0
+        0x00000120:    00000000    ....    DCD    0
+        0x00000124:    00000000    ....    DCD    0
+        0x00000128:    00000000    ....    DCD    0
+        0x0000012c:    00000000    ....    DCD    0
+        0x00000130:    00000000    ....    DCD    0
+        0x00000134:    00000000    ....    DCD    0
+        0x00000138:    00000000    ....    DCD    0
+        0x0000013c:    00000000    ....    DCD    0
+        0x00000140:    00000000    ....    DCD    0
+        0x00000144:    00000000    ....    DCD    0
+        0x00000148:    00000000    ....    DCD    0
+        0x0000014c:    00000000    ....    DCD    0
+        0x00000150:    00000000    ....    DCD    0
+        0x00000154:    00000000    ....    DCD    0
+        0x00000158:    00000000    ....    DCD    0
+        0x0000015c:    00000000    ....    DCD    0
+        0x00000160:    00000000    ....    DCD    0
+        0x00000164:    00000000    ....    DCD    0
+        0x00000168:    00000000    ....    DCD    0
+        0x0000016c:    00000000    ....    DCD    0
+        0x00000170:    00000000    ....    DCD    0
+        0x00000174:    00000000    ....    DCD    0
+        0x00000178:    00000000    ....    DCD    0
+        0x0000017c:    00000000    ....    DCD    0
+        0x00000180:    00000000    ....    DCD    0
+        0x00000184:    00000000    ....    DCD    0
+        0x00000188:    00000000    ....    DCD    0
+        0x0000018c:    00000000    ....    DCD    0
+        0x00000190:    00000000    ....    DCD    0
+        0x00000194:    00000000    ....    DCD    0
+        0x00000198:    00000000    ....    DCD    0
+        0x0000019c:    00000000    ....    DCD    0
+        0x000001a0:    00000000    ....    DCD    0
+        0x000001a4:    00000000    ....    DCD    0
+        0x000001a8:    00000000    ....    DCD    0
+        0x000001ac:    00000000    ....    DCD    0
+        0x000001b0:    00000000    ....    DCD    0
+        0x000001b4:    00000000    ....    DCD    0
+        0x000001b8:    00000000    ....    DCD    0
+        0x000001bc:    00000000    ....    DCD    0
+        0x000001c0:    00000000    ....    DCD    0
+        0x000001c4:    00000000    ....    DCD    0
+        0x000001c8:    00000000    ....    DCD    0
+        0x000001cc:    00000000    ....    DCD    0
+        0x000001d0:    00000000    ....    DCD    0
+        0x000001d4:    00000000    ....    DCD    0
+        0x000001d8:    00000000    ....    DCD    0
+        0x000001dc:    00000000    ....    DCD    0
+        0x000001e0:    00000000    ....    DCD    0
+        0x000001e4:    00000000    ....    DCD    0
+        0x000001e8:    00000000    ....    DCD    0
+        0x000001ec:    00000000    ....    DCD    0
+        0x000001f0:    00000000    ....    DCD    0
+        0x000001f4:    00000000    ....    DCD    0
+        0x000001f8:    00000000    ....    DCD    0
+        0x000001fc:    00000000    ....    DCD    0
+        0x00000200:    00000000    ....    DCD    0
+        0x00000204:    00000000    ....    DCD    0
+        0x00000208:    00000000    ....    DCD    0
+        0x0000020c:    00000000    ....    DCD    0
+        0x00000210:    00000000    ....    DCD    0
+        0x00000214:    00000000    ....    DCD    0
+        0x00000218:    00000000    ....    DCD    0
+        0x0000021c:    00000000    ....    DCD    0
+        0x00000220:    00000000    ....    DCD    0
+        0x00000224:    00000000    ....    DCD    0
+        0x00000228:    00000000    ....    DCD    0
+        0x0000022c:    00000000    ....    DCD    0
+        0x00000230:    00000000    ....    DCD    0
+        0x00000234:    00000000    ....    DCD    0
+        0x00000238:    00000000    ....    DCD    0
+        0x0000023c:    00000000    ....    DCD    0
+        0x00000240:    00000000    ....    DCD    0
+        0x00000244:    00000000    ....    DCD    0
+        0x00000248:    00000000    ....    DCD    0
+        0x0000024c:    00000000    ....    DCD    0
+        0x00000250:    00000000    ....    DCD    0
+        0x00000254:    00000000    ....    DCD    0
+        0x00000258:    00000000    ....    DCD    0
+        0x0000025c:    00000000    ....    DCD    0
+        0x00000260:    00000000    ....    DCD    0
+        0x00000264:    00000000    ....    DCD    0
+        0x00000268:    00000000    ....    DCD    0
+        0x0000026c:    00000000    ....    DCD    0
+        0x00000270:    00000000    ....    DCD    0
+        0x00000274:    00000000    ....    DCD    0
+        0x00000278:    00000000    ....    DCD    0
+        0x0000027c:    00000000    ....    DCD    0
+        0x00000280:    00000000    ....    DCD    0
+        0x00000284:    00000000    ....    DCD    0
+        0x00000288:    00000000    ....    DCD    0
+        0x0000028c:    00000000    ....    DCD    0
+        0x00000290:    00000000    ....    DCD    0
+        0x00000294:    00000000    ....    DCD    0
+        0x00000298:    00000000    ....    DCD    0
+        0x0000029c:    00000000    ....    DCD    0
+        0x000002a0:    00000000    ....    DCD    0
+        0x000002a4:    00000000    ....    DCD    0
+        0x000002a8:    00000000    ....    DCD    0
+        0x000002ac:    00000000    ....    DCD    0
+        0x000002b0:    00000000    ....    DCD    0
+        0x000002b4:    00000000    ....    DCD    0
+        0x000002b8:    00000000    ....    DCD    0
+        0x000002bc:    00000000    ....    DCD    0
+        0x000002c0:    00000000    ....    DCD    0
+        0x000002c4:    00000000    ....    DCD    0
+        0x000002c8:    00000000    ....    DCD    0
+        0x000002cc:    00000000    ....    DCD    0
+        0x000002d0:    00000000    ....    DCD    0
+        0x000002d4:    00000000    ....    DCD    0
+        0x000002d8:    00000000    ....    DCD    0
+        0x000002dc:    00000000    ....    DCD    0
+        0x000002e0:    00000000    ....    DCD    0
+        0x000002e4:    00000000    ....    DCD    0
+        0x000002e8:    00000000    ....    DCD    0
+        0x000002ec:    00000000    ....    DCD    0
+        0x000002f0:    00000000    ....    DCD    0
+        0x000002f4:    00000000    ....    DCD    0
+        0x000002f8:    00000000    ....    DCD    0
+        0x000002fc:    00000000    ....    DCD    0
+        0x00000300:    00000000    ....    DCD    0
+        0x00000304:    00000000    ....    DCD    0
+        0x00000308:    00000000    ....    DCD    0
+        0x0000030c:    00000000    ....    DCD    0
+        0x00000310:    00000000    ....    DCD    0
+        0x00000314:    00000000    ....    DCD    0
+        0x00000318:    00000000    ....    DCD    0
+        0x0000031c:    00000000    ....    DCD    0
+        0x00000320:    00000000    ....    DCD    0
+        0x00000324:    00000000    ....    DCD    0
+        0x00000328:    00000000    ....    DCD    0
+        0x0000032c:    00000000    ....    DCD    0
+        0x00000330:    00000000    ....    DCD    0
+        0x00000334:    00000000    ....    DCD    0
+        0x00000338:    00000000    ....    DCD    0
+        0x0000033c:    00000000    ....    DCD    0
+        0x00000340:    00000000    ....    DCD    0
+        0x00000344:    00000000    ....    DCD    0
+        0x00000348:    00000000    ....    DCD    0
+        0x0000034c:    00000000    ....    DCD    0
+        0x00000350:    00000000    ....    DCD    0
+        0x00000354:    00000000    ....    DCD    0
+        0x00000358:    00000000    ....    DCD    0
+        0x0000035c:    00000000    ....    DCD    0
+        0x00000360:    00000000    ....    DCD    0
+        0x00000364:    00000000    ....    DCD    0
+        0x00000368:    00000000    ....    DCD    0
+        0x0000036c:    00000000    ....    DCD    0
+        0x00000370:    00000000    ....    DCD    0
+        0x00000374:    00000000    ....    DCD    0
+        0x00000378:    00000000    ....    DCD    0
+        0x0000037c:    00000000    ....    DCD    0
+        0x00000380:    00000000    ....    DCD    0
+        0x00000384:    00000000    ....    DCD    0
+        0x00000388:    00000000    ....    DCD    0
+        0x0000038c:    00000000    ....    DCD    0
+        0x00000390:    00000000    ....    DCD    0
+        0x00000394:    00000000    ....    DCD    0
+        0x00000398:    00000000    ....    DCD    0
+        0x0000039c:    00000000    ....    DCD    0
+        0x000003a0:    00000000    ....    DCD    0
+        0x000003a4:    00000000    ....    DCD    0
+        0x000003a8:    00000000    ....    DCD    0
+        0x000003ac:    00000000    ....    DCD    0
+        0x000003b0:    00000000    ....    DCD    0
+        0x000003b4:    00000000    ....    DCD    0
+        0x000003b8:    00000000    ....    DCD    0
+        0x000003bc:    00000000    ....    DCD    0
+        0x000003c0:    00000000    ....    DCD    0
+        0x000003c4:    00000000    ....    DCD    0
+        0x000003c8:    00000000    ....    DCD    0
+        0x000003cc:    00000000    ....    DCD    0
+        0x000003d0:    00000000    ....    DCD    0
+        0x000003d4:    00000000    ....    DCD    0
+        0x000003d8:    00000000    ....    DCD    0
+        0x000003dc:    00000000    ....    DCD    0
+        0x000003e0:    00000000    ....    DCD    0
+        0x000003e4:    00000000    ....    DCD    0
+        0x000003e8:    00000000    ....    DCD    0
+        0x000003ec:    00000000    ....    DCD    0
+        0x000003f0:    00000000    ....    DCD    0
+        0x000003f4:    00000000    ....    DCD    0
+        0x000003f8:    00000000    ....    DCD    0
+        0x000003fc:    00000000    ....    DCD    0
+    $t
+    .ARM.Collect$$$$00000000
+    .ARM.Collect$$$$00000003
+    __main
+    _main_stk
+        0x00000400:    f8dfd00c    ....    LDR      sp,__lit__00000000 ; [0x410] = 0x20040000
+    .ARM.Collect$$$$00000004
+    _main_scatterload
+        0x00000404:    f000f806    ....    BL       __scatterload ; 0x414
+    .ARM.Collect$$$$00000008
+    .ARM.Collect$$$$0000000A
+    .ARM.Collect$$$$0000000B
+    __main_after_scatterload
+    _main_clock
+    _main_cpp_init
+    _main_init
+        0x00000408:    4800        .H      LDR      r0,[pc,#0] ; [0x40c] = 0x47d
+        0x0000040a:    4700        .G      BX       r0
+    $d
+        0x0000040c:    0000047d    }...    DCD    1149
+    .ARM.Collect$$$$00002714
+    __lit__00000000
+    .ARM.Collect$$$$0000000D
+    .ARM.Collect$$$$0000000F
+    __rt_final_cpp
+    __rt_final_exit
+        0x00000410:    20040000    ...     DCD    537133056
+    $t
+    .text
+    __scatterload
+    __scatterload_rt2
+        0x00000414:    b51c        ..      PUSH     {r2-r4,lr}
+        0x00000416:    4809        .H      LDR      r0,[pc,#36] ; [0x43c] = 0x52c
+        0x00000418:    9000        ..      STR      r0,[sp,#0]
+        0x0000041a:    4809        .H      LDR      r0,[pc,#36] ; [0x440] = 0x53c
+        0x0000041c:    9001        ..      STR      r0,[sp,#4]
+        0x0000041e:    4605        .F      MOV      r5,r0
+        0x00000420:    9c00        ..      LDR      r4,[sp,#0]
+        0x00000422:    e006        ..      B        0x432 ; __scatterload + 30
+        0x00000424:    68e0        .h      LDR      r0,[r4,#0xc]
+        0x00000426:    f0400301    @...    ORR      r3,r0,#1
+        0x0000042a:    e8940007    ....    LDM      r4,{r0-r2}
+        0x0000042e:    4798        .G      BLX      r3
+        0x00000430:    3410        .4      ADDS     r4,r4,#0x10
+        0x00000432:    42ac        .B      CMP      r4,r5
+        0x00000434:    d3f6        ..      BCC      0x424 ; __scatterload + 16
+        0x00000436:    f7ffffe7    ....    BL       __main_after_scatterload ; 0x408
+    $d
+        0x0000043a:    0000        ..      DCW    0
+        0x0000043c:    0000052c    ,...    DCD    1324
+        0x00000440:    0000053c    <...    DCD    1340
+    $t.0
+    .text
+    .text
+    BusFault_Handler
+    DUALTIMER_Handler
+    DebugMon_Handler
+    Default_Handler
+    ETHERNET_Handler
+    GPIO0ALL_Handler
+    GPIO0_0_Handler
+    GPIO0_1_Handler
+    GPIO0_2_Handler
+    GPIO0_3_Handler
+    GPIO0_4_Handler
+    GPIO0_5_Handler
+    GPIO0_6_Handler
+    GPIO0_7_Handler
+    GPIO1ALL_Handler
+    GPIO2_Handler
+    GPIO3_Handler
+    I2S_Handler
+    MemManage_Handler
+    NMI_Handler
+    PendSV_Handler
+    SPI_0_1_Handler
+    SPI_2_Handler
+    SPI_3_4_Handler
+    SVC_Handler
+    SysTick_Handler
+    TIMER0_Handler
+    TIMER1_Handler
+    TOUCHSCREEN_Handler
+    UART0RX_Handler
+    UART0TX_Handler
+    UART1RX_Handler
+    UART1TX_Handler
+    UART2RX_Handler
+    UART2TX_Handler
+    UART3RX_Handler
+    UART3TX_Handler
+    UART4RX_Handler
+    UART4TX_Handler
+    UART_0_1_2_OVF_Handler
+    UsageFault_Handler
+    __I$use$semihosting$fputc
+    __semihosting_library_function
+        0x00000444:    e7fe        ..      B        BusFault_Handler ; 0x444
+        0x00000446:    0000        ..      MOVS     r0,r0
+    HardFault_Handler
+        0x00000448:    e7fe        ..      B        HardFault_Handler ; 0x448
+        0x0000044a:    0000        ..      MOVS     r0,r0
+    Reset_Handler
+        0x0000044c:    f000f802    ....    BL       SystemInit ; 0x454
+        0x00000450:    f7ffffd6    ....    BL       __main ; 0x400
+    SystemInit
+        0x00000454:    f2400000    @...    MOVW     r0,#0
+        0x00000458:    f64e5108    N..Q    MOV      r1,#0xed08
+        0x0000045c:    f2c00000    ....    MOVT     r0,#0
+        0x00000460:    f2ce0100    ....    MOVT     r1,#0xe000
+        0x00000464:    6008        .`      STR      r0,[r1,#0]
+        0x00000466:    f2400004    @...    MOVW     r0,#4
+        0x0000046a:    f6470140    G.@.    MOV      r1,#0x7840
+        0x0000046e:    f2c20000    ....    MOVT     r0,#0x2000
+        0x00000472:    f2c0117d    ..}.    MOVT     r1,#0x17d
+        0x00000476:    6001        .`      STR      r1,[r0,#0]
+        0x00000478:    4770        pG      BX       lr
+        0x0000047a:    0000        ..      MOVS     r0,r0
+    main
+        0x0000047c:    b510        ..      PUSH     {r4,lr}
+        0x0000047e:    f2405418    @..T    MOVW     r4,#0x518
+        0x00000482:    f2c00400    ....    MOVT     r4,#0
+        0x00000486:    4620         F      MOV      r0,r4
+        0x00000488:    f000f834    ..4.    BL       puts ; 0x4f4
+        0x0000048c:    a005        ..      ADR      r0,{pc}+0x18 ; 0x4a4
+        0x0000048e:    f000f831    ..1.    BL       puts ; 0x4f4
+        0x00000492:    4620         F      MOV      r0,r4
+        0x00000494:    f000f82e    ....    BL       puts ; 0x4f4
+        0x00000498:    a007        ..      ADR      r0,{pc}+0x20 ; 0x4b8
+        0x0000049a:    f000f82b    ..+.    BL       puts ; 0x4f4
+        0x0000049e:    2000        .       MOVS     r0,#0
+        0x000004a0:    bd10        ..      POP      {r4,pc}
+        0x000004a2:    bf00        ..      NOP      
+    $d.1
+        0x000004a4:    74726f63    cort    DCD    1953656675
+        0x000004a8:    6d2d7865    ex-m    DCD    1831696485
+        0x000004ac:    74732033    3 st    DCD    1953701939
+        0x000004b0:    75747261    artu    DCD    1970565729
+        0x000004b4:    00002170    p!..    DCD    8560
+        0x000004b8:    74736574    test    DCD    1953719668
+        0x000004bc:    67656220     beg    DCD    1734697504
+        0x000004c0:    00006e69    in..    DCD    28265
+    $t
+    i.__scatterload_copy
+    __scatterload_copy
+        0x000004c4:    e002        ..      B        0x4cc ; __scatterload_copy + 8
+        0x000004c6:    c808        ..      LDM      r0!,{r3}
+        0x000004c8:    1f12        ..      SUBS     r2,r2,#4
+        0x000004ca:    c108        ..      STM      r1!,{r3}
+        0x000004cc:    2a00        .*      CMP      r2,#0
+        0x000004ce:    d1fa        ..      BNE      0x4c6 ; __scatterload_copy + 2
+        0x000004d0:    4770        pG      BX       lr
+    i.__scatterload_null
+    __scatterload_null
+        0x000004d2:    4770        pG      BX       lr
+    i.__scatterload_zeroinit
+    __scatterload_zeroinit
+        0x000004d4:    2000        .       MOVS     r0,#0
+        0x000004d6:    e001        ..      B        0x4dc ; __scatterload_zeroinit + 8
+        0x000004d8:    c101        ..      STM      r1!,{r0}
+        0x000004da:    1f12        ..      SUBS     r2,r2,#4
+        0x000004dc:    2a00        .*      CMP      r2,#0
+        0x000004de:    d1fb        ..      BNE      0x4d8 ; __scatterload_zeroinit + 4
+        0x000004e0:    4770        pG      BX       lr
+    i.fputc
+    fputc
+        0x000004e2:    b538        8.      PUSH     {r3-r5,lr}
+        0x000004e4:    4604        .F      MOV      r4,r0
+        0x000004e6:    f88d0000    ....    STRB     r0,[sp,#0]
+        0x000004ea:    4669        iF      MOV      r1,sp
+        0x000004ec:    2003        .       MOVS     r0,#3
+        0x000004ee:    beab        ..      BKPT     #0xab
+        0x000004f0:    4620         F      MOV      r0,r4
+        0x000004f2:    bd38        8.      POP      {r3-r5,pc}
+    i.puts
+    puts
+        0x000004f4:    b510        ..      PUSH     {r4,lr}
+        0x000004f6:    4604        .F      MOV      r4,r0
+        0x000004f8:    e001        ..      B        0x4fe ; puts + 10
+        0x000004fa:    f7fffff2    ....    BL       fputc ; 0x4e2
+        0x000004fe:    f8140b01    ....    LDRB     r0,[r4],#1
+        0x00000502:    4904        .I      LDR      r1,[pc,#16] ; [0x514] = 0x20000000
+        0x00000504:    2800        .(      CMP      r0,#0
+        0x00000506:    d1f8        ..      BNE      0x4fa ; puts + 6
+        0x00000508:    e8bd4010    ...@    POP      {r4,lr}
+        0x0000050c:    200a        .       MOVS     r0,#0xa
+        0x0000050e:    f7ffbfe8    ....    B.W      fputc ; 0x4e2
+    $d
+        0x00000512:    0000        ..      DCW    0
+        0x00000514:    20000000    ...     DCD    536870912
+    $d.realdata
+    .Lstr.4
+        0x00000518:    2a2a2a2a    ****    DCD    707406378
+        0x0000051c:    2a2a2a2a    ****    DCD    707406378
+        0x00000520:    2a2a2a2a    ****    DCD    707406378
+        0x00000524:    2a2a2a2a    ****    DCD    707406378
+        0x00000528:    00002a2a    **..    DCD    10794
+    Region$$Table$$Base
+        0x0000052c:    0000053c    <...    DCD    1340
+        0x00000530:    20000000    ...     DCD    536870912
+        0x00000534:    00000008    ....    DCD    8
+        0x00000538:    000004c4    ....    DCD    1220
+    Region$$Table$$Limit
+
+====================================
+
+** Section #2
+
+    Name        : RW_RAM
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : SHF_ALLOC + SHF_WRITE (0x00000003)
+    Addr        : 0x20000000
+    File Offset : 1392 (0x570)
+    Size        : 8 bytes (0x8)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 4
+    Entry Size  : 0
+
+
+====================================
+
+** Section #3
+
+    Name        : ARM_LIB_HEAP
+    Type        : SHT_NOBITS (0x00000008)
+    Flags       : SHF_ALLOC + SHF_WRITE (0x00000003)
+    Addr        : 0x20000008
+    File Offset : 1400 (0x578)
+    Size        : 3072 bytes (0xc00)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #4
+
+    Name        : ARM_LIB_STACK
+    Type        : SHT_NOBITS (0x00000008)
+    Flags       : SHF_ALLOC + SHF_WRITE (0x00000003)
+    Addr        : 0x2003fe00
+    File Offset : 1400 (0x578)
+    Size        : 512 bytes (0x200)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #5
+
+    Name        : .debug_abbrev
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 1400 (0x578)
+    Size        : 459 bytes (0x1cb)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #6
+
+    Name        : .debug_frame
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 1859 (0x743)
+    Size        : 504 bytes (0x1f8)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #7
+
+    Name        : .debug_info
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 2363 (0x93b)
+    Size        : 901 bytes (0x385)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #8
+
+    Name        : .debug_line
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 3264 (0xcc0)
+    Size        : 613 bytes (0x265)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #9
+
+    Name        : .debug_loc
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 3877 (0xf25)
+    Size        : 80 bytes (0x50)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #10
+
+    Name        : .debug_ranges
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 3957 (0xf75)
+    Size        : 56 bytes (0x38)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #11
+
+    Name        : .debug_str
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 4013 (0xfad)
+    Size        : 962 bytes (0x3c2)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #12
+
+    Name        : .symtab
+    Type        : SHT_SYMTAB (0x00000002)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 4976 (0x1370)
+    Size        : 2096 bytes (0x830)
+    Link        : Section 13 (.strtab)
+    Info        : Last local symbol no = 60
+    Alignment   : 4
+    Entry Size  : 16
+
+
+====================================
+
+** Section #13
+
+    Name        : .strtab
+    Type        : SHT_STRTAB (0x00000003)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 7072 (0x1ba0)
+    Size        : 1884 bytes (0x75c)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+
+** Section #14
+
+    Name        : .note
+    Type        : SHT_NOTE (0x00000007)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 8956 (0x22fc)
+    Size        : 32 bytes (0x20)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 4
+    Entry Size  : 0
+
+        Section     Segment
+    ====================================
+
+              1           0
+              2           0
+              3           0
+              4           0
+
+====================================
+
+** Section #15
+
+    Name        : .comment
+    Type        : SHT_PROGBITS (0x00000001)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 8988 (0x231c)
+    Size        : 972 bytes (0x3cc)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+    Component: Arm Compiler for Embedded 6.22 Tool: armlink [5ee90200]
+    ArmLink --strict --library_type=microlib --callgraph --load_addr_map_info --map --symbols --xref --diag_suppress=9931 --cpu=Cortex-M3 --list=.\Listings\soc_cm3_prj.map --output=.\Objects\soc_cm3_prj.axf --scatter=.\RTE\Device\ARMCM3\ARMCM3_ac6.sct --info=summarysizes,sizes,totals,unused,veneers
+
+    D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\armlib\h_w.l
+    D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\libcxx\libcpp-experimental_w.l
+    D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\libcxx\libcpp_w.l
+    D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\libcxx\libcppabi_w.l
+    D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\armlib\m_ws.l
+    D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\armlib\mc_w.l
+    D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\armlib\mf_w.l
+    D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\armlib\vfpsupport.l
+    Input Comments:
+    
+    mian.o
+    startup_cmsdk_cm3.o
+    system_cmsdk_cm3.o
+    
+    
+    Component: Arm Compiler for Embedded 6.22 Tool: armclang [5ee92100]
+    
+    
+
+====================================
+
+** Section #16
+
+    Name        : .shstrtab
+    Type        : SHT_STRTAB (0x00000003)
+    Flags       : None (0x00000000)
+    Addr        : 0x00000000
+    File Offset : 9960 (0x26e8)
+    Size        : 180 bytes (0xb4)
+    Link        : SHN_UNDEF
+    Info        : 0
+    Alignment   : 1
+    Entry Size  : 0
+
+
+====================================
+

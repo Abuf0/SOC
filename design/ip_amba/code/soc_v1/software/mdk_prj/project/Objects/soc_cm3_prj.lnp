@@ -1,7 +1,7 @@
 --cpu Cortex-M3
 ".\objects\mian.o"
-".\objects\startup_armcm3.o"
-".\objects\system_armcm3.o"
+".\objects\startup_cmsdk_cm3.o"
+".\objects\system_cmsdk_cm3.o"
 --library_type=microlib --strict --scatter ".\RTE\Device\ARMCM3\ARMCM3_ac6.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

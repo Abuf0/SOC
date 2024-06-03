@@ -1,7 +1,7 @@
 #include "stdio.h"
 #include "stdint.h"
-#include "ARMCM3.h"
-#include "system_ARMCM3.h"
+#include "CMSDK_CM3.h"
+#include "system_CMSDK_CM3.h"
 int main(void)
 {
 printf("******************\n");

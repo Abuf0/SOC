@@ -1,6 +1,7 @@
 ../sim/soc_top_tb.sv
 ../rtl/soc_top.sv
 ../rtl/crgu.sv
+../rtl/cortexm3ds_logic.v
 ../rtl/core_v0.sv
 ../rtl/arbiter.sv
 ../rtl/ahb_m2s_mux.sv

@@ -101,10 +101,10 @@
         <yPos>-1</yPos>
       </MaxPosition>
       <NormalPosition>
-        <Top>135</Top>
-        <Left>232</Left>
-        <Right>1357</Right>
-        <Bottom>818</Bottom>
+        <Top>131</Top>
+        <Left>178</Left>
+        <Right>1303</Right>
+        <Bottom>814</Bottom>
       </NormalPosition>
     </WindowPosition>
     <MDIClientArea>
@@ -1865,15 +1865,15 @@
       <ActiveTab>0</ActiveTab>
       <Doc>
         <Name>.\mian.c</Name>
-        <ColumnNumber>6</ColumnNumber>
+        <ColumnNumber>13</ColumnNumber>
         <TopLine>1</TopLine>
-        <CurrentLine>14</CurrentLine>
+        <CurrentLine>11</CurrentLine>
         <Folding>0</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>RTE/Device/ARMCM3/startup_ARMCM3.c</Name>
+        <Name>D:\Learn\2-DESIGN\0-DEMO\SOC\design\ip_amba\code\soc_v1\software\mdk_prj\project\RTE\Device\ARMCM3\startup_ARMCM3.c</Name>
         <ColumnNumber>20</ColumnNumber>
         <TopLine>106</TopLine>
         <CurrentLine>25</CurrentLine>
@@ -1882,7 +1882,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>RTE/Device/ARMCM3/system_ARMCM3.c</Name>
+        <Name>D:\Learn\2-DESIGN\0-DEMO\SOC\design\ip_amba\code\soc_v1\software\mdk_prj\project\RTE\Device\ARMCM3\system_ARMCM3.c</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>3</TopLine>
         <CurrentLine>1</CurrentLine>
@@ -1891,7 +1891,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>RTE/Device/ARMCM3/ARMCM3_ac6.sct</Name>
+        <Name>D:\Learn\2-DESIGN\0-DEMO\SOC\design\ip_amba\code\soc_v1\software\mdk_prj\project\RTE\Device\ARMCM3\ARMCM3_ac6.sct</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>1</TopLine>
         <CurrentLine>1</CurrentLine>

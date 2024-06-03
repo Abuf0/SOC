@@ -71,7 +71,7 @@ generate
     end
 endgenerate
 initial begin
-    $readmemh("./cm3.txt",memory);
+    $readmemh("~/SOC/ip_demo/soc_v1/rtl/cm3.txt",memory);
 end
 // write
 always_ff @( posedge hclk or negedge hresetn ) begin

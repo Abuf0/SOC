@@ -4,22 +4,22 @@ Component: Arm Compiler for Embedded 6.22 Tool: armlink [5ee90200]
 
 Section Cross References
 
-    mian.o(.text.main) refers to mian.o(.rodata.str1.1) for .L.str
-    mian.o(.text.main) refers to printfa.o(i.__0printf) for printf
+    mian.o(.text.main) refers to mian.o(.rodata.str1.1) for .Lstr.4
+    mian.o(.text.main) refers to puts.o(i.puts) for puts
     mian.o(.ARM.exidx.text.main) refers to mian.o(.text.main) for [Anonymous Symbol]
-    startup_armcm3.o(.ARM.exidx.text.Default_Handler) refers to startup_armcm3.o(.text.Default_Handler) for [Anonymous Symbol]
-    startup_armcm3.o(.text.Reset_Handler) refers to system_armcm3.o(.text.SystemInit) for SystemInit
-    startup_armcm3.o(.text.Reset_Handler) refers to entry.o(.ARM.Collect$$$$00000000) for __main
-    startup_armcm3.o(.ARM.exidx.text.Reset_Handler) refers to startup_armcm3.o(.text.Reset_Handler) for [Anonymous Symbol]
-    startup_armcm3.o(.ARM.exidx.text.HardFault_Handler) refers to startup_armcm3.o(.text.HardFault_Handler) for [Anonymous Symbol]
-    startup_armcm3.o(RESET) refers to startup_armcm3.o(.text.Reset_Handler) for Reset_Handler
-    startup_armcm3.o(RESET) refers to startup_armcm3.o(.text.Default_Handler) for NMI_Handler
-    startup_armcm3.o(RESET) refers to startup_armcm3.o(.text.HardFault_Handler) for HardFault_Handler
-    system_armcm3.o(.text.SystemCoreClockUpdate) refers to system_armcm3.o(.data.SystemCoreClock) for SystemCoreClock
-    system_armcm3.o(.ARM.exidx.text.SystemCoreClockUpdate) refers to system_armcm3.o(.text.SystemCoreClockUpdate) for [Anonymous Symbol]
-    system_armcm3.o(.text.SystemInit) refers to startup_armcm3.o(RESET) for __Vectors
-    system_armcm3.o(.text.SystemInit) refers to system_armcm3.o(.data.SystemCoreClock) for SystemCoreClock
-    system_armcm3.o(.ARM.exidx.text.SystemInit) refers to system_armcm3.o(.text.SystemInit) for [Anonymous Symbol]
+    startup_cmsdk_cm3.o(.ARM.exidx.text.Default_Handler) refers to startup_cmsdk_cm3.o(.text.Default_Handler) for [Anonymous Symbol]
+    startup_cmsdk_cm3.o(.text.Reset_Handler) refers to system_cmsdk_cm3.o(.text.SystemInit) for SystemInit
+    startup_cmsdk_cm3.o(.text.Reset_Handler) refers to entry.o(.ARM.Collect$$$$00000000) for __main
+    startup_cmsdk_cm3.o(.ARM.exidx.text.Reset_Handler) refers to startup_cmsdk_cm3.o(.text.Reset_Handler) for [Anonymous Symbol]
+    startup_cmsdk_cm3.o(.ARM.exidx.text.HardFault_Handler) refers to startup_cmsdk_cm3.o(.text.HardFault_Handler) for [Anonymous Symbol]
+    startup_cmsdk_cm3.o(RESET) refers to startup_cmsdk_cm3.o(.text.Reset_Handler) for Reset_Handler
+    startup_cmsdk_cm3.o(RESET) refers to startup_cmsdk_cm3.o(.text.Default_Handler) for NMI_Handler
+    startup_cmsdk_cm3.o(RESET) refers to startup_cmsdk_cm3.o(.text.HardFault_Handler) for HardFault_Handler
+    system_cmsdk_cm3.o(.text.SystemCoreClockUpdate) refers to system_cmsdk_cm3.o(.data.SystemCoreClock) for SystemCoreClock
+    system_cmsdk_cm3.o(.ARM.exidx.text.SystemCoreClockUpdate) refers to system_cmsdk_cm3.o(.text.SystemCoreClockUpdate) for [Anonymous Symbol]
+    system_cmsdk_cm3.o(.text.SystemInit) refers to startup_cmsdk_cm3.o(RESET) for __Vectors
+    system_cmsdk_cm3.o(.text.SystemInit) refers to system_cmsdk_cm3.o(.data.SystemCoreClock) for SystemCoreClock
+    system_cmsdk_cm3.o(.ARM.exidx.text.SystemInit) refers to system_cmsdk_cm3.o(.text.SystemInit) for [Anonymous Symbol]
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry10a.o(.ARM.Collect$$$$0000000D) for __rt_final_cpp
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry11a.o(.ARM.Collect$$$$0000000F) for __rt_final_exit
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry7b.o(.ARM.Collect$$$$00000008) for _main_clock
@@ -27,49 +27,10 @@ Section Cross References
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry9a.o(.ARM.Collect$$$$0000000B) for _main_init
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry5.o(.ARM.Collect$$$$00000004) for _main_scatterload
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry4.o(.ARM.Collect$$$$00000003) for _main_stk
-    printfa.o(i.__0fprintf) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i.__0fprintf) refers to printfa.o(i._printf_core) for _printf_core
-    printfa.o(i.__0fprintf) refers to fputc.o(i.fputc) for fputc
-    printfa.o(i.__0printf) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i.__0printf) refers to printfa.o(i._printf_core) for _printf_core
-    printfa.o(i.__0printf) refers to fputc.o(i.fputc) for fputc
-    printfa.o(i.__0printf) refers to stdout.o(.data) for __stdout
-    printfa.o(i.__0snprintf) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i.__0snprintf) refers to printfa.o(i._printf_core) for _printf_core
-    printfa.o(i.__0snprintf) refers to printfa.o(i._snputc) for _snputc
-    printfa.o(i.__0sprintf) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i.__0sprintf) refers to printfa.o(i._printf_core) for _printf_core
-    printfa.o(i.__0sprintf) refers to printfa.o(i._sputc) for _sputc
-    printfa.o(i.__0vfprintf) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i.__0vfprintf) refers to printfa.o(i._printf_core) for _printf_core
-    printfa.o(i.__0vfprintf) refers to fputc.o(i.fputc) for fputc
-    printfa.o(i.__0vprintf) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i.__0vprintf) refers to printfa.o(i._printf_core) for _printf_core
-    printfa.o(i.__0vprintf) refers to fputc.o(i.fputc) for fputc
-    printfa.o(i.__0vprintf) refers to stdout.o(.data) for __stdout
-    printfa.o(i.__0vsnprintf) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i.__0vsnprintf) refers to printfa.o(i._printf_core) for _printf_core
-    printfa.o(i.__0vsnprintf) refers to printfa.o(i._snputc) for _snputc
-    printfa.o(i.__0vsprintf) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i.__0vsprintf) refers to printfa.o(i._printf_core) for _printf_core
-    printfa.o(i.__0vsprintf) refers to printfa.o(i._sputc) for _sputc
-    printfa.o(i._fp_digits) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i._fp_digits) refers to dmul.o(.text) for __aeabi_dmul
-    printfa.o(i._fp_digits) refers to ddiv.o(.text) for __aeabi_ddiv
-    printfa.o(i._fp_digits) refers to cdrcmple.o(.text) for __aeabi_cdrcmple
-    printfa.o(i._fp_digits) refers to dadd.o(.text) for __aeabi_dadd
-    printfa.o(i._fp_digits) refers to dfixul.o(.text) for __aeabi_d2ulz
-    printfa.o(i._fp_digits) refers to uldiv.o(.text) for __aeabi_uldivmod
-    printfa.o(i._printf_core) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i._printf_core) refers to printfa.o(i._printf_pre_padding) for _printf_pre_padding
-    printfa.o(i._printf_core) refers to uldiv.o(.text) for __aeabi_uldivmod
-    printfa.o(i._printf_core) refers to printfa.o(i._printf_post_padding) for _printf_post_padding
-    printfa.o(i._printf_core) refers to printfa.o(i._fp_digits) for _fp_digits
-    printfa.o(i._printf_core) refers to uidiv.o(.text) for __aeabi_uidivmod
-    printfa.o(i._printf_post_padding) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i._printf_pre_padding) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i._snputc) refers (Special) to iusefp.o(.text) for __I$use$fp
-    printfa.o(i._sputc) refers (Special) to iusefp.o(.text) for __I$use$fp
+    puts.o(i.puts) refers to fputc.o(i.fputc) for fputc
+    puts.o(i.puts) refers to stdout.o(.data) for __stdout
+    puts_e.o(.text) refers to fputc.o(i.fputc) for fputc
+    puts_e.o(.text) refers to stdout.o(.data) for __stdout
     entry4.o(.ARM.Collect$$$$00000003) refers to entry4.o(.ARM.Collect$$$$00002714) for __lit__00000000
     entry4.o(__vectab_stack_and_reset_area) refers to entry.o(.ARM.Collect$$$$00000000) for __main
     entry5.o(.ARM.Collect$$$$00000004) refers to init.o(.text) for __scatterload
@@ -79,24 +40,7 @@ Section Cross References
     fputc.o(i.fputc) refers (Special) to semi.o(.text) for __semihosting_library_function
     fputc_h.o(i._fputc$hlt) refers (Special) to iusesemip.o(.text) for __I$use$semihosting$fputc
     fputc_h.o(i._fputc$hlt) refers (Special) to semi.o(.text) for __semihosting_library_function
-    uldiv.o(.text) refers to llushr.o(.text) for __aeabi_llsr
-    uldiv.o(.text) refers to llshl.o(.text) for __aeabi_llsl
-    dadd.o(.text) refers (Special) to iusefp.o(.text) for __I$use$fp
-    dadd.o(.text) refers to llshl.o(.text) for __aeabi_llsl
-    dadd.o(.text) refers to llsshr.o(.text) for __aeabi_lasr
-    dadd.o(.text) refers to depilogue.o(.text) for _double_epilogue
-    dmul.o(.text) refers (Special) to iusefp.o(.text) for __I$use$fp
-    dmul.o(.text) refers to depilogue.o(.text) for _double_epilogue
-    ddiv.o(.text) refers (Special) to iusefp.o(.text) for __I$use$fp
-    ddiv.o(.text) refers to depilogue.o(.text) for _double_round
-    dfixul.o(.text) refers (Special) to iusefp.o(.text) for __I$use$fp
-    dfixul.o(.text) refers to llushr.o(.text) for __aeabi_llsr
-    dfixul.o(.text) refers to llshl.o(.text) for __aeabi_llsl
-    cdrcmple.o(.text) refers (Special) to iusefp.o(.text) for __I$use$fp
     init.o(.text) refers to entry5.o(.ARM.Collect$$$$00000004) for __main_after_scatterload
-    depilogue.o(.text) refers (Special) to iusefp.o(.text) for __I$use$fp
-    depilogue.o(.text) refers to llshl.o(.text) for __aeabi_llsl
-    depilogue.o(.text) refers to llushr.o(.text) for __aeabi_llsr
 
 
 ==============================================================================
@@ -106,14 +50,14 @@ Removing Unused input sections from the image.
     Removing mian.o(.text), (0 bytes).
     Removing mian.o(.ARM.exidx.text.main), (8 bytes).
     Removing mian.o(.ARM.use_no_argv), (4 bytes).
-    Removing startup_armcm3.o(.text), (0 bytes).
-    Removing startup_armcm3.o(.ARM.exidx.text.Default_Handler), (8 bytes).
-    Removing startup_armcm3.o(.ARM.exidx.text.Reset_Handler), (8 bytes).
-    Removing startup_armcm3.o(.ARM.exidx.text.HardFault_Handler), (8 bytes).
-    Removing system_armcm3.o(.text), (0 bytes).
-    Removing system_armcm3.o(.text.SystemCoreClockUpdate), (20 bytes).
-    Removing system_armcm3.o(.ARM.exidx.text.SystemCoreClockUpdate), (8 bytes).
-    Removing system_armcm3.o(.ARM.exidx.text.SystemInit), (8 bytes).
+    Removing startup_cmsdk_cm3.o(.text), (0 bytes).
+    Removing startup_cmsdk_cm3.o(.ARM.exidx.text.Default_Handler), (8 bytes).
+    Removing startup_cmsdk_cm3.o(.ARM.exidx.text.Reset_Handler), (8 bytes).
+    Removing startup_cmsdk_cm3.o(.ARM.exidx.text.HardFault_Handler), (8 bytes).
+    Removing system_cmsdk_cm3.o(.text), (0 bytes).
+    Removing system_cmsdk_cm3.o(.text.SystemCoreClockUpdate), (20 bytes).
+    Removing system_cmsdk_cm3.o(.ARM.exidx.text.SystemCoreClockUpdate), (8 bytes).
+    Removing system_cmsdk_cm3.o(.ARM.exidx.text.SystemInit), (8 bytes).
 
 11 unused section(s) (total 72 bytes) removed from the image.
 
@@ -125,9 +69,6 @@ Image Symbol Table
 
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
-    ../clib/division.s                       0x00000000   Number         0  aeabi_sdiv.o ABSOLUTE
-    ../clib/microlib/division.c              0x00000000   Number         0  uidiv.o ABSOLUTE
-    ../clib/microlib/division.c              0x00000000   Number         0  uldiv.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry4.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
@@ -141,157 +82,125 @@ Image Symbol Table
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
-    ../clib/microlib/longlong.c              0x00000000   Number         0  llshl.o ABSOLUTE
-    ../clib/microlib/longlong.c              0x00000000   Number         0  llushr.o ABSOLUTE
-    ../clib/microlib/longlong.c              0x00000000   Number         0  llsshr.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfa.o ABSOLUTE
     ../clib/microlib/stdio/fputc.c           0x00000000   Number         0  fputc.o ABSOLUTE
     ../clib/microlib/stdio/fputc.c           0x00000000   Number         0  fputc_h.o ABSOLUTE
+    ../clib/microlib/stdio/puts.c            0x00000000   Number         0  puts.o ABSOLUTE
+    ../clib/microlib/stdio/puts.c            0x00000000   Number         0  puts_e.o ABSOLUTE
     ../clib/microlib/stdio/semi.s            0x00000000   Number         0  semi.o ABSOLUTE
     ../clib/microlib/stdio/streams.c         0x00000000   Number         0  stdout.o ABSOLUTE
-    ../clib/microlib/stubs.s                 0x00000000   Number         0  iusefp.o ABSOLUTE
     ../clib/microlib/stubs.s                 0x00000000   Number         0  iusesemip.o ABSOLUTE
-    ../fplib/microlib/fpadd.c                0x00000000   Number         0  dadd.o ABSOLUTE
-    ../fplib/microlib/fpdiv.c                0x00000000   Number         0  ddiv.o ABSOLUTE
-    ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  depilogue.o ABSOLUTE
-    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixul.o ABSOLUTE
-    ../fplib/microlib/fpmul.c                0x00000000   Number         0  dmul.o ABSOLUTE
-    __tagsym$$used.0                         0x00000000   Number         0  startup_armcm3.o(RESET)
-    cdrcmple.s                               0x00000000   Number         0  cdrcmple.o ABSOLUTE
+    __tagsym$$used.0                         0x00000000   Number         0  startup_cmsdk_cm3.o(RESET)
     dc.s                                     0x00000000   Number         0  dc.o ABSOLUTE
     handlers.s                               0x00000000   Number         0  handlers.o ABSOLUTE
     init.s                                   0x00000000   Number         0  init.o ABSOLUTE
     mian.c                                   0x00000000   Number         0  mian.o ABSOLUTE
-    startup_ARMCM3.c                         0x00000000   Number         0  startup_armcm3.o ABSOLUTE
-    system_ARMCM3.c                          0x00000000   Number         0  system_armcm3.o ABSOLUTE
-    .ARM.Collect$$$$00000000                 0x000003c0   Section        0  entry.o(.ARM.Collect$$$$00000000)
-    .ARM.Collect$$$$00000003                 0x000003c0   Section        4  entry4.o(.ARM.Collect$$$$00000003)
-    .ARM.Collect$$$$00000004                 0x000003c4   Section        4  entry5.o(.ARM.Collect$$$$00000004)
-    .ARM.Collect$$$$00000008                 0x000003c8   Section        0  entry7b.o(.ARM.Collect$$$$00000008)
-    .ARM.Collect$$$$0000000A                 0x000003c8   Section        0  entry8b.o(.ARM.Collect$$$$0000000A)
-    .ARM.Collect$$$$0000000B                 0x000003c8   Section        8  entry9a.o(.ARM.Collect$$$$0000000B)
-    __lit__00000000                          0x000003d0   Data           4  entry4.o(.ARM.Collect$$$$00002714)
-    .ARM.Collect$$$$0000000D                 0x000003d0   Section        0  entry10a.o(.ARM.Collect$$$$0000000D)
-    .ARM.Collect$$$$0000000F                 0x000003d0   Section        0  entry11a.o(.ARM.Collect$$$$0000000F)
-    .ARM.Collect$$$$00002714                 0x000003d0   Section        4  entry4.o(.ARM.Collect$$$$00002714)
-    .text                                    0x000003d4   Section        0  uidiv.o(.text)
-    .text                                    0x00000400   Section        0  uldiv.o(.text)
-    .text                                    0x00000462   Section        0  iusefp.o(.text)
-    .text                                    0x00000462   Section        0  dadd.o(.text)
-    .text                                    0x000005b0   Section        0  dmul.o(.text)
-    .text                                    0x00000694   Section        0  ddiv.o(.text)
-    .text                                    0x00000772   Section        0  dfixul.o(.text)
-    .text                                    0x000007a4   Section       48  cdrcmple.o(.text)
-    .text                                    0x000007d4   Section       48  init.o(.text)
-    .text                                    0x00000804   Section        0  semi.o(.text)
-    .text                                    0x00000804   Section        0  llshl.o(.text)
-    .text                                    0x00000822   Section        0  llushr.o(.text)
-    .text                                    0x00000842   Section        0  llsshr.o(.text)
-    .text                                    0x00000866   Section        0  iusesemip.o(.text)
-    .text                                    0x00000866   Section        0  depilogue.o(.text)
-    [Anonymous Symbol]                       0x00000920   Section        0  startup_armcm3.o(.text.Default_Handler)
-    [Anonymous Symbol]                       0x00000924   Section        0  startup_armcm3.o(.text.HardFault_Handler)
-    [Anonymous Symbol]                       0x00000928   Section        0  startup_armcm3.o(.text.Reset_Handler)
-    [Anonymous Symbol]                       0x00000930   Section        0  system_armcm3.o(.text.SystemInit)
-    [Anonymous Symbol]                       0x00000958   Section        0  mian.o(.text.main)
-    i.__0printf                              0x000009b8   Section        0  printfa.o(i.__0printf)
-    i.__scatterload_copy                     0x000009d8   Section       14  handlers.o(i.__scatterload_copy)
-    i.__scatterload_null                     0x000009e6   Section        2  handlers.o(i.__scatterload_null)
-    i.__scatterload_zeroinit                 0x000009e8   Section       14  handlers.o(i.__scatterload_zeroinit)
-    _fp_digits                               0x000009f9   Thumb Code   366  printfa.o(i._fp_digits)
-    i._fp_digits                             0x000009f8   Section        0  printfa.o(i._fp_digits)
-    _printf_core                             0x00000b7d   Thumb Code  1744  printfa.o(i._printf_core)
-    i._printf_core                           0x00000b7c   Section        0  printfa.o(i._printf_core)
-    _printf_post_padding                     0x00001259   Thumb Code    36  printfa.o(i._printf_post_padding)
-    i._printf_post_padding                   0x00001258   Section        0  printfa.o(i._printf_post_padding)
-    _printf_pre_padding                      0x0000127d   Thumb Code    46  printfa.o(i._printf_pre_padding)
-    i._printf_pre_padding                    0x0000127c   Section        0  printfa.o(i._printf_pre_padding)
-    i.fputc                                  0x000012aa   Section        0  fputc.o(i.fputc)
-    .L.str.1                                 0x000012bc   Data          20  mian.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x000012bc   Section        0  mian.o(.rodata.str1.1)
-    .L.str                                   0x000012d0   Data          20  mian.o(.rodata.str1.1)
-    .L.str.2                                 0x000012e4   Data          12  mian.o(.rodata.str1.1)
+    startup_CMSDK_CM3.c                      0x00000000   Number         0  startup_cmsdk_cm3.o ABSOLUTE
+    system_CMSDK_CM3.c                       0x00000000   Number         0  system_cmsdk_cm3.o ABSOLUTE
+    .ARM.Collect$$$$00000000                 0x00000400   Section        0  entry.o(.ARM.Collect$$$$00000000)
+    .ARM.Collect$$$$00000003                 0x00000400   Section        4  entry4.o(.ARM.Collect$$$$00000003)
+    .ARM.Collect$$$$00000004                 0x00000404   Section        4  entry5.o(.ARM.Collect$$$$00000004)
+    .ARM.Collect$$$$00000008                 0x00000408   Section        0  entry7b.o(.ARM.Collect$$$$00000008)
+    .ARM.Collect$$$$0000000A                 0x00000408   Section        0  entry8b.o(.ARM.Collect$$$$0000000A)
+    .ARM.Collect$$$$0000000B                 0x00000408   Section        8  entry9a.o(.ARM.Collect$$$$0000000B)
+    __lit__00000000                          0x00000410   Data           4  entry4.o(.ARM.Collect$$$$00002714)
+    .ARM.Collect$$$$0000000D                 0x00000410   Section        0  entry10a.o(.ARM.Collect$$$$0000000D)
+    .ARM.Collect$$$$0000000F                 0x00000410   Section        0  entry11a.o(.ARM.Collect$$$$0000000F)
+    .ARM.Collect$$$$00002714                 0x00000410   Section        4  entry4.o(.ARM.Collect$$$$00002714)
+    .text                                    0x00000414   Section       48  init.o(.text)
+    [Anonymous Symbol]                       0x00000444   Section        0  startup_cmsdk_cm3.o(.text.Default_Handler)
+    .text                                    0x00000444   Section        0  semi.o(.text)
+    .text                                    0x00000444   Section        0  iusesemip.o(.text)
+    [Anonymous Symbol]                       0x00000448   Section        0  startup_cmsdk_cm3.o(.text.HardFault_Handler)
+    [Anonymous Symbol]                       0x0000044c   Section        0  startup_cmsdk_cm3.o(.text.Reset_Handler)
+    [Anonymous Symbol]                       0x00000454   Section        0  system_cmsdk_cm3.o(.text.SystemInit)
+    [Anonymous Symbol]                       0x0000047c   Section        0  mian.o(.text.main)
+    i.__scatterload_copy                     0x000004c4   Section       14  handlers.o(i.__scatterload_copy)
+    i.__scatterload_null                     0x000004d2   Section        2  handlers.o(i.__scatterload_null)
+    i.__scatterload_zeroinit                 0x000004d4   Section       14  handlers.o(i.__scatterload_zeroinit)
+    i.fputc                                  0x000004e2   Section        0  fputc.o(i.fputc)
+    i.puts                                   0x000004f4   Section        0  puts.o(i.puts)
+    .Lstr.4                                  0x00000518   Data          19  mian.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x00000518   Section        0  mian.o(.rodata.str1.1)
     .data                                    0x20000000   Section        4  stdout.o(.data)
 
     Global Symbols
 
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
-    BuildAttributes$$THM_ISAv4$P$D$K$B$S$PE$A:L22UL41UL21$X:L11$S22US41US21$IEEE1$IW$USESV6$~STKCKD$USESV7$~SHL$OSPACE$ROPI$MICROLIB$REQ8$PRES8$EABIv2 0x00000000   Number         0  anon$$obj.o ABSOLUTE
-    __Vectors                                0x00000000   Data         960  startup_armcm3.o(RESET)
+    BuildAttributes$$THM_ISAv4$P$D$K$B$S$PE$A:L22UL41UL21$X:L11$S22US41US21$IEEE1$IW$USESV6$~STKCKD$USESV7$~SHL$OTIME$MICROLIB$REQ8$PRES8$EABIv2 0x00000000   Number         0  anon$$obj.o ABSOLUTE
+    __Vectors                                0x00000000   Data        1024  startup_cmsdk_cm3.o(RESET)
     __cpp_initialize__aeabi_                  - Undefined Weak Reference
     __cxa_finalize                            - Undefined Weak Reference
     __decompress                              - Undefined Weak Reference
     _clock_init                               - Undefined Weak Reference
     _microlib_exit                            - Undefined Weak Reference
-    __main                                   0x000003c1   Thumb Code     0  entry.o(.ARM.Collect$$$$00000000)
-    _main_stk                                0x000003c1   Thumb Code     0  entry4.o(.ARM.Collect$$$$00000003)
-    _main_scatterload                        0x000003c5   Thumb Code     0  entry5.o(.ARM.Collect$$$$00000004)
-    __main_after_scatterload                 0x000003c9   Thumb Code     0  entry5.o(.ARM.Collect$$$$00000004)
-    _main_clock                              0x000003c9   Thumb Code     0  entry7b.o(.ARM.Collect$$$$00000008)
-    _main_cpp_init                           0x000003c9   Thumb Code     0  entry8b.o(.ARM.Collect$$$$0000000A)
-    _main_init                               0x000003c9   Thumb Code     0  entry9a.o(.ARM.Collect$$$$0000000B)
-    __rt_final_cpp                           0x000003d1   Thumb Code     0  entry10a.o(.ARM.Collect$$$$0000000D)
-    __rt_final_exit                          0x000003d1   Thumb Code     0  entry11a.o(.ARM.Collect$$$$0000000F)
-    __aeabi_uidiv                            0x000003d5   Thumb Code     0  uidiv.o(.text)
-    __aeabi_uidivmod                         0x000003d5   Thumb Code    44  uidiv.o(.text)
-    __aeabi_uldivmod                         0x00000401   Thumb Code    98  uldiv.o(.text)
-    __I$use$fp                               0x00000463   Thumb Code     0  iusefp.o(.text)
-    __aeabi_dadd                             0x00000463   Thumb Code   322  dadd.o(.text)
-    __aeabi_dsub                             0x000005a5   Thumb Code     6  dadd.o(.text)
-    __aeabi_drsub                            0x000005ab   Thumb Code     6  dadd.o(.text)
-    __aeabi_dmul                             0x000005b1   Thumb Code   228  dmul.o(.text)
-    __aeabi_ddiv                             0x00000695   Thumb Code   222  ddiv.o(.text)
-    __aeabi_d2ulz                            0x00000773   Thumb Code    48  dfixul.o(.text)
-    __aeabi_cdrcmple                         0x000007a5   Thumb Code    48  cdrcmple.o(.text)
-    __scatterload                            0x000007d5   Thumb Code    38  init.o(.text)
-    __scatterload_rt2                        0x000007d5   Thumb Code     0  init.o(.text)
-    __aeabi_llsl                             0x00000805   Thumb Code    30  llshl.o(.text)
-    __semihosting_library_function           0x00000805   Thumb Code     0  semi.o(.text)
-    _ll_shift_l                              0x00000805   Thumb Code     0  llshl.o(.text)
-    __aeabi_llsr                             0x00000823   Thumb Code    32  llushr.o(.text)
-    _ll_ushift_r                             0x00000823   Thumb Code     0  llushr.o(.text)
-    __aeabi_lasr                             0x00000843   Thumb Code    36  llsshr.o(.text)
-    _ll_sshift_r                             0x00000843   Thumb Code     0  llsshr.o(.text)
-    __I$use$semihosting$fputc                0x00000867   Thumb Code     0  iusesemip.o(.text)
-    _double_round                            0x00000867   Thumb Code    30  depilogue.o(.text)
-    _double_epilogue                         0x00000885   Thumb Code   156  depilogue.o(.text)
-    BusFault_Handler                         0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    DebugMon_Handler                         0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Default_Handler                          0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt0_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt1_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt2_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt3_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt4_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt5_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt6_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt7_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt8_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    Interrupt9_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    MemManage_Handler                        0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    NMI_Handler                              0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    PendSV_Handler                           0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    SVC_Handler                              0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    SysTick_Handler                          0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    UsageFault_Handler                       0x00000921   Thumb Code     4  startup_armcm3.o(.text.Default_Handler)
-    HardFault_Handler                        0x00000925   Thumb Code     4  startup_armcm3.o(.text.HardFault_Handler)
-    Reset_Handler                            0x00000929   Thumb Code     8  startup_armcm3.o(.text.Reset_Handler)
-    SystemInit                               0x00000931   Thumb Code    38  system_armcm3.o(.text.SystemInit)
-    main                                     0x00000959   Thumb Code    94  mian.o(.text.main)
-    __0printf                                0x000009b9   Thumb Code    22  printfa.o(i.__0printf)
-    __1printf                                0x000009b9   Thumb Code     0  printfa.o(i.__0printf)
-    __2printf                                0x000009b9   Thumb Code     0  printfa.o(i.__0printf)
-    __c89printf                              0x000009b9   Thumb Code     0  printfa.o(i.__0printf)
-    printf                                   0x000009b9   Thumb Code     0  printfa.o(i.__0printf)
-    __scatterload_copy                       0x000009d9   Thumb Code    14  handlers.o(i.__scatterload_copy)
-    __scatterload_null                       0x000009e7   Thumb Code     2  handlers.o(i.__scatterload_null)
-    __scatterload_zeroinit                   0x000009e9   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
-    fputc                                    0x000012ab   Thumb Code    18  fputc.o(i.fputc)
-    Region$$Table$$Base                      0x000012f0   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x00001300   Number         0  anon$$obj.o(Region$$Table)
+    __main                                   0x00000401   Thumb Code     0  entry.o(.ARM.Collect$$$$00000000)
+    _main_stk                                0x00000401   Thumb Code     0  entry4.o(.ARM.Collect$$$$00000003)
+    _main_scatterload                        0x00000405   Thumb Code     0  entry5.o(.ARM.Collect$$$$00000004)
+    __main_after_scatterload                 0x00000409   Thumb Code     0  entry5.o(.ARM.Collect$$$$00000004)
+    _main_clock                              0x00000409   Thumb Code     0  entry7b.o(.ARM.Collect$$$$00000008)
+    _main_cpp_init                           0x00000409   Thumb Code     0  entry8b.o(.ARM.Collect$$$$0000000A)
+    _main_init                               0x00000409   Thumb Code     0  entry9a.o(.ARM.Collect$$$$0000000B)
+    __rt_final_cpp                           0x00000411   Thumb Code     0  entry10a.o(.ARM.Collect$$$$0000000D)
+    __rt_final_exit                          0x00000411   Thumb Code     0  entry11a.o(.ARM.Collect$$$$0000000F)
+    __scatterload                            0x00000415   Thumb Code    38  init.o(.text)
+    __scatterload_rt2                        0x00000415   Thumb Code     0  init.o(.text)
+    BusFault_Handler                         0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    DUALTIMER_Handler                        0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    DebugMon_Handler                         0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    Default_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    ETHERNET_Handler                         0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0ALL_Handler                         0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0_0_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0_1_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0_2_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0_3_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0_4_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0_5_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0_6_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO0_7_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO1ALL_Handler                         0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO2_Handler                            0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    GPIO3_Handler                            0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    I2S_Handler                              0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    MemManage_Handler                        0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    NMI_Handler                              0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    PendSV_Handler                           0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    SPI_0_1_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    SPI_2_Handler                            0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    SPI_3_4_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    SVC_Handler                              0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    SysTick_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    TIMER0_Handler                           0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    TIMER1_Handler                           0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    TOUCHSCREEN_Handler                      0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART0RX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART0TX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART1RX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART1TX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART2RX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART2TX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART3RX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART3TX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART4RX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART4TX_Handler                          0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UART_0_1_2_OVF_Handler                   0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    UsageFault_Handler                       0x00000445   Thumb Code     2  startup_cmsdk_cm3.o(.text.Default_Handler)
+    __I$use$semihosting$fputc                0x00000445   Thumb Code     0  iusesemip.o(.text)
+    __semihosting_library_function           0x00000445   Thumb Code     0  semi.o(.text)
+    HardFault_Handler                        0x00000449   Thumb Code     2  startup_cmsdk_cm3.o(.text.HardFault_Handler)
+    Reset_Handler                            0x0000044d   Thumb Code     8  startup_cmsdk_cm3.o(.text.Reset_Handler)
+    SystemInit                               0x00000455   Thumb Code    38  system_cmsdk_cm3.o(.text.SystemInit)
+    main                                     0x0000047d   Thumb Code    40  mian.o(.text.main)
+    __scatterload_copy                       0x000004c5   Thumb Code    14  handlers.o(i.__scatterload_copy)
+    __scatterload_null                       0x000004d3   Thumb Code     2  handlers.o(i.__scatterload_null)
+    __scatterload_zeroinit                   0x000004d5   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
+    fputc                                    0x000004e3   Thumb Code    18  fputc.o(i.fputc)
+    puts                                     0x000004f5   Thumb Code    30  puts.o(i.puts)
+    Region$$Table$$Base                      0x0000052c   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x0000053c   Number         0  anon$$obj.o(Region$$Table)
     __stdout                                 0x20000000   Data           4  stdout.o(.data)
-    SystemCoreClock                          0x20000004   Data           4  system_armcm3.o(.data.SystemCoreClock)
+    SystemCoreClock                          0x20000004   Data           4  system_cmsdk_cm3.o(.data.SystemCoreClock)
     Image$$ARM_LIB_STACK$$ZI$$Limit          0x20040000   Number         0  anon$$obj.o ABSOLUTE
 
 
@@ -300,82 +209,66 @@ Image Symbol Table
 
 Memory Map of the image
 
-  Image Entry point : 0x000003c1
+  Image Entry point : 0x00000401
 
-  Load Region LR_ROM (Base: 0x00000000, Size: 0x00001308, Max: 0x00080000, ABSOLUTE)
+  Load Region LR_ROM (Base: 0x00000000, Size: 0x00000544, Max: 0x00080000, ABSOLUTE)
 
-    Execution Region ER_ROM (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00001300, Max: 0x00080000, ABSOLUTE)
+    Execution Region ER_ROM (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x0000053c, Max: 0x00080000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x00000000   0x00000000   0x000003c0   Data   RO           20    RESET               startup_armcm3.o
-    0x000003c0   0x000003c0   0x00000000   Code   RO           39  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
-    0x000003c0   0x000003c0   0x00000004   Code   RO           70    .ARM.Collect$$$$00000003  mc_w.l(entry4.o)
-    0x000003c4   0x000003c4   0x00000004   Code   RO           73    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
-    0x000003c8   0x000003c8   0x00000000   Code   RO           75    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
-    0x000003c8   0x000003c8   0x00000000   Code   RO           77    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
-    0x000003c8   0x000003c8   0x00000008   Code   RO           78    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
-    0x000003d0   0x000003d0   0x00000000   Code   RO           80    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
-    0x000003d0   0x000003d0   0x00000000   Code   RO           82    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
-    0x000003d0   0x000003d0   0x00000004   Code   RO           71    .ARM.Collect$$$$00002714  mc_w.l(entry4.o)
-    0x000003d4   0x000003d4   0x0000002c   Code   RO           98    .text               mc_w.l(uidiv.o)
-    0x00000400   0x00000400   0x00000062   Code   RO          100    .text               mc_w.l(uldiv.o)
-    0x00000462   0x00000462   0x00000000   Code   RO          102    .text               mc_w.l(iusefp.o)
-    0x00000462   0x00000462   0x0000014e   Code   RO          103    .text               mf_w.l(dadd.o)
-    0x000005b0   0x000005b0   0x000000e4   Code   RO          105    .text               mf_w.l(dmul.o)
-    0x00000694   0x00000694   0x000000de   Code   RO          107    .text               mf_w.l(ddiv.o)
-    0x00000772   0x00000772   0x00000030   Code   RO          109    .text               mf_w.l(dfixul.o)
-    0x000007a2   0x000007a2   0x00000002   PAD
-    0x000007a4   0x000007a4   0x00000030   Code   RO          111    .text               mf_w.l(cdrcmple.o)
-    0x000007d4   0x000007d4   0x00000030   Code   RO          113    .text               mc_w.l(init.o)
-    0x00000804   0x00000804   0x00000000   Code   RO          115    .text               mc_w.l(semi.o)
-    0x00000804   0x00000804   0x0000001e   Code   RO          116    .text               mc_w.l(llshl.o)
-    0x00000822   0x00000822   0x00000020   Code   RO          118    .text               mc_w.l(llushr.o)
-    0x00000842   0x00000842   0x00000024   Code   RO          120    .text               mc_w.l(llsshr.o)
-    0x00000866   0x00000866   0x00000000   Code   RO          122    .text               mc_w.l(iusesemip.o)
-    0x00000866   0x00000866   0x000000ba   Code   RO          123    .text               mf_w.l(depilogue.o)
-    0x00000920   0x00000920   0x00000004   Code   RO           14    .text.Default_Handler  startup_armcm3.o
-    0x00000924   0x00000924   0x00000004   Code   RO           18    .text.HardFault_Handler  startup_armcm3.o
-    0x00000928   0x00000928   0x00000008   Code   RO           16    .text.Reset_Handler  startup_armcm3.o
-    0x00000930   0x00000930   0x00000026   Code   RO           30    .text.SystemInit    system_armcm3.o
-    0x00000956   0x00000956   0x00000002   PAD
-    0x00000958   0x00000958   0x0000005e   Code   RO            4    .text.main          mian.o
-    0x000009b6   0x000009b6   0x00000002   PAD
-    0x000009b8   0x000009b8   0x00000020   Code   RO           43    i.__0printf         mc_w.l(printfa.o)
-    0x000009d8   0x000009d8   0x0000000e   Code   RO          127    i.__scatterload_copy  mc_w.l(handlers.o)
-    0x000009e6   0x000009e6   0x00000002   Code   RO          128    i.__scatterload_null  mc_w.l(handlers.o)
-    0x000009e8   0x000009e8   0x0000000e   Code   RO          129    i.__scatterload_zeroinit  mc_w.l(handlers.o)
-    0x000009f6   0x000009f6   0x00000002   PAD
-    0x000009f8   0x000009f8   0x00000184   Code   RO           50    i._fp_digits        mc_w.l(printfa.o)
-    0x00000b7c   0x00000b7c   0x000006dc   Code   RO           51    i._printf_core      mc_w.l(printfa.o)
-    0x00001258   0x00001258   0x00000024   Code   RO           52    i._printf_post_padding  mc_w.l(printfa.o)
-    0x0000127c   0x0000127c   0x0000002e   Code   RO           53    i._printf_pre_padding  mc_w.l(printfa.o)
-    0x000012aa   0x000012aa   0x00000012   Code   RO           84    i.fputc             mc_w.l(fputc.o)
-    0x000012bc   0x000012bc   0x00000034   Data   RO            6    .rodata.str1.1      mian.o
-    0x000012f0   0x000012f0   0x00000010   Data   RO          126    Region$$Table       anon$$obj.o
+    0x00000000   0x00000000   0x00000400   Data   RO           21    RESET               startup_cmsdk_cm3.o
+    0x00000400   0x00000400   0x00000000   Code   RO           40  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
+    0x00000400   0x00000400   0x00000004   Code   RO           47    .ARM.Collect$$$$00000003  mc_w.l(entry4.o)
+    0x00000404   0x00000404   0x00000004   Code   RO           50    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
+    0x00000408   0x00000408   0x00000000   Code   RO           52    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
+    0x00000408   0x00000408   0x00000000   Code   RO           54    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
+    0x00000408   0x00000408   0x00000008   Code   RO           55    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
+    0x00000410   0x00000410   0x00000000   Code   RO           57    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
+    0x00000410   0x00000410   0x00000000   Code   RO           59    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
+    0x00000410   0x00000410   0x00000004   Code   RO           48    .ARM.Collect$$$$00002714  mc_w.l(entry4.o)
+    0x00000414   0x00000414   0x00000030   Code   RO           66    .text               mc_w.l(init.o)
+    0x00000444   0x00000444   0x00000000   Code   RO           68    .text               mc_w.l(semi.o)
+    0x00000444   0x00000444   0x00000000   Code   RO           69    .text               mc_w.l(iusesemip.o)
+    0x00000444   0x00000444   0x00000002   Code   RO           15    .text.Default_Handler  startup_cmsdk_cm3.o
+    0x00000446   0x00000446   0x00000002   PAD
+    0x00000448   0x00000448   0x00000002   Code   RO           19    .text.HardFault_Handler  startup_cmsdk_cm3.o
+    0x0000044a   0x0000044a   0x00000002   PAD
+    0x0000044c   0x0000044c   0x00000008   Code   RO           17    .text.Reset_Handler  startup_cmsdk_cm3.o
+    0x00000454   0x00000454   0x00000026   Code   RO           31    .text.SystemInit    system_cmsdk_cm3.o
+    0x0000047a   0x0000047a   0x00000002   PAD
+    0x0000047c   0x0000047c   0x00000048   Code   RO            4    .text.main          mian.o
+    0x000004c4   0x000004c4   0x0000000e   Code   RO           72    i.__scatterload_copy  mc_w.l(handlers.o)
+    0x000004d2   0x000004d2   0x00000002   Code   RO           73    i.__scatterload_null  mc_w.l(handlers.o)
+    0x000004d4   0x000004d4   0x0000000e   Code   RO           74    i.__scatterload_zeroinit  mc_w.l(handlers.o)
+    0x000004e2   0x000004e2   0x00000012   Code   RO           61    i.fputc             mc_w.l(fputc.o)
+    0x000004f4   0x000004f4   0x00000024   Code   RO           43    i.puts              mc_w.l(puts.o)
+    0x00000518   0x00000518   0x00000013   Data   RO            6    .rodata.str1.1      mian.o
+    0x0000052b   0x0000052b   0x00000001   PAD
+    0x0000052c   0x0000052c   0x00000010   Data   RO           71    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_NOINIT (Exec base: 0x20000000, Load base: 0x00001300, Size: 0x00000000, Max: 0x0003f200, ABSOLUTE, UNINIT)
+    Execution Region RW_NOINIT (Exec base: 0x20000000, Load base: 0x0000053c, Size: 0x00000000, Max: 0x0003f200, ABSOLUTE, UNINIT)
 
     **** No section assigned to this execution region ****
 
 
-    Execution Region RW_RAM (Exec base: 0x20000000, Load base: 0x00001300, Size: 0x00000008, Max: 0x0003f200, ABSOLUTE)
+    Execution Region RW_RAM (Exec base: 0x20000000, Load base: 0x0000053c, Size: 0x00000008, Max: 0x0003f200, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x00001300   0x00000004   Data   RW           88    .data               mc_w.l(stdout.o)
-    0x20000004   0x00001304   0x00000004   Data   RW           32    .data.SystemCoreClock  system_armcm3.o
+    0x20000000   0x0000053c   0x00000004   Data   RW           65    .data               mc_w.l(stdout.o)
+    0x20000004   0x00000540   0x00000004   Data   RW           33    .data.SystemCoreClock  system_cmsdk_cm3.o
 
 
-    Execution Region ARM_LIB_HEAP (Exec base: 0x20000008, Load base: 0x00001308, Size: 0x00000c00, Max: 0x00000c00, ABSOLUTE)
+    Execution Region ARM_LIB_HEAP (Exec base: 0x20000008, Load base: 0x00000544, Size: 0x00000c00, Max: 0x00000c00, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x20000008        -       0x00000c00   Zero   RW            1    ARM_LIB_HEAP.bss    anon$$obj.o
 
 
-    Execution Region ARM_LIB_STACK (Exec base: 0x2003fe00, Load base: 0x00001308, Size: 0x00000200, Max: 0x00000200, ABSOLUTE)
+    Execution Region ARM_LIB_STACK (Exec base: 0x2003fe00, Load base: 0x00000544, Size: 0x00000200, Max: 0x00000200, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -389,14 +282,14 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-        94          0         52          0          0        767   mian.o
-        16          0        960          0          0        888   startup_armcm3.o
-        38          0          0          4          0       1497   system_armcm3.o
+        72         32         19          0          0        799   mian.o
+        12          0       1024          0          0        923   startup_cmsdk_cm3.o
+        38          0          0          4          0       1513   system_cmsdk_cm3.o
 
     ----------------------------------------------------------------------
-       152          0       1028          4       3584       3152   Object Totals
+       128         32       1060          4       3584       3235   Object Totals
          0          0         16          0       3584          0   (incl. Generated)
-         4          0          0          0          0          0   (incl. Padding)
+         6          0          1          0          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -413,36 +306,23 @@ Image component sizes
         18          0          0          0          0         80   fputc.o
         30          0          0          0          0          0   handlers.o
         48         10          0          0          0         68   init.o
-         0          0          0          0          0          0   iusefp.o
          0          0          0          0          0          0   iusesemip.o
-        30          0          0          0          0         68   llshl.o
-        36          0          0          0          0         68   llsshr.o
-        32          0          0          0          0         68   llushr.o
-      2258         90          0          0          0        452   printfa.o
+        36          6          0          0          0         80   puts.o
          0          0          0          0          0          0   semi.o
          0          0          0          4          0          0   stdout.o
-        44          0          0          0          0         80   uidiv.o
-        98          0          0          0          0         92   uldiv.o
-        48          0          0          0          0         68   cdrcmple.o
-       334          0          0          0          0        148   dadd.o
-       222          0          0          0          0        100   ddiv.o
-       186          0          0          0          0        176   depilogue.o
-        48          0          0          0          0         68   dfixul.o
-       228          0          0          0          0         96   dmul.o
 
     ----------------------------------------------------------------------
-      3684        108          0          4          0       1632   Library Totals
-         4          0          0          0          0          0   (incl. Padding)
+       152         24          0          4          0        228   Library Totals
+         0          0          0          0          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Library Name
 
-      2614        108          0          4          0        976   mc_w.l
-      1066          0          0          0          0        656   mf_w.l
+       152         24          0          4          0        228   mc_w.l
 
     ----------------------------------------------------------------------
-      3684        108          0          4          0       1632   Library Totals
+       152         24          0          4          0        228   Library Totals
 
     ----------------------------------------------------------------------
 
@@ -451,15 +331,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      3836        108       1028          8       3584       4116   Grand Totals
-      3836        108       1028          8       3584       4116   ELF Image Totals
-      3836        108       1028          8          0          0   ROM Totals
+       280         56       1060          8       3584       3575   Grand Totals
+       280         56       1060          8       3584       3575   ELF Image Totals
+       280         56       1060          8          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 4864 (   4.75kB)
+    Total RO  Size (Code + RO Data)                 1340 (   1.31kB)
     Total RW  Size (RW Data + ZI Data)              3592 (   3.51kB)
-    Total ROM Size (Code + RO Data + RW Data)       4872 (   4.76kB)
+    Total ROM Size (Code + RO Data + RW Data)       1348 (   1.32kB)
 
 ==============================================================================
 

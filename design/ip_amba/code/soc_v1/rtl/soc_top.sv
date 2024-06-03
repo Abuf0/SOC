@@ -153,6 +153,7 @@ logic            HMASTERLOCKS;
 logic            SWDO;
 logic            SWDOEN;
 logic            SWDI;
+logic            SWDIO;
 logic            SYSRESETREQ;
 logic            cpuresetn;
 logic            CDBGPWRUPREQ;
@@ -187,8 +188,8 @@ assign SWDIO = (SWDOEN) ?  SWDO : 1'bz;
 //------------------------------------------------------------------------------
 
 
-always @(posedge clk or negedge RSTn)begin
-    if (~RSTn) 
+always @(posedge hclk or negedge hresetn)begin
+    if (~hresetn) 
         cpuresetn <= 1'b0;
     else if (SYSRESETREQ) 
         cpuresetn <= 1'b0;
@@ -203,8 +204,8 @@ logic        SLEEPing;
 //------------------------------------------------------------------------------
 
 
-always @(posedge clk or negedge RSTn)begin
-    if (~RSTn) 
+always @(posedge hclk or negedge hresetn)begin
+    if (~hresetn) 
         CDBGPWRUPACK <= 1'b0;
     else 
         CDBGPWRUPACK <= CDBGPWRUPREQ;
@@ -245,7 +246,7 @@ cortexm3ds_logic ulogic(
     // SWJDAP
     .nTRST                              (1'b1),
     .SWDITMS                            (SWDI),
-    .SWCLKTCK                           (swck),
+    .SWCLKTCK                           (1'b0),
     .TDI                                (1'b0),
     .CDBGPWRUPACK                       (CDBGPWRUPACK),
     .CDBGPWRUPREQ                       (CDBGPWRUPREQ),
@@ -259,7 +260,7 @@ cortexm3ds_logic ulogic(
     // I-CODE BUS
     .HREADYI                            (hready_mux),
     .HRDATAI                            (hrdata_mux),
-    .HRESPI                             (hresp_mux ),
+    .HRESPI                             ( {1'b0,hresp_mux} ),
     .IFLUSH                             (1'b0),
     .HADDRI                             (haddr_i[1] ),
     .HTRANSI                            (htrans_i[1]),
@@ -270,7 +271,7 @@ cortexm3ds_logic ulogic(
     // D-CODE BUS
     .HREADYD                            (hready_mux),
     .HRDATAD                            (hrdata_mux),
-    .HRESPD                             (hresp_mux ),
+    .HRESPD                             ({1'b0,hresp_mux} ),
     .EXRESPD                            (1'b0   ),
     .HADDRD                             (haddr_i[2] ),
     .HTRANSD                            (htrans_i[2]),
@@ -284,7 +285,7 @@ cortexm3ds_logic ulogic(
     // SYSTEM BUS
     .HREADYS                            (hready_mux ),          //(HREADYS),
     .HRDATAS                            (hrdata_mux ),          //(HRDATAS),
-    .HRESPS                             (hresp_mux  ),           //(HRESPS),
+    .HRESPS                             ({1'b0,hresp_mux}  ),           //(HRESPS),
     .EXRESPS                            (1'b0       ),             //(1'b0),
     .HADDRS                             (haddr_i[4] ),           //(HADDRS),
     .HTRANSS                            (htrans_i[4]),          //(HTRANSS),
@@ -473,10 +474,10 @@ ahb_sram
     .hresetn       ( hresetn       ),
     .haddr         ( haddr         ),
     .hburst        ( hburst        ),
-    .hmasterlock   ( hmasterlock   ),
-    .hprot         ( hprot         ),
+    .hmasterlock   (    ),
+    .hprot         (          ),
     .hsize         ( hsize         ),
-    .hnonsec       ( hnonsec       ),
+    .hnonsec       (        ),
     .hmaster       (               ),
     .htrans        ( htrans        ),
     .hwdata        ( hwdata        ),
@@ -504,10 +505,10 @@ ahb_sram
     .hresetn       ( hresetn       ),
     .haddr         ( haddr         ),
     .hburst        ( hburst        ),
-    .hmasterlock   ( hmasterlock   ),
-    .hprot         ( hprot         ),
+    .hmasterlock   (    ),
+    .hprot         (          ),
     .hsize         ( hsize         ),
-    .hnonsec       ( hnonsec       ),
+    .hnonsec       (        ),
     .hmaster       (               ),
     .htrans        ( htrans        ),
     .hwdata        ( hwdata        ),
@@ -561,7 +562,7 @@ ahb2apb_bridge #(
 // APB Slaves
 apb_uart #(
     .CLK_FREQ    ( CLK_FREQ    ),
-    .PADDR_WIDTH ( PADDR_WIDTH ),
+    .ADDR_WIDTH  ( PADDR_WIDTH ),
     .DATA_WIDTH  ( DATA_WIDTH  ))
  apb_uart_inst (
     .pclk         ( pclk         ),
