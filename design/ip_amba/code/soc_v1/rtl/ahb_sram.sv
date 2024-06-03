@@ -70,6 +70,9 @@ generate
         assign strb_ext[i] = {8{hwstrb[i/8]}};        
     end
 endgenerate
+initial begin
+    $readmemh("./cm3.txt",memory);
+end
 // write
 always_ff @( posedge hclk or negedge hresetn ) begin
     if(~hresetn) begin

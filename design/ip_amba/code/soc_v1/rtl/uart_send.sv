@@ -151,9 +151,9 @@ assign tx_flag = (state_c!=IDLE);
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         uart_tx_busy <= 1'b0;
-    else if(uart_en)
+    else if(state_n == START)
         uart_tx_busy <= 1'b1;
-    else if(state_c == IDLE)
+    else if(state_n == IDLE)
         uart_tx_busy <= 1'b0;
 end
 

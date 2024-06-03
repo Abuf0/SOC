@@ -104,6 +104,271 @@ crgu_inst (
     .pclken      ( pclken        )
 );
 
+//----------------------------------------------
+// CORE BUS
+//----------------------------------------------
+
+// CPU I-Code 
+logic    [31:0]  HADDRI;
+logic    [1:0]   HTRANSI;
+logic    [2:0]   HSIZEI;
+logic    [2:0]   HBURSTI;
+logic    [3:0]   HPROTI;
+logic    [31:0]  HRDATAI;
+logic            HREADYI;
+logic    [1:0]   HRESPI;
+
+// CPU D-Code 
+logic    [31:0]  HADDRD;
+logic    [1:0]   HTRANSD;
+logic    [2:0]   HSIZED;
+logic    [2:0]   HBURSTD;
+logic    [3:0]   HPROTD;
+logic    [31:0]  HWDATAD;
+logic            HWRITED;
+logic    [31:0]  HRDATAD;
+logic            HREADYD;
+logic    [1:0]   HRESPD;
+logic    [1:0]   HMASTERD;
+
+// CPU System bus 
+logic    [31:0]  HADDRS;
+logic    [1:0]   HTRANSS;
+logic            HWRITES;
+logic    [2:0]   HSIZES;
+logic    [31:0]  HWDATAS;
+logic    [2:0]   HBURSTS;
+logic    [3:0]   HPROTS;
+logic            HREADYS;
+logic    [31:0]  HRDATAS;
+logic    [1:0]   HRESPS;
+logic    [1:0]   HMASTERS;
+logic            HMASTERLOCKS;
+
+
+//------------------------------------------------------------------------------
+// DEBUG IOBUF 
+//------------------------------------------------------------------------------
+
+logic            SWDO;
+logic            SWDOEN;
+logic            SWDI;
+logic            SYSRESETREQ;
+logic            cpuresetn;
+logic            CDBGPWRUPREQ;
+logic            CDBGPWRUPACK;
+logic    [239:0] IRQ;
+
+/*
+generate
+    if(SimPresent) begin : SimIOBuf
+
+        assign SWDI = SWDIO;
+        assign SWDIO = (SWDOEN) ?  SWDO : 1'bz;
+
+    end else begin : SynIOBuf
+
+        IOBUF SWIOBUF(
+            .datain                 (SWDO),
+            .oe                     (SWDOEN),
+            .dataout                (SWDI),
+            .dataio                 (SWDIO)
+        );
+
+    end
+endgenerate
+*/
+
+assign SWDI = SWDIO;
+assign SWDIO = (SWDOEN) ?  SWDO : 1'bz;
+
+//------------------------------------------------------------------------------
+// RESET
+//------------------------------------------------------------------------------
+
+
+always @(posedge clk or negedge RSTn)begin
+    if (~RSTn) 
+        cpuresetn <= 1'b0;
+    else if (SYSRESETREQ) 
+        cpuresetn <= 1'b0;
+    else 
+        cpuresetn <= 1'b1;
+end
+
+logic        SLEEPing;
+
+//------------------------------------------------------------------------------
+// DEBUG CONFIG
+//------------------------------------------------------------------------------
+
+
+always @(posedge clk or negedge RSTn)begin
+    if (~RSTn) 
+        CDBGPWRUPACK <= 1'b0;
+    else 
+        CDBGPWRUPACK <= CDBGPWRUPREQ;
+end
+
+
+//----------------------------------------------------
+// Instantiate Cortex-M3 processor 
+//----------------------------------------------------
+
+cortexm3ds_logic ulogic(
+    // PMU
+    .ISOLATEn                           (1'b1),
+    .RETAINn                            (1'b1),
+
+    // RESETS
+    .PORESETn                           (hresetn),
+    .SYSRESETn                          (cpuresetn),
+    .SYSRESETREQ                        (SYSRESETREQ),
+    .RSTBYPASS                          (1'b0),
+    .CGBYPASS                           (1'b0),
+    .SE                                 (1'b0),
+
+    // CLOCKS
+    .FCLK                               (hclk),
+    .HCLK                               (hclk),
+    .TRACECLKIN                         (1'b0),
+
+    // SYSTICK
+    .STCLK                              (1'b0),
+    .STCALIB                            (26'b0),
+    .AUXFAULT                           (32'b0),
+
+    // CONFIG - SYSTEM
+    .BIGEND                             (1'b0),
+    .DNOTITRANS                         (1'b1),
+    
+    // SWJDAP
+    .nTRST                              (1'b1),
+    .SWDITMS                            (SWDI),
+    .SWCLKTCK                           (swck),
+    .TDI                                (1'b0),
+    .CDBGPWRUPACK                       (CDBGPWRUPACK),
+    .CDBGPWRUPREQ                       (CDBGPWRUPREQ),
+    .SWDO                               (SWDO),
+    .SWDOEN                             (SWDOEN),
+
+    // IRQS
+    .INTISR                             (IRQ),
+    .INTNMI                             (1'b0),
+    
+    // I-CODE BUS
+    .HREADYI                            (hready_mux),
+    .HRDATAI                            (hrdata_mux),
+    .HRESPI                             (hresp_mux ),
+    .IFLUSH                             (1'b0),
+    .HADDRI                             (haddr_i[1] ),
+    .HTRANSI                            (htrans_i[1]),
+    .HSIZEI                             (hsize_i[1] ),
+    .HBURSTI                            (hburst_i[1]),
+    .HPROTI                             (),
+
+    // D-CODE BUS
+    .HREADYD                            (hready_mux),
+    .HRDATAD                            (hrdata_mux),
+    .HRESPD                             (hresp_mux ),
+    .EXRESPD                            (1'b0   ),
+    .HADDRD                             (haddr_i[2] ),
+    .HTRANSD                            (htrans_i[2]),
+    .HSIZED                             (hsize_i[2] ),
+    .HBURSTD                            (hburst_i[2]),
+    .HPROTD                             ( ),
+    .HWDATAD                            (hwdata_i[2]),
+    .HWRITED                            (hwrite_i[2]),
+    .HMASTERD                           (),
+
+    // SYSTEM BUS
+    .HREADYS                            (hready_mux ),          //(HREADYS),
+    .HRDATAS                            (hrdata_mux ),          //(HRDATAS),
+    .HRESPS                             (hresp_mux  ),           //(HRESPS),
+    .EXRESPS                            (1'b0       ),             //(1'b0),
+    .HADDRS                             (haddr_i[4] ),           //(HADDRS),
+    .HTRANSS                            (htrans_i[4]),          //(HTRANSS),
+    .HSIZES                             (hsize_i[4] ),           //(HSIZES),
+    .HBURSTS                            (hburst_i[4]),          //(HBURSTS),
+    .HPROTS                             (           ),           //(HPROTS),
+    .HWDATAS                            (hwdata_i[4]),          //(HWDATAS),
+    .HWRITES                            (hwrite_i[4]),          //(HWRITES),
+    .HMASTERS                           (),         //(HMASTERS),
+    .HMASTLOCKS                         (),     //(HMASTERLOCKS),
+
+    // SLEEP
+    .RXEV                               (1'b0),
+    .SLEEPHOLDREQn                      (1'b1),
+    .SLEEPING                           (SLEEPing),
+    
+    // EXTERNAL DEBUG REQUEST
+    .EDBGRQ                             (1'b0),
+    .DBGRESTART                         (1'b0),
+    
+    // DAP HMASTER OVERRIDE
+    .FIXMASTERTYPE                      (1'b0),
+
+    // WIC
+    .WICENREQ                           (1'b0),
+
+    // TIMESTAMP INTERFACE
+    .TSVALUEB                           (48'b0),
+
+    // CONFIG - DEBUG
+    .DBGEN                              (1'b1),
+    .NIDEN                              (1'b1),
+    .MPUDISABLE                         (1'b0)
+);
+
+
+// DMA MASTER
+logic    [31:0]  HADDRDM;
+logic    [1:0]   HTRANSDM;
+logic            HWRITEDM;
+logic    [2:0]   HSIZEDM;
+logic    [31:0]  HWDATADM;
+logic    [2:0]   HBURSTDM;
+logic    [3:0]   HPROTDM;
+logic            HREADYDM;
+logic    [31:0]  HRDATADM;
+logic    [1:0]   HRESPDM;
+logic    [1:0]   HMASTERDM;
+logic            HMASTERLOCKDM;
+
+assign  HADDRDM         =   32'b0;
+assign  HTRANSDM        =   2'b0;
+assign  HWRITEDM        =   1'b0;
+assign  HSIZEDM         =   3'b0;
+assign  HWDATADM        =   32'b0;
+assign  HBURSTDM        =   3'b0;
+assign  HPROTDM         =   4'b0;
+assign  HMASTERDM       =   2'b0;
+assign  HMASTERLOCKDM   =   1'b0;
+
+// RESERVED MASTER 
+logic    [31:0]  HADDRR;
+logic    [1:0]   HTRANSR;
+logic            WRITER;
+logic    [2:0]   HSIZER;
+logic    [31:0]  HWDATAR;
+logic    [2:0]   HBURSTR;
+logic    [3:0]   HPROTR;
+logic            HREADYR;
+logic    [31:0]  HRDATAR;
+logic    [1:0]   HRESPR;
+logic    [1:0]   HMASTERR;
+logic            HMASTERLOCKR;
+
+assign  HADDRR          =   32'b0;
+assign  HTRANSR         =   2'b0;
+assign  HWRITER         =   1'b0;
+assign  HSIZER          =   3'b0;
+assign  HWDATAR         =   32'b0;
+assign  HBURSTR         =   3'b0;
+assign  HPROTR          =   4'b0;
+assign  HMASTERR        =   2'b0;
+assign  HMASTERLOCKR    =   1'b0;
+/*
 core_v0 #(
     .HADDR_WIDTH  ( HADDR_WIDTH  ),
     .DATA_WIDTH   ( DATA_WIDTH   ),
@@ -133,7 +398,7 @@ core_v0_inst (
     .sysresetreq  (              ),
     .tx_ev        (              )
 );
-
+*/
 arbiter #(
     .HSLV_NUM   ( HSLV_NUM  ))
 arbiter_inst(

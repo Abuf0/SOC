@@ -92,6 +92,7 @@ end
 
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
+        //haddr <= 32'h40030000;
         haddr <= 32'h40000000;
     else if(state_c == BUSY && hready)
         haddr <= haddr+'d4;

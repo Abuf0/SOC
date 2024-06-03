@@ -58,7 +58,7 @@ end
 always_ff @( posedge pclk or negedge presetn ) begin
     if(~presetn) 
         prdata_o <= 'd0;
-    else if(~pwrite && (state_c == WORK) && penable)
+    else if(~pwrite && uart_rx_done)
         prdata_o <= {{(DATA_WIDTH-16){1'b0}},rx_data};
 end
 

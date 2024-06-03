@@ -111,6 +111,8 @@ always_ff@(posedge clk or negedge rstn) begin
         rx_data <= 'd0;
     else if((state_c == TRANS) && bps_en) 
         rx_data <= {rx_data[14:0],uart_rxd};
+    else if(state_c == IDLE)
+        rx_data <= 'd0;
 end
 
 always_ff@(posedge clk or negedge rstn) begin
@@ -137,6 +139,15 @@ always_ff@(posedge clk or negedge rstn) begin
         uart_rx_busy <= 1'b1;
     else if(state_c == IDLE)
         uart_rx_busy <= 1'b0;
+end
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        uart_rx_done <= 1'b0;
+    else if(state_c == DONE)
+        uart_rx_done <= 1'b1;
+    else if(state_c == IDLE)
+        uart_rx_done <= 1'b0;
 end
 
 endmodule
