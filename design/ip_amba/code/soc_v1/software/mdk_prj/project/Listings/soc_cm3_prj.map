@@ -248,11 +248,6 @@ Memory Map of the image
     0x0000052c   0x0000052c   0x00000010   Data   RO           71    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_NOINIT (Exec base: 0x20000000, Load base: 0x0000053c, Size: 0x00000000, Max: 0x0003f200, ABSOLUTE, UNINIT)
-
-    **** No section assigned to this execution region ****
-
-
     Execution Region RW_RAM (Exec base: 0x20000000, Load base: 0x0000053c, Size: 0x00000008, Max: 0x0003f200, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
@@ -282,12 +277,12 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-        72         32         19          0          0        799   mian.o
+        72         32         19          0          0        801   mian.o
         12          0       1024          0          0        923   startup_cmsdk_cm3.o
         38          0          0          4          0       1513   system_cmsdk_cm3.o
 
     ----------------------------------------------------------------------
-       128         32       1060          4       3584       3235   Object Totals
+       128         32       1060          4       3584       3237   Object Totals
          0          0         16          0       3584          0   (incl. Generated)
          6          0          1          0          0          0   (incl. Padding)
 
@@ -331,8 +326,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-       280         56       1060          8       3584       3575   Grand Totals
-       280         56       1060          8       3584       3575   ELF Image Totals
+       280         56       1060          8       3584       3577   Grand Totals
+       280         56       1060          8       3584       3577   ELF Image Totals
        280         56       1060          8          0          0   ROM Totals
 
 ==============================================================================

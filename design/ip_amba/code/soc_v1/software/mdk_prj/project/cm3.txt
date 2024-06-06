@@ -30,8 +30,8 @@
     Program header entries: 1
     Section header entries: 17
 
-    Program header offset: 10140 (0x0000279c)
-    Section header offset: 10172 (0x000027bc)
+    Program header offset: 10136 (0x00002798)
+    Section header offset: 10168 (0x000027b8)
 
     Section header string table index: 16
 
@@ -632,7 +632,7 @@
     Flags       : None (0x00000000)
     Addr        : 0x00000000
     File Offset : 3264 (0xcc0)
-    Size        : 613 bytes (0x265)
+    Size        : 615 bytes (0x267)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
@@ -647,7 +647,7 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 3877 (0xf25)
+    File Offset : 3879 (0xf27)
     Size        : 80 bytes (0x50)
     Link        : SHN_UNDEF
     Info        : 0
@@ -663,7 +663,7 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 3957 (0xf75)
+    File Offset : 3959 (0xf77)
     Size        : 56 bytes (0x38)
     Link        : SHN_UNDEF
     Info        : 0
@@ -679,7 +679,7 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 4013 (0xfad)
+    File Offset : 4015 (0xfaf)
     Size        : 962 bytes (0x3c2)
     Link        : SHN_UNDEF
     Info        : 0
@@ -695,7 +695,7 @@
     Type        : SHT_SYMTAB (0x00000002)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 4976 (0x1370)
+    File Offset : 4980 (0x1374)
     Size        : 2096 bytes (0x830)
     Link        : Section 13 (.strtab)
     Info        : Last local symbol no = 60
@@ -711,7 +711,7 @@
     Type        : SHT_STRTAB (0x00000003)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 7072 (0x1ba0)
+    File Offset : 7076 (0x1ba4)
     Size        : 1884 bytes (0x75c)
     Link        : SHN_UNDEF
     Info        : 0
@@ -727,7 +727,7 @@
     Type        : SHT_NOTE (0x00000007)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 8956 (0x22fc)
+    File Offset : 8960 (0x2300)
     Size        : 32 bytes (0x20)
     Link        : SHN_UNDEF
     Info        : 0
@@ -750,7 +750,7 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 8988 (0x231c)
+    File Offset : 8992 (0x2320)
     Size        : 972 bytes (0x3cc)
     Link        : SHN_UNDEF
     Info        : 0
@@ -758,7 +758,7 @@
     Entry Size  : 0
 
     Component: Arm Compiler for Embedded 6.22 Tool: armlink [5ee90200]
-    ArmLink --strict --library_type=microlib --callgraph --load_addr_map_info --map --symbols --xref --diag_suppress=9931 --cpu=Cortex-M3 --list=.\Listings\soc_cm3_prj.map --output=.\Objects\soc_cm3_prj.axf --scatter=.\RTE\Device\ARMCM3\ARMCM3_ac6.sct --info=summarysizes,sizes,totals,unused,veneers
+    ArmLink --strict --library_type=microlib --callgraph --load_addr_map_info --map --symbols --xref --diag_suppress=9931 --cpu=Cortex-M3 --list=.\Listings\soc_cm3_prj.map --output=.\Objects\soc_cm3_prj.axf --scatter=.\RTE\Device\CMSDK_CM3\ac6_arm.sct --info=summarysizes,sizes,totals,unused,veneers
 
     D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\armlib\h_w.l
     D:\Keil5\Keil_v5\ARM\ARMCLANG\Bin\..\lib\libcxx\libcpp-experimental_w.l
@@ -787,8 +787,8 @@
     Type        : SHT_STRTAB (0x00000003)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 9960 (0x26e8)
-    Size        : 180 bytes (0xb4)
+    File Offset : 9964 (0x26ec)
+    Size        : 172 bytes (0xac)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1

@@ -51,9 +51,9 @@ module soc_top#(
 // ahb2apb_bridge Inputs
 //logic                       hclk                        ;
 //logic                       hresetn                     ;
-logic [HSLV_NUM-1:0]        req                         ;
+//logic [HSLV_NUM-1:0]        req                         ;
 logic [HSLV_NUM-1:0]        hsel                        ;
-logic [HMAS_NUM-1:0]        grant                       ;
+//logic [HMAS_NUM-1:0]        grant                       ;
 logic                       hready_mux                  ;
 logic                       hresp_mux                   ;
 logic                       hexokay_mux                 ;
@@ -85,13 +85,28 @@ logic [DATA_WIDTH-1:0]      hwdata                      ;
 logic [DATA_WIDTH/8-1:0]    hwstrb                      ;
 logic                       hwrite                      ;
 
-logic [HADDR_WIDTH-1:0]     haddr_i   [0:HSLV_LEN-1]    ;
-logic [HBURST_WIDTH-1:0]    hburst_i  [0:HSLV_LEN-1]    ;
-logic [2:0]                 hsize_i   [0:HSLV_LEN-1]    ;
-logic [1:0]                 htrans_i  [0:HSLV_LEN-1]    ;
-logic [DATA_WIDTH-1:0]      hwdata_i  [0:HSLV_LEN-1]    ;
-logic [DATA_WIDTH/8-1:0]    hwstrb_i  [0:HSLV_LEN-1]    ;
-logic                       hwrite_i  [0:HSLV_LEN-1]    ;
+logic [HADDR_WIDTH-1:0]     haddr_m   [0:HMAS_LEN-1]    ;
+logic [HBURST_WIDTH-1:0]    hburst_m  [0:HMAS_LEN-1]    ;
+logic [2:0]                 hsize_m   [0:HMAS_LEN-1]    ;
+logic [1:0]                 htrans_m  [0:HMAS_LEN-1]    ;
+logic [DATA_WIDTH-1:0]      hwdata_m  [0:HMAS_LEN-1]    ;
+logic [DATA_WIDTH/8-1:0]    hwstrb_m  [0:HMAS_LEN-1]    ;
+logic                       hwrite_m  [0:HMAS_LEN-1]    ;
+
+logic [HADDR_WIDTH-1:0]     haddr_s   [0:HSLV_LEN-1]    ;
+logic [HBURST_WIDTH-1:0]    hburst_s  [0:HSLV_LEN-1]    ;
+logic [2:0]                 hsize_s   [0:HSLV_LEN-1]    ;
+logic [1:0]                 htrans_s  [0:HSLV_LEN-1]    ;
+logic [DATA_WIDTH-1:0]      hwdata_s  [0:HSLV_LEN-1]    ;
+logic [DATA_WIDTH/8-1:0]    hwstrb_s  [0:HSLV_LEN-1]    ;
+logic                       hwrite_s  [0:HSLV_LEN-1]    ;
+
+logic [HMAS_NUM-1:0]        req_m [0:HSLV_LEN-1]        ;
+logic [HMAS_NUM-1:0]        grant [0:HSLV_LEN-1]        ;
+
+logic                       hready_m [0:HMAS_NUM-1]     ;
+logic                       hresp_m [0:HMAS_NUM-1]      ;
+logic [HADDR_WIDTH-1:0]     hrdata_m [0:HMAS_NUM-1]     ;
 
 crgu #(
     .DIV_WID ( DIV_WID ))
@@ -258,42 +273,42 @@ cortexm3ds_logic ulogic(
     .INTNMI                             (1'b0),
     
     // I-CODE BUS
-    .HREADYI                            (hready_mux),
-    .HRDATAI                            (hrdata_mux),
-    .HRESPI                             ( {1'b0,hresp_mux} ),
+    .HREADYI                            (hready_m[1]),
+    .HRDATAI                            (hrdata_m[1]),
+    .HRESPI                             ( {1'b0,hresp_m[1]} ),
     .IFLUSH                             (1'b0),
-    .HADDRI                             (haddr_i[1] ),
-    .HTRANSI                            (htrans_i[1]),
-    .HSIZEI                             (hsize_i[1] ),
-    .HBURSTI                            (hburst_i[1]),
+    .HADDRI                             (haddr_m[1] ),
+    .HTRANSI                            (htrans_m[1]),
+    .HSIZEI                             (hsize_m[1] ),
+    .HBURSTI                            (hburst_m[1]),
     .HPROTI                             (),
 
     // D-CODE BUS
-    .HREADYD                            (hready_mux),
-    .HRDATAD                            (hrdata_mux),
-    .HRESPD                             ({1'b0,hresp_mux} ),
+    .HREADYD                            (hready_m[2]),
+    .HRDATAD                            (hrdata_m[2]),
+    .HRESPD                             ({1'b0,hresp_m[2]} ),
     .EXRESPD                            (1'b0   ),
-    .HADDRD                             (haddr_i[2] ),
-    .HTRANSD                            (htrans_i[2]),
-    .HSIZED                             (hsize_i[2] ),
-    .HBURSTD                            (hburst_i[2]),
+    .HADDRD                             (haddr_m[2] ),
+    .HTRANSD                            (htrans_m[2]),
+    .HSIZED                             (hsize_m[2] ),
+    .HBURSTD                            (hburst_m[2]),
     .HPROTD                             ( ),
-    .HWDATAD                            (hwdata_i[2]),
-    .HWRITED                            (hwrite_i[2]),
+    .HWDATAD                            (hwdata_m[2]),
+    .HWRITED                            (hwrite_m[2]),
     .HMASTERD                           (),
 
     // SYSTEM BUS
-    .HREADYS                            (hready_mux ),          //(HREADYS),
-    .HRDATAS                            (hrdata_mux ),          //(HRDATAS),
-    .HRESPS                             ({1'b0,hresp_mux}  ),           //(HRESPS),
+    .HREADYS                            (hready_m[4] ),          //(HREADYS),
+    .HRDATAS                            (hrdata_m[4] ),          //(HRDATAS),
+    .HRESPS                             ({1'b0,hresp_m[2]}  ),           //(HRESPS),
     .EXRESPS                            (1'b0       ),             //(1'b0),
-    .HADDRS                             (haddr_i[4] ),           //(HADDRS),
-    .HTRANSS                            (htrans_i[4]),          //(HTRANSS),
-    .HSIZES                             (hsize_i[4] ),           //(HSIZES),
-    .HBURSTS                            (hburst_i[4]),          //(HBURSTS),
+    .HADDRS                             (haddr_m[4] ),           //(HADDRS),
+    .HTRANSS                            (htrans_m[4]),          //(HTRANSS),
+    .HSIZES                             (hsize_m[4] ),           //(HSIZES),
+    .HBURSTS                            (hburst_m[4]),          //(HBURSTS),
     .HPROTS                             (           ),           //(HPROTS),
-    .HWDATAS                            (hwdata_i[4]),          //(HWDATAS),
-    .HWRITES                            (hwrite_i[4]),          //(HWRITES),
+    .HWDATAS                            (hwdata_m[4]),          //(HWDATAS),
+    .HWRITES                            (hwrite_m[4]),          //(HWRITES),
     .HMASTERS                           (),         //(HMASTERS),
     .HMASTLOCKS                         (),     //(HMASTERLOCKS),
 
@@ -385,21 +400,22 @@ core_v0_inst (
     .nmi          (              ),
     .irq          (              ),
     .rx_ev        (              ),
-    .haddr        ( haddr_i[4]   ),
-    .hburst       ( hburst_i[4]  ),
+    .haddr        ( haddr_m[4]   ),
+    .hburst       ( hburst_m[4]  ),
     .hmasterlock  (              ),
     .hprot        (              ),
-    .hsize        ( hsize_i[4]   ),
-    .htrans       ( htrans_i[4]  ),
-    .hwdata       ( hwdata_i[4]  ),
-    .hwstrb       ( hwstrb_i[4]  ),
-    .hwrite       ( hwrite_i[4]  ),
+    .hsize        ( hsize_m[4]   ),
+    .htrans       ( htrans_m[4]  ),
+    .hwdata       ( hwdata_m[4]  ),
+    .hwstrb       ( hwstrb_m[4]  ),
+    .hwrite       ( hwrite_m[4]  ),
     .lockup       (              ),
     .sleeping     (              ),
     .sysresetreq  (              ),
     .tx_ev        (              )
 );
 */
+/*
 arbiter #(
     .HSLV_NUM   ( HSLV_NUM  ))
 arbiter_inst(
@@ -430,20 +446,160 @@ ahb_m2s_mux_inst (
     .hwstrb_o   ( hwstrb         ),
     .hwrite_o   ( hwrite         )
 );
+*/
 /* according to haddr --> pick hsel */
-assign hsel[0] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h0);
-assign hsel[1] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h2);
-assign hsel[2] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h4);
-assign hsel[3] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]>=4'h6 && haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]<=4'h9);
-assign hsel[4] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-4]==4'h5);
+//assign hsel[0] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]>=22'h000000 && haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]<=22'h00003f);
+//assign hsel[1] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]>=22'h080000 && haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]<=22'h08003f);
+//assign hsel[2] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]>=22'h100000 && haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]<=22'h13ffff);
+//assign hsel[3] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]>=22'h180000 && haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]<=22'h27ffff);
+//assign hsel[4] = (haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]>=22'h140000 && haddr[HADDR_WIDTH-1:HADDR_WIDTH-22]<=22'h17ffff);
+//
+//assign req[0] = |htrans_m[1];
+//assign req[1] = |htrans_m[2];
+//assign req[2] = |htrans_m[4];
+//assign req[3] = 0;
+//assign req[4] = 0;
+//
+//assign hwrite_i[1] = 0;
 
-assign req[0] = 0;
-assign req[1] = 0;
-assign req[2] = 1;
-assign req[3] = 0;
-assign req[4] = 0;
+ahb_m2s_mux #(
+    .ADDR_MIN     ( 22'h000000     ),
+    .ADDR_MAX     ( 22'h00003f     ),
+    .HADDR_WIDTH  ( HADDR_WIDTH  ),
+    .DATA_WIDTH   ( DATA_WIDTH   ),
+    .HMAS_NUM     ( HMAS_NUM     ),
+    .HMAS_LEN     ( HMAS_LEN     ),
+    .HBURST_WIDTH ( HBURST_WIDTH ))
+ ahb_m2s_mux_inst_0 (
+    .haddr_m  ( haddr_m         ),
+    .hburst_m ( hburst_m        ),
+    .hsize_m  ( hsize_m         ),
+    .htrans_m ( htrans_m        ),
+    .hwdata_m ( hwdata_m        ),
+    .hwstrb_m ( hwstrb_m        ),
+    .hwrite_m ( hwrite_m        ),
+    .haddr_s  ( haddr_s[1]      ),
+    .hburst_s ( hburst_s[1]     ),
+    .hsize_s  ( hsize_s[1]      ),
+    .htrans_s ( htrans_s[1]     ),
+    .hwdata_s ( hwdata_s[1]     ),
+    .hwstrb_s ( hwstrb_s[1]     ),
+    .hwrite_s ( hwrite_s[1]     ),
+    .req_m    ( req_m[1]        ),
+    .grant    ( grant[1]        ),
+    .hsel_s   ( hsel[0]         )
+);
 
+ahb_m2s_mux #(
+    .ADDR_MIN     ( 22'h080000     ),
+    .ADDR_MAX     ( 22'h08003f     ),
+    .HADDR_WIDTH  ( HADDR_WIDTH  ),
+    .DATA_WIDTH   ( DATA_WIDTH   ),
+    .HMAS_NUM     ( HMAS_NUM     ),
+    .HMAS_LEN     ( HMAS_LEN     ),
+    .HBURST_WIDTH ( HBURST_WIDTH ))
+ ahb_m2s_mux_inst_1 (
+    .haddr_m  ( haddr_m         ),
+    .hburst_m ( hburst_m        ),
+    .hsize_m  ( hsize_m         ),
+    .htrans_m ( htrans_m        ),
+    .hwdata_m ( hwdata_m        ),
+    .hwstrb_m ( hwstrb_m        ),
+    .hwrite_m ( hwrite_m        ),
+    .haddr_s  ( haddr_s[2]      ),
+    .hburst_s ( hburst_s[2]     ),
+    .hsize_s  ( hsize_s[2]      ),
+    .htrans_s ( htrans_s[2]     ),
+    .hwdata_s ( hwdata_s[2]     ),
+    .hwstrb_s ( hwstrb_s[2]     ),
+    .hwrite_s ( hwrite_s[2]     ),
+    .req_m    ( req_m[2]        ),
+    .grant    ( grant[2]        ),
+    .hsel_s   ( hsel[1]         )
+);
 
+ahb_m2s_mux #(
+    .ADDR_MIN     ( 22'h100000     ),
+    .ADDR_MAX     ( 22'h13ffff     ),
+    .HADDR_WIDTH  ( HADDR_WIDTH  ),
+    .DATA_WIDTH   ( DATA_WIDTH   ),
+    .HMAS_NUM     ( HMAS_NUM     ),
+    .HMAS_LEN     ( HMAS_LEN     ),
+    .HBURST_WIDTH ( HBURST_WIDTH ))
+ ahb_m2s_mux_inst_2 (
+    .haddr_m  ( haddr_m         ),
+    .hburst_m ( hburst_m        ),
+    .hsize_m  ( hsize_m         ),
+    .htrans_m ( htrans_m        ),
+    .hwdata_m ( hwdata_m        ),
+    .hwstrb_m ( hwstrb_m        ),
+    .hwrite_m ( hwrite_m        ),
+    .haddr_s  ( haddr_s[4]      ),
+    .hburst_s ( hburst_s[4]     ),
+    .hsize_s  ( hsize_s[4]      ),
+    .htrans_s ( htrans_s[4]     ),
+    .hwdata_s ( hwdata_s[4]     ),
+    .hwstrb_s ( hwstrb_s[4]     ),
+    .hwrite_s ( hwrite_s[4]     ),
+    .req_m    ( req_m[4]        ),
+    .grant    ( grant[4]        ),
+    .hsel_s   ( hsel[2]         )
+);
+ahb_m2s_mux #(
+    .ADDR_MIN     ( 22'h080000     ),
+    .ADDR_MAX     ( 22'h08003f     ),
+    .HADDR_WIDTH  ( HADDR_WIDTH  ),
+    .DATA_WIDTH   ( DATA_WIDTH   ),
+    .HMAS_NUM     ( HMAS_NUM     ),
+    .HMAS_LEN     ( HMAS_LEN     ),
+    .HBURST_WIDTH ( HBURST_WIDTH ))
+ ahb_m2s_mux_inst_3 (
+    .haddr_m  ( haddr_m         ),
+    .hburst_m ( hburst_m        ),
+    .hsize_m  ( hsize_m         ),
+    .htrans_m ( htrans_m        ),
+    .hwdata_m ( hwdata_m        ),
+    .hwstrb_m ( hwstrb_m        ),
+    .hwrite_m ( hwrite_m        ),
+    .haddr_s  ( haddr_s[8]      ),
+    .hburst_s ( hburst_s[8]     ),
+    .hsize_s  ( hsize_s[8]      ),
+    .htrans_s ( htrans_s[8]     ),
+    .hwdata_s ( hwdata_s[8]     ),
+    .hwstrb_s ( hwstrb_s[8]     ),
+    .hwrite_s ( hwrite_s[8]     ),
+    .req_m    ( req_m[8]        ),
+    .grant    ( grant[8]        ),
+    .hsel_s   ( hsel[3]         )
+);
+ahb_m2s_mux #(
+    .ADDR_MIN     ( 22'h140000     ),
+    .ADDR_MAX     ( 22'h17ffff     ),
+    .HADDR_WIDTH  ( HADDR_WIDTH  ),
+    .DATA_WIDTH   ( DATA_WIDTH   ),
+    .HMAS_NUM     ( HMAS_NUM     ),
+    .HMAS_LEN     ( HMAS_LEN     ),
+    .HBURST_WIDTH ( HBURST_WIDTH ))
+ ahb_m2s_mux_inst_4 (
+    .haddr_m  ( haddr_m         ),
+    .hburst_m ( hburst_m        ),
+    .hsize_m  ( hsize_m         ),
+    .htrans_m ( htrans_m        ),
+    .hwdata_m ( hwdata_m        ),
+    .hwstrb_m ( hwstrb_m        ),
+    .hwrite_m ( hwrite_m        ),
+    .haddr_s  ( haddr_s[32]      ),
+    .hburst_s ( hburst_s[32]     ),
+    .hsize_s  ( hsize_s[32]      ),
+    .htrans_s ( htrans_s[32]     ),
+    .hwdata_s ( hwdata_s[32]     ),
+    .hwstrb_s ( hwstrb_s[32]     ),
+    .hwrite_s ( hwrite_s[32]     ),
+    .req_m    ( req_m[32]        ),
+    .grant    ( grant[32]        ),
+    .hsel_s   ( hsel[4]         )
+);
+/*
 ahb_s2m_mux #(
     .DATA_WIDTH ( DATA_WIDTH ),
     .HSLV_NUM   ( HSLV_NUM   ),
@@ -459,7 +615,31 @@ ahb_s2m_mux_inst (
     .hexokay_o  ( hexokay_mux ),
     .hrdata_o   ( hrdata_mux  )
 );
+*/
+genvar j;
+generate
+    for(j=0;j<HMAS_NUM;j=j+1) begin
+        assign hready_m[j] = grant[0][j]?   hready_s2m[1]:
+                             grant[1][j]?   hready_s2m[2]:
+                             grant[2][j]?   hready_s2m[4]:
+                             grant[3][j]?   hready_s2m[8]:
+                             grant[4][j]?   hready_s2m[16]:
+                                            1'b0;
 
+        assign hresp_m[j] =  grant[0][j]?   hresp_s2m[1]:
+                             grant[1][j]?   hresp_s2m[2]:
+                             grant[2][j]?   hresp_s2m[4]:
+                             grant[3][j]?   hresp_s2m[8]:
+                             grant[4][j]?   hresp_s2m[16]:
+                                            1'b0;
+        assign hrdata[j] =   grant[0][j]?   hrdata_s2m[1]:
+                             grant[1][j]?   hrdata_s2m[2]:
+                             grant[2][j]?   hrdata_s2m[4]:
+                             grant[3][j]?   hrdata_s2m[8]:
+                             grant[4][j]?   hrdata_s2m[16]:
+                                            1'b0;                                            
+    end
+endgenerate
 ahb_sram 
 #(
     .HADDR_WIDTH   ( HADDR_WIDTH   ),
@@ -472,19 +652,19 @@ ahb_sram
 (
     .hclk          ( hclk          ),
     .hresetn       ( hresetn       ),
-    .haddr         ( haddr         ),
-    .hburst        ( hburst        ),
+    .haddr         ( haddr_s[1]         ),
+    .hburst        ( hburst_s[1]        ),
     .hmasterlock   (    ),
     .hprot         (          ),
-    .hsize         ( hsize         ),
+    .hsize         ( hsize_s[1]         ),
     .hnonsec       (        ),
     .hmaster       (               ),
-    .htrans        ( htrans        ),
-    .hwdata        ( hwdata        ),
-    .hwstrb        ( hwstrb        ),
-    .hwrite        ( hwrite        ),
+    .htrans        ( htrans_s[1]        ),
+    .hwdata        ( hwdata_s[1]        ),
+    .hwstrb        ( hwstrb_s[1]        ),
+    .hwrite        ( hwrite_s[1]        ),
     .hsel          ( hsel[0]       ),
-    .hready        ( hready_mux    ),
+    .hready        ( hready_m[grant[1]]    ),
     .hrdata        ( hrdata_s2m[1] ),   // bin(1)-->onehot(0)
     .hreadyout     ( hready_s2m[1]),
     .hresp         ( hresp_s2m[1]  ),
@@ -503,19 +683,19 @@ ahb_sram
 (
     .hclk          ( hclk          ),
     .hresetn       ( hresetn       ),
-    .haddr         ( haddr         ),
-    .hburst        ( hburst        ),
+    .haddr         ( haddr_s[2]         ),
+    .hburst        ( hburst_s[2]        ),
     .hmasterlock   (    ),
     .hprot         (          ),
-    .hsize         ( hsize         ),
+    .hsize         ( hsize_s[2]         ),
     .hnonsec       (        ),
     .hmaster       (               ),
-    .htrans        ( htrans        ),
-    .hwdata        ( hwdata        ),
-    .hwstrb        ( hwstrb        ),
-    .hwrite        ( hwrite        ),
+    .htrans        ( htrans_s[2]        ),
+    .hwdata        ( hwdata_s[2]        ),
+    .hwstrb        ( hwstrb_s[2]        ),
+    .hwrite        ( hwrite_s[2]        ),
     .hsel          ( hsel[1]       ),   
-    .hready        ( hready_mux    ),
+    .hready        ( hready_m[grant[2]]    ),
     .hrdata        ( hrdata_s2m[2] ),   // bin(2)-->onehot(1)
     .hreadyout     ( hready_s2m[2]),
     .hresp         ( hresp_s2m[2]  ),
@@ -534,15 +714,15 @@ ahb2apb_bridge #(
  ahb2apb_bridge_inst (
     .hclk         ( hclk         ),
     .hresetn      ( hresetn      ),
-    .haddr        ( haddr        ),
-    .hburst       ( hburst       ),
-    .hsize        ( hsize        ),
-    .htrans       ( htrans       ),
-    .hwdata       ( hwdata       ),
-    .hwstrb       ( hwstrb       ),
-    .hwrite       ( hwrite       ),
+    .haddr        ( haddr_s[4]        ),
+    .hburst       ( hburst_s[4]       ),
+    .hsize        ( hsize_s[4]        ),
+    .htrans       ( htrans_s[4]       ),
+    .hwdata       ( hwdata_s[4]       ),
+    .hwstrb       ( hwstrb_s[4]       ),
+    .hwrite       ( hwrite_s[4]       ),
     .hsel_i       ( hsel[2]      ),
-    .hready_i     ( hready_mux   ),
+    .hready_i     ( hready_m[grant[4]]   ),
     .pclk         ( pclk         ),
     .presetn      ( presetn      ),
     .pclken       ( pclken       ),

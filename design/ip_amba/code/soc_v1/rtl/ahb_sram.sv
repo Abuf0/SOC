@@ -76,26 +76,29 @@ end
 // write
 always_ff @( posedge hclk or negedge hresetn ) begin
     if(~hresetn) begin
-        for(j=0;j<MEM_DEEPTH;j=j+1) begin
-            memory[j] <= 'd0;
-        end
+        //for(j=0;j<MEM_DEEPTH;j=j+1) begin
+            //memory[j] <= 'd0;
+        //end
+        $readmemh("~/SOC/ip_demo/soc_v1/rtl/cm3.txt",memory);
     end
     else if(mem_ce && mem_wr) begin
-        memory[mem_addr[MEM_ADDR_LEN-1:0]] <= (mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:0]]) | 
-                         (~strb_ext & ~mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:0]]) | 
-                         (strb_ext & mem_wdata & ~memory[mem_addr[MEM_ADDR_LEN-1:0]]);
-        //memory[mem_addr[MEM_ADDR_LEN-1:0]] <= mem_wdata;
+        memory[mem_addr[MEM_ADDR_LEN-1:2]] <= (mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:2]]) | 
+                         (~strb_ext & ~mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:2]]) | 
+                         (strb_ext & mem_wdata & ~memory[mem_addr[MEM_ADDR_LEN-1:2]]);
+        //memory[mem_addr[MEM_ADDR_LEN-1:2]] <= mem_wdata;
     end
 end
 // output
 // read
+/*
 always_ff @( posedge hclk or negedge hresetn ) begin
     if(~hresetn) 
         mem_rdata <= 'd0;
     else if(mem_ce && ~mem_wr)
-        mem_rdata <= memory[mem_addr[MEM_ADDR_LEN-1:0]];
+        mem_rdata <= memory[mem_addr[MEM_ADDR_LEN-1:2]];
 end
-
+*/
+assign mem_rdata = memory[mem_addr[MEM_ADDR_LEN-1:2]];
 
 logic transfer_on;
 assign transfer_on = hsel && hready && htrans[1];   // HTRANS = NONSEQ/SEQ
@@ -131,7 +134,7 @@ end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         mem_ce <= 1'b0;
-    else if(state_c == MEM_W | state_c == MEM_R)
+    else if(state_n == MEM_W | state_n == MEM_R)
         mem_ce <= 1'b1;
     else 
         mem_ce <= 1'b0;
@@ -139,7 +142,7 @@ end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         mem_wr <= 1'b0;
-    else if(state_c == MEM_W)
+    else if(state_n == MEM_W)
         mem_wr <= 1'b1;
     else 
         mem_wr <= 1'b0;
@@ -147,21 +150,21 @@ end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         mem_addr <= 'b0;
-    else if(state_c == MEM_W | state_c == MEM_R)
-        mem_addr <= haddr_d1;
+    else if(state_n == MEM_W | state_n == MEM_R)
+        mem_addr <= haddr;
     else 
         mem_addr <= 'b0;
 end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         mem_wdata <= 'b0;
-    else if(state_c == MEM_W)
-        mem_wdata <= hwdata_d1;
+    else if(state_n == MEM_W)
+        mem_wdata <= hwdata;
 end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hrdata <= 'b0;
-    else if(state_c == MEM_R)
+    else if(state_n == MEM_R)
         hrdata <= mem_rdata;
 end
 assign hexokay = 1'b1;
@@ -169,7 +172,7 @@ assign hresp = 1'b0;
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hreadyout <= 1'b1;
-    else if(state_c == MEM_W | state_c == MEM_R)    // can add condition to extend transfer
+    else if(state_n == MEM_W | state_n == MEM_R)    // can add condition to extend transfer
         hreadyout <= 1'b1;
 end
 
