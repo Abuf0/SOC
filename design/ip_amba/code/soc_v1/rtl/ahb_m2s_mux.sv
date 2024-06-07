@@ -8,13 +8,13 @@ module ahb_m2s_mux #(
     parameter HBURST_WIDTH = 3  
 )
 (
-    input [HADDR_WIDTH-1:0]         haddr_m  [0:HMAS_LEN-1] ,
-    input [HBURST_WIDTH-1:0]        hburst_m [0:HMAS_LEN-1] ,
-    input [2:0]                     hsize_m  [0:HMAS_LEN-1] ,
-    input [1:0]                     htrans_m [0:HMAS_LEN-1] ,
-    input [DATA_WIDTH-1:0]          hwdata_m [0:HMAS_LEN-1] ,
-    input [DATA_WIDTH/8-1:0]        hwstrb_m [0:HMAS_LEN-1] ,
-    input                           hwrite_m [0:HMAS_LEN-1] ,
+    input [HADDR_WIDTH-1:0]         haddr_m  [0:HMAS_LEN] ,
+    input [HBURST_WIDTH-1:0]        hburst_m [0:HMAS_LEN] ,
+    input [2:0]                     hsize_m  [0:HMAS_LEN] ,
+    input [1:0]                     htrans_m [0:HMAS_LEN] ,
+    input [DATA_WIDTH-1:0]          hwdata_m [0:HMAS_LEN] ,
+    input [DATA_WIDTH/8-1:0]        hwstrb_m [0:HMAS_LEN] ,
+    input                           hwrite_m [0:HMAS_LEN] ,
     output logic [HADDR_WIDTH-1:0]  haddr_s                 ,
     output logic [HBURST_WIDTH-1:0] hburst_s                ,
     output logic [2:0]              hsize_s                 ,
@@ -26,14 +26,14 @@ module ahb_m2s_mux #(
     output logic [HMAS_NUM-1:0]     grant                   ,
     output logic                    hsel_s
 );
-//logic [HMAS_LEN-1:0] req_m;
-//logic [HMAS_LEN-1:0] grant;
+//logic [HMAS_LEN:0] req_m;
+//logic [HMAS_LEN:0] grant;
 genvar i;
 generate 
     for(i=0;i<HMAS_NUM;i=i+1) begin
-        logic [HMAS_LEN-1:0] index;
+        logic [HMAS_LEN:0] index;
         assign index = 1'b1 << i;
-        assign req_m [i] = (haddr_m[index][HADDR_WIDTH-1:HADDR_WIDTH-22]>=ADDR_MIN && haddr_m[i][HADDR_WIDTH-1:HADDR_WIDTH-22]<=ADDR_MAX);
+        assign req_m [i] = (haddr_m[index][HADDR_WIDTH-1:HADDR_WIDTH-22]>=ADDR_MIN && haddr_m[i][HADDR_WIDTH-1:HADDR_WIDTH-22]<=ADDR_MAX)?  1'b1:1'b0;
     end
 endgenerate
 arbiter #(.HSLV_NUM(HMAS_NUM)) arbiter_inst(.req(req_m),.grant(grant));

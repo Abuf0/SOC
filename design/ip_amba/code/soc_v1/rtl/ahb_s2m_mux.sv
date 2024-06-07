@@ -6,10 +6,10 @@ module ahb_s2m_mux
 )
 (
     input [HSLV_NUM-1:0] hsel                       ,
-    input hready_i [0:HSLV_LEN-1]                   ,
-    input hresp_i [0:HSLV_LEN-1]                    ,
-    input hexokay_i [0:HSLV_LEN-1]                  ,
-    input [DATA_WIDTH-1:0] hrdata_i [0:HSLV_LEN-1]  ,
+    input hready_i [0:HSLV_LEN]                   ,
+    input hresp_i [0:HSLV_LEN]                    ,
+    input hexokay_i [0:HSLV_LEN]                  ,
+    input [DATA_WIDTH-1:0] hrdata_i [0:HSLV_LEN]  ,
     output logic hready_o                           ,
     output logic hresp_o                            ,
     output logic hexokay_o                          ,

@@ -7,11 +7,11 @@ module soc_top#(
     parameter ITCM_DEEPTH = 64  ,
     parameter DTCM_DEEPTH = 64  ,
     parameter PSLV_NUM = 5      , 
-    parameter PSLV_LEN = 32     , 
+    parameter PSLV_LEN = 16     , 
     parameter HSLV_NUM = 5      ,
-    parameter HSLV_LEN = 32     ,
+    parameter HSLV_LEN = 16     ,
     parameter HMAS_NUM = 5      ,
-    parameter HMAS_LEN = 32     ,
+    parameter HMAS_LEN = 16     ,
     parameter HBURST_WIDTH = 3  ,
     parameter HPROT_WIDTH = 1   ,
     parameter HMASTER_WIDTH = 8 ,
@@ -62,14 +62,14 @@ logic [DATA_WIDTH-1:0]      hrdata_mux                  ;
 logic                       pclk                        ;
 logic                       presetn                     ;
 logic                       pclken                      ;
-logic                       pready_s2m [0:PSLV_LEN-1]   ;
-logic [DATA_WIDTH-1:0]      prdata_s2m [0:PSLV_LEN-1]   ;
+logic                       pready_s2m [0:PSLV_LEN]   ;
+logic [DATA_WIDTH-1:0]      prdata_s2m [0:PSLV_LEN]   ;
 
 // ahb2apb_bridge Outputs
-logic                       hready_s2m [0:HSLV_LEN-1]   ;
-logic                       hresp_s2m [0:HSLV_LEN-1]    ;
-logic                       hexokay_s2m [0:HSLV_LEN-1]  ;
-logic [DATA_WIDTH-1:0]      hrdata_s2m [0:HSLV_LEN-1]   ;
+logic                       hready_s2m [0:HSLV_LEN]   ;
+logic                       hresp_s2m [0:HSLV_LEN]    ;
+logic                       hexokay_s2m [0:HSLV_LEN]  ;
+logic [DATA_WIDTH-1:0]      hrdata_s2m [0:HSLV_LEN]   ;
 logic [PADDR_WIDTH-1:0]     paddr                       ;
 logic [PSLV_NUM-1:0]        psel                        ;
 logic                       penable                     ;
@@ -85,24 +85,24 @@ logic [DATA_WIDTH-1:0]      hwdata                      ;
 logic [DATA_WIDTH/8-1:0]    hwstrb                      ;
 logic                       hwrite                      ;
 
-logic [HADDR_WIDTH-1:0]     haddr_m   [0:HMAS_LEN-1]    ;
-logic [HBURST_WIDTH-1:0]    hburst_m  [0:HMAS_LEN-1]    ;
-logic [2:0]                 hsize_m   [0:HMAS_LEN-1]    ;
-logic [1:0]                 htrans_m  [0:HMAS_LEN-1]    ;
-logic [DATA_WIDTH-1:0]      hwdata_m  [0:HMAS_LEN-1]    ;
-logic [DATA_WIDTH/8-1:0]    hwstrb_m  [0:HMAS_LEN-1]    ;
-logic                       hwrite_m  [0:HMAS_LEN-1]    ;
+logic [HADDR_WIDTH-1:0]     haddr_m   [0:HMAS_LEN]    ;
+logic [HBURST_WIDTH-1:0]    hburst_m  [0:HMAS_LEN]    ;
+logic [2:0]                 hsize_m   [0:HMAS_LEN]    ;
+logic [1:0]                 htrans_m  [0:HMAS_LEN]    ;
+logic [DATA_WIDTH-1:0]      hwdata_m  [0:HMAS_LEN]    ;
+logic [DATA_WIDTH/8-1:0]    hwstrb_m  [0:HMAS_LEN]    ;
+logic                       hwrite_m  [0:HMAS_LEN]    ;
 
-logic [HADDR_WIDTH-1:0]     haddr_s   [0:HSLV_LEN-1]    ;
-logic [HBURST_WIDTH-1:0]    hburst_s  [0:HSLV_LEN-1]    ;
-logic [2:0]                 hsize_s   [0:HSLV_LEN-1]    ;
-logic [1:0]                 htrans_s  [0:HSLV_LEN-1]    ;
-logic [DATA_WIDTH-1:0]      hwdata_s  [0:HSLV_LEN-1]    ;
-logic [DATA_WIDTH/8-1:0]    hwstrb_s  [0:HSLV_LEN-1]    ;
-logic                       hwrite_s  [0:HSLV_LEN-1]    ;
+logic [HADDR_WIDTH-1:0]     haddr_s   [0:HSLV_LEN]    ;
+logic [HBURST_WIDTH-1:0]    hburst_s  [0:HSLV_LEN]    ;
+logic [2:0]                 hsize_s   [0:HSLV_LEN]    ;
+logic [1:0]                 htrans_s  [0:HSLV_LEN]    ;
+logic [DATA_WIDTH-1:0]      hwdata_s  [0:HSLV_LEN]    ;
+logic [DATA_WIDTH/8-1:0]    hwstrb_s  [0:HSLV_LEN]    ;
+logic                       hwrite_s  [0:HSLV_LEN]    ;
 
-logic [HMAS_NUM-1:0]        req_m [0:HSLV_LEN-1]        ;
-logic [HMAS_NUM-1:0]        grant [0:HSLV_LEN-1]        ;
+logic [HMAS_NUM-1:0]        req_m [0:HSLV_LEN]        ;
+logic [HMAS_NUM-1:0]        grant [0:HSLV_LEN]        ;
 
 logic                       hready_m [0:HMAS_NUM-1]     ;
 logic                       hresp_m [0:HMAS_NUM-1]      ;
@@ -361,6 +361,14 @@ assign  HPROTDM         =   4'b0;
 assign  HMASTERDM       =   2'b0;
 assign  HMASTERLOCKDM   =   1'b0;
 
+assign haddr_m[8]  = 'd0;
+assign hburst_m[8] = 'd0; 
+assign hsize_m[8]  = 'd0;
+assign htrans_m[8] = 'd0;
+assign hwdata_m[8] = 'd0;
+assign hwstrb_m[8] = 'd0;
+assign hwrite_m[8] = 'd0;
+
 // RESERVED MASTER 
 logic    [31:0]  HADDRR;
 logic    [1:0]   HTRANSR;
@@ -384,6 +392,15 @@ assign  HBURSTR         =   3'b0;
 assign  HPROTR          =   4'b0;
 assign  HMASTERR        =   2'b0;
 assign  HMASTERLOCKR    =   1'b0;
+
+assign haddr_m[16]  = 'd0;
+assign hburst_m[16] = 'd0; 
+assign hsize_m[16]  = 'd0;
+assign htrans_m[16] = 'd0;
+assign hwdata_m[16] = 'd0;
+assign hwstrb_m[16] = 'd0;
+assign hwrite_m[16] = 'd0;
+
 /*
 core_v0 #(
     .HADDR_WIDTH  ( HADDR_WIDTH  ),
@@ -588,15 +605,15 @@ ahb_m2s_mux #(
     .hwdata_m ( hwdata_m        ),
     .hwstrb_m ( hwstrb_m        ),
     .hwrite_m ( hwrite_m        ),
-    .haddr_s  ( haddr_s[32]      ),
-    .hburst_s ( hburst_s[32]     ),
-    .hsize_s  ( hsize_s[32]      ),
-    .htrans_s ( htrans_s[32]     ),
-    .hwdata_s ( hwdata_s[32]     ),
-    .hwstrb_s ( hwstrb_s[32]     ),
-    .hwrite_s ( hwrite_s[32]     ),
-    .req_m    ( req_m[32]        ),
-    .grant    ( grant[32]        ),
+    .haddr_s  ( haddr_s[16]      ),
+    .hburst_s ( hburst_s[16]     ),
+    .hsize_s  ( hsize_s[16]      ),
+    .htrans_s ( htrans_s[16]     ),
+    .hwdata_s ( hwdata_s[16]     ),
+    .hwstrb_s ( hwstrb_s[16]     ),
+    .hwrite_s ( hwrite_s[16]     ),
+    .req_m    ( req_m[16]        ),
+    .grant    ( grant[16]        ),
     .hsel_s   ( hsel[4]         )
 );
 /*
@@ -632,7 +649,7 @@ generate
                              grant[3][j]?   hresp_s2m[8]:
                              grant[4][j]?   hresp_s2m[16]:
                                             1'b0;
-        assign hrdata[j] =   grant[0][j]?   hrdata_s2m[1]:
+        assign hrdata_m[j] = grant[0][j]?   hrdata_s2m[1]:
                              grant[1][j]?   hrdata_s2m[2]:
                              grant[2][j]?   hrdata_s2m[4]:
                              grant[3][j]?   hrdata_s2m[8]:

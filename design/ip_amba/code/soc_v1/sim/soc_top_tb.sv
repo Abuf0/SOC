@@ -12,11 +12,11 @@ parameter DATA_WIDTH    = 32;
 parameter ITCM_DEEPTH   = 65536;
 parameter DTCM_DEEPTH   = 65536;
 parameter PSLV_NUM      = 5 ;
-parameter PSLV_LEN      = 32;
+parameter PSLV_LEN      = 16;
 parameter HSLV_NUM      = 5 ;
-parameter HSLV_LEN      = 32;
+parameter HSLV_LEN      = 16;
 parameter HMAS_NUM      = 5 ;
-parameter HMAS_LEN      = 32;
+parameter HMAS_LEN      = 16;
 parameter HBURST_WIDTH  = 3 ;
 parameter IRQ_LEN       = 16;
 

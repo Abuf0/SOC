@@ -33,8 +33,8 @@ module ahb2apb_bridge #(
     output logic                    pwrite                  ,   // To APB
     output logic [DATA_WIDTH-1:0]   pwdata                  ,   // To APB
     output logic [DATA_WIDTH/8-1:0] pstrb                   ,   // To APB
-    input                           pready_i [0:PSLV_LEN-1] ,   // From APBs
-    input [DATA_WIDTH-1:0]          prdata_i [0:PSLV_LEN-1]      // From APBs
+    input                           pready_i [0:PSLV_LEN] ,   // From APBs
+    input [DATA_WIDTH-1:0]          prdata_i [0:PSLV_LEN]      // From APBs
 );
 
 /* APB Slave List */
