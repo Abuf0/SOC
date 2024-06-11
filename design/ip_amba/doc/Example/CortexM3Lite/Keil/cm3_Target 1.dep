@@ -1,0 +1,40 @@
+Dependencies for Project 'cm3', Target 'Target 1': (DO NOT MODIFY !)
+CompilerVersion: 5060750::V5.06 update 6 (build 750)::ARMCC
+F (..\Software\core_cm3.h)(0x5E54FF60)()
+F (..\Software\core_cmFunc.h)(0x5E54FA30)()
+F (..\Software\core_cmInstr.h)(0x5E54FA30)()
+F (..\Software\CortexM3.h)(0x5E8C14FB)()
+F (..\Software\CortexM3_driver.c)(0x5E8C16E6)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\tianj\AppData\Local\Arm\Packs\Keil\V2M-MPS2_CMx_BSP\1.7.0\Device\CMSDK_CM3\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DCMSDK_CM3-o .\cortexm3_driver.o --omf_browse .\cortexm3_driver.crf --depend .\cortexm3_driver.d)
+I (..\Software\CortexM3.h)(0x5E8C14FB)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5D9AD218)
+I (..\Software\core_cm3.h)(0x5E54FF60)
+I (..\Software\core_cmInstr.h)(0x5E54FA30)
+I (..\Software\core_cmFunc.h)(0x5E54FA30)
+I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x5D9AD218)
+F (..\Software\CortexM3_driver.h)(0x5E8C14BF)()
+F (..\Software\handler.c)(0x5E58A03D)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\tianj\AppData\Local\Arm\Packs\Keil\V2M-MPS2_CMx_BSP\1.7.0\Device\CMSDK_CM3\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DCMSDK_CM3-o .\handler.o --omf_browse .\handler.crf --depend .\handler.d)
+I (..\Software\CortexM3.h)(0x5E8C14FB)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5D9AD218)
+I (..\Software\core_cm3.h)(0x5E54FF60)
+I (..\Software\core_cmInstr.h)(0x5E54FA30)
+I (..\Software\core_cmFunc.h)(0x5E54FA30)
+F (..\Software\main.c)(0x5E8C261F)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\tianj\AppData\Local\Arm\Packs\Keil\V2M-MPS2_CMx_BSP\1.7.0\Device\CMSDK_CM3\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DCMSDK_CM3-o .\main.o --omf_browse .\main.crf --depend .\main.d)
+I (..\Software\CortexM3.h)(0x5E8C14FB)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5D9AD218)
+I (..\Software\core_cm3.h)(0x5E54FF60)
+I (..\Software\core_cmInstr.h)(0x5E54FA30)
+I (..\Software\core_cmFunc.h)(0x5E54FA30)
+F (..\Software\Retarget.c)(0x5E8C269D)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\tianj\AppData\Local\Arm\Packs\Keil\V2M-MPS2_CMx_BSP\1.7.0\Device\CMSDK_CM3\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DCMSDK_CM3-o .\retarget.o --omf_browse .\retarget.crf --depend .\retarget.d)
+I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x5D9AD21A)
+I (..\Software\CortexM3.h)(0x5E8C14FB)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5D9AD218)
+I (..\Software\core_cm3.h)(0x5E54FF60)
+I (..\Software\core_cmInstr.h)(0x5E54FA30)
+I (..\Software\core_cmFunc.h)(0x5E54FA30)
+F (..\Software\startup_CM3DS.s)(0x5E623FFB)(--cpu Cortex-M3 --pd "__EVAL SETA 1" -g --apcs=interwork --pd "__MICROLIB SETA 1"-I.\RTE\_Target_1-IC:\Users\tianj\AppData\Local\Arm\Packs\Keil\V2M-MPS2_CMx_BSP\1.7.0\Device\CMSDK_CM3\Include-IC:\Keil_v5\ARM\CMSIS\Include--pd "__UVISION_VERSION SETA 529" --pd "CMSDK_CM3 SETA 1"--list .\listings\startup_cm3ds.lst --xref -o .\startup_cm3ds.o --depend .\startup_cm3ds.d)
+F (..\Software\system.c)(0x5E8C159D)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\tianj\AppData\Local\Arm\Packs\Keil\V2M-MPS2_CMx_BSP\1.7.0\Device\CMSDK_CM3\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DCMSDK_CM3-o .\system.o --omf_browse .\system.crf --depend .\system.d)
+I (..\Software\CortexM3.h)(0x5E8C14FB)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5D9AD218)
+I (..\Software\core_cm3.h)(0x5E54FF60)
+I (..\Software\core_cmInstr.h)(0x5E54FA30)
+I (..\Software\core_cmFunc.h)(0x5E54FA30)

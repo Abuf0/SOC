@@ -1,0 +1,37 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "TXD",
+					"strict" : false
+				},
+				{
+					"name" : "TXDLED",
+					"strict" : false
+				},
+				{
+					"name" : "SWDIO",
+					"strict" : false
+				},
+				{
+					"name" : "CLK50m",
+					"strict" : false
+				},
+				{
+					"name" : "RSTn",
+					"strict" : false
+				},
+				{
+					"name" : "SWCLK",
+					"strict" : false
+				},
+				{
+					"name" : "RXD",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,20 @@
+Fitter Status : Successful - Thu Apr 09 20:50:43 2020
+Quartus Prime Version : 19.1.0 Build 670 09/22/2019 SJ Standard Edition
+Revision Name : cm3
+Top-level Entity Name : CortexM3
+Family : Cyclone V
+Device : 5CEFA5F23C6
+Timing Models : Final
+Logic utilization (in ALMs) : 10,887 / 29,080 ( 37 % )
+Total registers : 6733
+Total pins : 7 / 240 ( 3 % )
+Total virtual pins : 0
+Total block memory bits : 1,048,576 / 4,567,040 ( 23 % )
+Total RAM Blocks : 128 / 446 ( 29 % )
+Total DSP Blocks : 2 / 150 ( 1 % )
+Total HSSI RX PCSs : 0
+Total HSSI PMA RX Deserializers : 0
+Total HSSI TX PCSs : 0
+Total HSSI PMA TX Serializers : 0
+Total PLLs : 0 / 6 ( 0 % )
+Total DLLs : 0 / 4 ( 0 % )
