@@ -55,6 +55,7 @@ logic mem_ce;
 logic [HADDR_WIDTH-1:0] mem_addr;
 logic [DATA_WIDTH-1:0] mem_wdata;
 logic [DATA_WIDTH-1:0] mem_rdata;
+logic [DATA_WIDTH-1:0] hrdata_old;
 
 logic [DATA_WIDTH-1:0] strb_ext;
 logic [DATA_WIDTH-1:0] memory [0:MEM_DEEPTH-1];
@@ -74,19 +75,61 @@ initial begin
     $readmemh("~/SOC/ip_demo/soc_v1/rtl/cm3.txt",memory);
 end
 // write
+/*
 always_ff @( posedge hclk or negedge hresetn ) begin
     if(~hresetn) begin
-        //for(j=0;j<MEM_DEEPTH;j=j+1) begin
-            //memory[j] <= 'd0;
-        //end
         $readmemh("~/SOC/ip_demo/soc_v1/rtl/cm3.txt",memory);
     end
     else if(mem_ce && mem_wr) begin
-        memory[mem_addr[MEM_ADDR_LEN-1:2]] <= (mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:2]]) | 
-                         (~strb_ext & ~mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:2]]) | 
-                         (strb_ext & mem_wdata & ~memory[mem_addr[MEM_ADDR_LEN-1:2]]);
+        //memory[mem_addr[MEM_ADDR_LEN-1:2]] <= (mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:2]]) | 
+        //                 (~strb_ext & ~mem_wdata & memory[mem_addr[MEM_ADDR_LEN-1:2]]) | 
+        //                 (strb_ext & mem_wdata & ~memory[mem_addr[MEM_ADDR_LEN-1:2]]);
         //memory[mem_addr[MEM_ADDR_LEN-1:2]] <= mem_wdata;
+        memory[mem_addr[MEM_ADDR_LEN-1:2]] <= hwdata;
     end
+end
+*/
+logic [3:0] byte_sel;
+logic tx_byte       ;
+logic tx_half       ;
+logic tx_word       ;
+logic byte_at_00    ;
+logic byte_at_01    ;
+logic byte_at_10    ;
+logic byte_at_11    ;
+logic half_at_00    ;
+logic half_at_10    ;
+logic word_at_00    ;
+assign tx_byte    = (~hsize[1]) & (~hsize[0]);
+assign tx_half    = (~hsize[1]) &  hsize[0];
+assign tx_word    =   hsize[1];
+assign byte_at_00 = tx_byte & (~haddr[1]) & (~haddr[0]);
+assign byte_at_01 = tx_byte & (~haddr[1]) &   haddr[0];
+assign byte_at_10 = tx_byte &   haddr[1]  & (~haddr[0]);
+assign byte_at_11 = tx_byte &   haddr[1]  &   haddr[0];
+assign half_at_00 = tx_half & (~haddr[1]);
+assign half_at_10 = tx_half &   haddr[1];
+assign word_at_00 = tx_word;
+assign byte_sel[0] = word_at_00 | half_at_00 | byte_at_00;
+assign byte_sel[1] = word_at_00 | half_at_00 | byte_at_01;
+assign byte_sel[2] = word_at_00 | half_at_10 | byte_at_10;
+assign byte_sel[3] = word_at_00 | half_at_10 | byte_at_11;
+
+always_ff@(posedge hclk) begin
+    if(mem_ce && mem_wr && byte_sel[0])
+        memory[mem_addr[MEM_ADDR_LEN-1:2]][7:0] <= hwdata[7:0];
+end
+always_ff@(posedge hclk) begin
+    if(mem_ce && mem_wr && byte_sel[1])
+        memory[mem_addr[MEM_ADDR_LEN-1:2]][15:8] <= hwdata[15:8];
+end
+always_ff@(posedge hclk) begin
+    if(mem_ce && mem_wr && byte_sel[2])
+        memory[mem_addr[MEM_ADDR_LEN-1:2]][23:16] <= hwdata[23:16];
+end
+always_ff@(posedge hclk) begin
+    if(mem_ce && mem_wr && byte_sel[3])
+        memory[mem_addr[MEM_ADDR_LEN-1:2]][31:24] <= hwdata[31:24];
 end
 // output
 // read
@@ -131,6 +174,7 @@ always@(*) begin
         endcase
     end
 end
+
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         mem_ce <= 1'b0;
@@ -158,15 +202,32 @@ end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         mem_wdata <= 'b0;
-    else if(state_n == MEM_W)
+    else if(state_c == MEM_W)
         mem_wdata <= hwdata;
 end
+/*
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hrdata <= 'b0;
     else if(state_n == MEM_R)
         hrdata <= mem_rdata;
 end
+*/
+/*
+assign mem_ce = (state_n == MEM_W | state_n == MEM_R);
+assign mem_wr = (state_n == MEM_W);
+assign mem_addr = haddr;
+assign mem_wdata = hwdata;
+*/
+//assign hrdata = (state_n == MEM_R)? mem_rdata : hrdata_old;
+assign hrdata = (state_n == MEM_R)? mem_rdata : 'd0;
+always_ff@(posedge hclk or negedge hresetn) begin
+    if(~hresetn)
+        hrdata_old <= 'b0;
+    else 
+        hrdata_old <= hrdata;
+end
+
 assign hexokay = 1'b1;
 assign hresp = 1'b0;
 always_ff@(posedge hclk or negedge hresetn) begin
