@@ -28,12 +28,12 @@
     Section header entry size: 40 bytes (0x28)
 
     Program header entries: 1
-    Section header entries: 17
+    Section header entries: 16
 
-    Program header offset: 10124 (0x0000278c)
-    Section header offset: 10156 (0x000027ac)
+    Program header offset: 9084 (0x0000237c)
+    Section header offset: 9116 (0x0000239c)
 
-    Section header string table index: 16
+    Section header string table index: 15
 
 ========================================================================
 
@@ -43,8 +43,8 @@
     File Offset   : 52 (0x34)
     Virtual Addr  : 0x00000000
     Physical Addr : 0x00000000
-    Size in file  : 1344 bytes (0x540)
-    Size in memory: 4928 bytes (0x1340)
+    Size in file  : 1204 bytes (0x4b4)
+    Size in memory: 4788 bytes (0x12b4)
     Flags         : PF_X + PF_W + PF_R + PF_ARM_ENTRY (0x80000007)
     Alignment     : 4
 
@@ -58,7 +58,7 @@
     Flags       : SHF_ALLOC + SHF_EXECINSTR (0x00000006)
     Addr        : 0x00000000
     File Offset : 52 (0x34)
-    Size        : 1336 bytes (0x538)
+    Size        : 1200 bytes (0x4b0)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 4
@@ -355,9 +355,9 @@
     __scatterload
     __scatterload_rt2
         0x00000414:    b51c        ..      PUSH     {r2-r4,lr}
-        0x00000416:    4809        .H      LDR      r0,[pc,#36] ; [0x43c] = 0x528
+        0x00000416:    4809        .H      LDR      r0,[pc,#36] ; [0x43c] = 0x4a0
         0x00000418:    9000        ..      STR      r0,[sp,#0]
-        0x0000041a:    4809        .H      LDR      r0,[pc,#36] ; [0x440] = 0x538
+        0x0000041a:    4809        .H      LDR      r0,[pc,#36] ; [0x440] = 0x4b0
         0x0000041c:    9001        ..      STR      r0,[sp,#4]
         0x0000041e:    4605        .F      MOV      r5,r0
         0x00000420:    9c00        ..      LDR      r4,[sp,#0]
@@ -372,11 +372,9 @@
         0x00000436:    f7ffffe7    ....    BL       __main_after_scatterload ; 0x408
     $d
         0x0000043a:    0000        ..      DCW    0
-        0x0000043c:    00000528    (...    DCD    1320
-        0x00000440:    00000538    8...    DCD    1336
+        0x0000043c:    000004a0    ....    DCD    1184
+        0x00000440:    000004b0    ....    DCD    1200
     $t.0
-    .text
-    .text
     BusFault_Handler
     DUALTIMER_Handler
     DebugMon_Handler
@@ -418,8 +416,6 @@
     UART4TX_Handler
     UART_0_1_2_OVF_Handler
     UsageFault_Handler
-    __I$use$semihosting$fputc
-    __semihosting_library_function
         0x00000444:    e7fe        ..      B        BusFault_Handler ; 0x444
         0x00000446:    0000        ..      MOVS     r0,r0
     HardFault_Handler
@@ -434,7 +430,7 @@
         0x0000045c:    f2c00000    ....    MOVT     r0,#0
         0x00000460:    f2ce0100    ....    MOVT     r1,#0xe000
         0x00000464:    6008        .`      STR      r0,[r1,#0]
-        0x00000466:    f2400004    @...    MOVW     r0,#4
+        0x00000466:    f2400000    @...    MOVW     r0,#0
         0x0000046a:    f6470140    G.@.    MOV      r1,#0x7840
         0x0000046e:    f2c20000    ....    MOVT     r0,#0x2000
         0x00000472:    f2c0117d    ..}.    MOVT     r1,#0x17d
@@ -442,87 +438,37 @@
         0x00000478:    4770        pG      BX       lr
         0x0000047a:    0000        ..      MOVS     r0,r0
     main
-        0x0000047c:    f2405414    @..T    MOV      r4,#0x514
-        0x00000480:    f2c00400    ....    MOVT     r4,#0
-        0x00000484:    4620         F      MOV      r0,r4
-        0x00000486:    f000f833    ..3.    BL       puts ; 0x4f0
-        0x0000048a:    a005        ..      ADR      r0,{pc}+0x16 ; 0x4a0
-        0x0000048c:    f000f830    ..0.    BL       puts ; 0x4f0
-        0x00000490:    4620         F      MOV      r0,r4
-        0x00000492:    f000f82d    ..-.    BL       puts ; 0x4f0
-        0x00000496:    a007        ..      ADR      r0,{pc}+0x1e ; 0x4b4
-        0x00000498:    f000f82a    ..*.    BL       puts ; 0x4f0
-        0x0000049c:    e7fe        ..      B        0x49c ; main + 32
-        0x0000049e:    bf00        ..      NOP      
-    $d.1
-        0x000004a0:    74726f63    cort    DCD    1953656675
-        0x000004a4:    6d2d7865    ex-m    DCD    1831696485
-        0x000004a8:    74732033    3 st    DCD    1953701939
-        0x000004ac:    75747261    artu    DCD    1970565729
-        0x000004b0:    00002170    p!..    DCD    8560
-        0x000004b4:    74736574    test    DCD    1953719668
-        0x000004b8:    67656220     beg    DCD    1734697504
-        0x000004bc:    00006e69    in..    DCD    28265
+        0x0000047c:    2000        .       MOVS     r0,#0
+        0x0000047e:    4770        pG      BX       lr
     $t
     i.__scatterload_copy
     __scatterload_copy
-        0x000004c0:    e002        ..      B        0x4c8 ; __scatterload_copy + 8
-        0x000004c2:    c808        ..      LDM      r0!,{r3}
-        0x000004c4:    1f12        ..      SUBS     r2,r2,#4
-        0x000004c6:    c108        ..      STM      r1!,{r3}
-        0x000004c8:    2a00        .*      CMP      r2,#0
-        0x000004ca:    d1fa        ..      BNE      0x4c2 ; __scatterload_copy + 2
-        0x000004cc:    4770        pG      BX       lr
+        0x00000480:    e002        ..      B        0x488 ; __scatterload_copy + 8
+        0x00000482:    c808        ..      LDM      r0!,{r3}
+        0x00000484:    1f12        ..      SUBS     r2,r2,#4
+        0x00000486:    c108        ..      STM      r1!,{r3}
+        0x00000488:    2a00        .*      CMP      r2,#0
+        0x0000048a:    d1fa        ..      BNE      0x482 ; __scatterload_copy + 2
+        0x0000048c:    4770        pG      BX       lr
     i.__scatterload_null
     __scatterload_null
-        0x000004ce:    4770        pG      BX       lr
+        0x0000048e:    4770        pG      BX       lr
     i.__scatterload_zeroinit
     __scatterload_zeroinit
-        0x000004d0:    2000        .       MOVS     r0,#0
-        0x000004d2:    e001        ..      B        0x4d8 ; __scatterload_zeroinit + 8
-        0x000004d4:    c101        ..      STM      r1!,{r0}
-        0x000004d6:    1f12        ..      SUBS     r2,r2,#4
-        0x000004d8:    2a00        .*      CMP      r2,#0
-        0x000004da:    d1fb        ..      BNE      0x4d4 ; __scatterload_zeroinit + 4
-        0x000004dc:    4770        pG      BX       lr
-    i.fputc
-    fputc
-        0x000004de:    b538        8.      PUSH     {r3-r5,lr}
-        0x000004e0:    4604        .F      MOV      r4,r0
-        0x000004e2:    f88d0000    ....    STRB     r0,[sp,#0]
-        0x000004e6:    4669        iF      MOV      r1,sp
-        0x000004e8:    2003        .       MOVS     r0,#3
-        0x000004ea:    beab        ..      BKPT     #0xab
-        0x000004ec:    4620         F      MOV      r0,r4
-        0x000004ee:    bd38        8.      POP      {r3-r5,pc}
-    i.puts
-    puts
-        0x000004f0:    b510        ..      PUSH     {r4,lr}
-        0x000004f2:    4604        .F      MOV      r4,r0
-        0x000004f4:    e001        ..      B        0x4fa ; puts + 10
-        0x000004f6:    f7fffff2    ....    BL       fputc ; 0x4de
-        0x000004fa:    f8140b01    ....    LDRB     r0,[r4],#1
-        0x000004fe:    4904        .I      LDR      r1,[pc,#16] ; [0x510] = 0x20000000
-        0x00000500:    2800        .(      CMP      r0,#0
-        0x00000502:    d1f8        ..      BNE      0x4f6 ; puts + 6
-        0x00000504:    e8bd4010    ...@    POP      {r4,lr}
-        0x00000508:    200a        .       MOVS     r0,#0xa
-        0x0000050a:    f7ffbfe8    ....    B.W      fputc ; 0x4de
-    $d
-        0x0000050e:    0000        ..      DCW    0
-        0x00000510:    20000000    ...     DCD    536870912
+        0x00000490:    2000        .       MOVS     r0,#0
+        0x00000492:    e001        ..      B        0x498 ; __scatterload_zeroinit + 8
+        0x00000494:    c101        ..      STM      r1!,{r0}
+        0x00000496:    1f12        ..      SUBS     r2,r2,#4
+        0x00000498:    2a00        .*      CMP      r2,#0
+        0x0000049a:    d1fb        ..      BNE      0x494 ; __scatterload_zeroinit + 4
+        0x0000049c:    4770        pG      BX       lr
+        0x0000049e:    0000        ..      MOVS     r0,r0
     $d.realdata
-    .Lstr.4
-        0x00000514:    2a2a2a2a    ****    DCD    707406378
-        0x00000518:    2a2a2a2a    ****    DCD    707406378
-        0x0000051c:    2a2a2a2a    ****    DCD    707406378
-        0x00000520:    2a2a2a2a    ****    DCD    707406378
-        0x00000524:    00002a2a    **..    DCD    10794
     Region$$Table$$Base
-        0x00000528:    00000538    8...    DCD    1336
-        0x0000052c:    20000000    ...     DCD    536870912
-        0x00000530:    00000008    ....    DCD    8
-        0x00000534:    000004c0    ....    DCD    1216
+        0x000004a0:    000004b0    ....    DCD    1200
+        0x000004a4:    20000000    ...     DCD    536870912
+        0x000004a8:    00000004    ....    DCD    4
+        0x000004ac:    00000480    ....    DCD    1152
     Region$$Table$$Limit
 
 ====================================
@@ -533,8 +479,8 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : SHF_ALLOC + SHF_WRITE (0x00000003)
     Addr        : 0x20000000
-    File Offset : 1388 (0x56c)
-    Size        : 8 bytes (0x8)
+    File Offset : 1252 (0x4e4)
+    Size        : 4 bytes (0x4)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 4
@@ -549,7 +495,7 @@
     Type        : SHT_NOBITS (0x00000008)
     Flags       : SHF_ALLOC + SHF_WRITE (0x00000003)
     Addr        : 0x20000008
-    File Offset : 1396 (0x574)
+    File Offset : 1256 (0x4e8)
     Size        : 3072 bytes (0xc00)
     Link        : SHN_UNDEF
     Info        : 0
@@ -565,7 +511,7 @@
     Type        : SHT_NOBITS (0x00000008)
     Flags       : SHF_ALLOC + SHF_WRITE (0x00000003)
     Addr        : 0x2003fe00
-    File Offset : 1396 (0x574)
+    File Offset : 1256 (0x4e8)
     Size        : 512 bytes (0x200)
     Link        : SHN_UNDEF
     Info        : 0
@@ -581,8 +527,8 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 1396 (0x574)
-    Size        : 459 bytes (0x1cb)
+    File Offset : 1256 (0x4e8)
+    Size        : 436 bytes (0x1b4)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
@@ -597,8 +543,8 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 1855 (0x73f)
-    Size        : 496 bytes (0x1f0)
+    File Offset : 1692 (0x69c)
+    Size        : 388 bytes (0x184)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
@@ -613,8 +559,8 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 2351 (0x92f)
-    Size        : 901 bytes (0x385)
+    File Offset : 2080 (0x820)
+    Size        : 838 bytes (0x346)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
@@ -629,8 +575,8 @@
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 3252 (0xcb4)
-    Size        : 612 bytes (0x264)
+    File Offset : 2918 (0xb66)
+    Size        : 606 bytes (0x25e)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
@@ -641,12 +587,12 @@
 
 ** Section #9
 
-    Name        : .debug_loc
+    Name        : .debug_ranges
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 3864 (0xf18)
-    Size        : 84 bytes (0x54)
+    File Offset : 3524 (0xdc4)
+    Size        : 56 bytes (0x38)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
@@ -657,12 +603,12 @@
 
 ** Section #10
 
-    Name        : .debug_ranges
+    Name        : .debug_str
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 3948 (0xf6c)
-    Size        : 56 bytes (0x38)
+    File Offset : 3580 (0xdfc)
+    Size        : 937 bytes (0x3a9)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
@@ -673,44 +619,28 @@
 
 ** Section #11
 
-    Name        : .debug_str
-    Type        : SHT_PROGBITS (0x00000001)
-    Flags       : None (0x00000000)
-    Addr        : 0x00000000
-    File Offset : 4004 (0xfa4)
-    Size        : 962 bytes (0x3c2)
-    Link        : SHN_UNDEF
-    Info        : 0
-    Alignment   : 1
-    Entry Size  : 0
-
-
-====================================
-
-** Section #12
-
     Name        : .symtab
     Type        : SHT_SYMTAB (0x00000002)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 4968 (0x1368)
-    Size        : 2096 bytes (0x830)
-    Link        : Section 13 (.strtab)
-    Info        : Last local symbol no = 60
+    File Offset : 4520 (0x11a8)
+    Size        : 1776 bytes (0x6f0)
+    Link        : Section 12 (.strtab)
+    Info        : Last local symbol no = 45
     Alignment   : 4
     Entry Size  : 16
 
 
 ====================================
 
-** Section #13
+** Section #12
 
     Name        : .strtab
     Type        : SHT_STRTAB (0x00000003)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 7064 (0x1b98)
-    Size        : 1884 bytes (0x75c)
+    File Offset : 6296 (0x1898)
+    Size        : 1624 bytes (0x658)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
@@ -719,13 +649,13 @@
 
 ====================================
 
-** Section #14
+** Section #13
 
     Name        : .note
     Type        : SHT_NOTE (0x00000007)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 8948 (0x22f4)
+    File Offset : 7920 (0x1ef0)
     Size        : 32 bytes (0x20)
     Link        : SHN_UNDEF
     Info        : 0
@@ -742,13 +672,13 @@
 
 ====================================
 
-** Section #15
+** Section #14
 
     Name        : .comment
     Type        : SHT_PROGBITS (0x00000001)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 8980 (0x2314)
+    File Offset : 7952 (0x1f10)
     Size        : 972 bytes (0x3cc)
     Link        : SHN_UNDEF
     Info        : 0
@@ -779,14 +709,14 @@
 
 ====================================
 
-** Section #16
+** Section #15
 
     Name        : .shstrtab
     Type        : SHT_STRTAB (0x00000003)
     Flags       : None (0x00000000)
     Addr        : 0x00000000
-    File Offset : 9952 (0x26e0)
-    Size        : 172 bytes (0xac)
+    File Offset : 8924 (0x22dc)
+    Size        : 160 bytes (0xa0)
     Link        : SHN_UNDEF
     Info        : 0
     Alignment   : 1
