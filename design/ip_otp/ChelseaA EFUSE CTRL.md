@@ -232,4 +232,7 @@
   - 芯片信息版本、功能disable/select、模拟偏置值(clock,temp等)；
 - efuse操作会消耗时间和功耗，所以autoload的bit数和blank check非必要可以缩减or使能；
 - efuse涉及器件IP，会有IP和LEVEL SHIFTER参与，前端无需关注VDD/VSS，仿真时只需要tie个能工作的值(by define)，后端会完成连接；
+- efuse的FPGA测试需要提供一个efuse的行为级model，且FPGA测试意义和其他模块不同，仅供参考；
 - efuse的IP中有timing check，因此仿真时注意option；
+- efuse需要注意数模上下电问题（GUS1）
+- efuse的问题往往难以规避，需要尤其注意；
