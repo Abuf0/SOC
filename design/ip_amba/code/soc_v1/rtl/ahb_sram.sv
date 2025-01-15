@@ -90,6 +90,7 @@ always_ff @( posedge hclk or negedge hresetn ) begin
 end
 */
 logic [3:0] byte_sel;
+logic [3:0] byte_sel_d1;
 logic tx_byte       ;
 logic tx_half       ;
 logic tx_word       ;
@@ -226,6 +227,13 @@ always_ff@(posedge hclk or negedge hresetn) begin
         hrdata_old <= 'b0;
     else 
         hrdata_old <= hrdata;
+end
+
+always_ff@(posedge hclk or negedge hresetn) begin
+    if(~hresetn)
+        byte_sel_d1 <= 'b0;
+    else if(state_n == MEM_W)
+        byte_sel_d1 <= byte_sel;
 end
 
 assign hexokay = 1'b1;

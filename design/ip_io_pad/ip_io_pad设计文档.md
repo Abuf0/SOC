@@ -132,3 +132,9 @@ assign {PAD_INT_toe,PAD_INT_tie,PAD_INT_tout} = //pinmux.v中产生的送给tmux
 - scan_mode：测试阶段一直为1（一旦用户打开rg_test_mode，则一直为高，直到下一次硬件复位）
 - scan_enable：复用PAD，scan_enable=scan_mode & test_se_pad；在测试的shift阶段一定为1，但在capture阶段会由atpg工具推算scan_enable是否要为1（比如icg）
 
+## 待整理
+- PAD的驱动能力
+  - scan_mode下要设置为最高
+  - 正常工作时：如果ds设高，肯定能正常工作，但功耗增加；如果设低，可能驱动不够
+- I2C的pull down enable
+  - 复用为sda的PAD，需要根据sda_oe来mux(作为输出时tie0，作为输入时根据寄存器控制)

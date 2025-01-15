@@ -233,3 +233,5 @@
 - efuse操作会消耗时间和功耗，所以autoload的bit数和blank check非必要可以缩减or使能；
 - efuse涉及器件IP，会有IP和LEVEL SHIFTER参与，前端无需关注VDD/VSS，仿真时只需要tie个能工作的值(by define)，后端会完成连接；
 - efuse的IP中有timing check，因此仿真时注意option；
+- efuse load的寄存器，可能有地址要求，注意需要满足；
+- 纯寄存器读写时，尽量把有先后时序要求的寄存器放在不同field中，免得用户同时配置同时生效；或者写明先后配置的要求；

@@ -41,6 +41,8 @@ module ahb_slave
     mem_wdata
     mem_rdata
 */
+logic [ADDR_WIDTH-1:0] haddr_d1;
+logic [DATA_WIDTH-1:0] hwdata_d1;
 logic mem_wr;
 logic mem_ce;
 logic [ADDR_WIDTH-1:0] mem_addr;
@@ -97,7 +99,7 @@ always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         mem_addr <= 'b0;
     else if(state_c == MEM_W | state_c == MEM_R)
-        mem_addr <= haddr;
+        mem_addr <= haddr_d1;
     else 
         mem_addr <= 'b0;
 end
@@ -105,7 +107,7 @@ always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         mem_wdata <= 'b0;
     else if(state_c == MEM_W)
-        mem_wdata <= hwdata;
+        mem_wdata <= hwdata_d1;
 end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
@@ -120,5 +122,14 @@ always_ff@(posedge hclk or negedge hresetn) begin
         hreadyout <= 1'b1;
     else if(state_c == MEM_W | state_c == MEM_R)    // can add condition to extend transfer
         hreadyout <= 1'b1;
+end
+
+always_ff@(posedge hclk or negedge hresetn) begin
+    if(~hresetn)    haddr_d1 <= 'd0;
+    else            haddr_d1 <= haddr;
+end
+always_ff@(posedge hclk or negedge hresetn) begin
+    if(~hresetn)    hwdata_d1 <= 'd0;
+    else            hwdata_d1 <= hwdata;
 end
 endmodule

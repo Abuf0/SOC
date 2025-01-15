@@ -120,8 +120,9 @@ always_ff@(posedge hclk or negedge hresetn) begin
         hrdata_o <= prdata_i[psel];
 end
 */
-/*
+
 assign hrdata_o = prdata_i[psel];
+/*
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         hready_o <= 1'b1;

@@ -14,7 +14,7 @@ module ahb_master
     input                                  hresetn     ,
     input [CMD_WIDTH-1:0]                  cmd         ,
     input                                  cmd_vld     ,
-    // ------ From master ------ //
+    // ------ To slave ------ //
     //output logic [ADDR_WIDTH-1:0]          haddr       ,
     output logic [HBURST_WIDTH-1:0]        hburst      ,
     output logic                           hmasterlock ,
@@ -47,6 +47,7 @@ module ahb_master
 logic [CMD_WIDTH-1:0] cmd_buff;
 logic cmd_vld_d1;
 logic cmd_vld_sync;
+logic cmd_vld_sync_d1;
 logic transfer_on;
 logic seq_done;
 logic [1:0] scnt;
@@ -54,9 +55,9 @@ logic [1:0] scnt;
 // *** cmd_vld sync ** // TODO
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
-        {cmd_vld_d1,cmd_vld_sync} <= 2'd0;
+        {cmd_vld_d1,cmd_vld_sync,cmd_vld_sync_d1} <= 3'd0;
     else
-        {cmd_vld_d1,cmd_vld_sync} <= {cmd_vld,cmd_vld_d1};
+        {cmd_vld_d1,cmd_vld_sync,cmd_vld_sync_d1} <= {cmd_vld,cmd_vld_d1,cmd_vld_sync};
 end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
@@ -125,11 +126,12 @@ always_ff@(posedge hclk or negedge hresetn) begin
         transfer_on <= 1'b0;
 end
 */
-assign transfer_on = cmd_vld_sync && (cmd[47:46]==2'b00 && (cmd[55:49]==8'b0 || cmd[55:49]==8'b1));
+//assign transfer_on = cmd_vld_sync && (cmd[47:46]==2'b00 && (cmd[55:49]==8'b0 || cmd[55:49]==8'b1));
+assign transfer_on = cmd_vld_sync_d1 && (cmd_buff[47:46]==2'b00 && (cmd_buff[55:49]==8'b0 || cmd_buff[55:49]==8'b1));
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         seq_done <= 1'b0;
-    else if(state_c == SEQ && scnt == 2'd3)
+    else if(state_c == SEQ && scnt == 2'd2)
         seq_done <= 1'b1;
     else 
         seq_done <= 1'b0;
@@ -137,7 +139,7 @@ end
 always_ff@(posedge hclk or negedge hresetn) begin
     if(~hresetn)
         scnt <= 2'd0;
-    else if(state_n == SEQ)
+    else if(state_c == SEQ || state_c == NONSEQ)
         scnt <= scnt+1'b1;
     else if(state_c ==  IDLE)
         scnt <= 2'd0;
@@ -195,6 +197,8 @@ always_ff@(posedge hclk or negedge hresetn) begin
     else if(state_n == SEQ) begin
         if(haddr[3:0] > haddr_next[3:0])    // 16-byte boundary
             haddr <= haddr_next & {{(ADDR_WIDTH-5){1'b1}},5'b01111};
+        else 
+            haddr <= haddr_next;
     end
     else if(hresp==1'b1) begin
         haddr <= cmd_buff[47:32]; 
