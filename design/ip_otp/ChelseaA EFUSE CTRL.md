@@ -230,6 +230,10 @@
 ### notion
 - efuse中存储的信息：
   - 芯片信息版本、功能disable/select、模拟偏置值(clock,temp等)；
+    - 关于用户不可写的信息，需要确认；
+    - 关于用户可读写，产测相关的信息，比如调节时钟的，虽然用户可读写，但寄存器地址不会开放给用户（比如手册里写reserved，即使用户操作后导致挂
+了，但算他非法操作）
+    - 关于功能的disable，是需要放在会autoload的地址里的，被autoload的寄存器默认值是使能，以防功能因为efuse问题而挂死；
 - efuse操作会消耗时间和功耗，所以autoload的bit数和blank check非必要可以缩减or使能；
 - efuse涉及器件IP，会有IP和LEVEL SHIFTER参与，前端无需关注VDD/VSS，仿真时只需要tie个能工作的值(by define)，后端会完成连接；
 - efuse的FPGA测试需要提供一个efuse的行为级model，且FPGA测试意义和其他模块不同，仅供参考；
