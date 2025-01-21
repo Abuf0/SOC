@@ -181,7 +181,7 @@ def RunDemo(param_file, data_root, roi_offset, MemSeqLen=5, PADDING_LEN_MARK=4, 
                 res_trans = 0 if MemSeq[-1] == 0 else 1 if count_down > count_up else 0
                 res_upDown = res_trans
 
-        elif decisioin_mode == 1:
+        elif decision_mode == 1:
             if res_upDown == 0:
                 downCount = 0   # pred结果为0时count重置
                 upCount += 1
