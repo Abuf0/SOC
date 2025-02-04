@@ -261,14 +261,14 @@ assign div_out_data = div_out_data_signed[15:0];
 always@(posedge clk or negedge rstn) begin
     if(~rstn) begin
         amp_mean <= 12'd0;
-        amp_neam_vld <= 1'b0;
+        amp_mean_vld <= 1'b0;
     end
     else if(div_out_vld) begin
         amp_mean <= div_out_data[11:0];
-        amp_neam_vld <= 1'b1;    
+        amp_mean_vld <= 1'b1;    
     end
     else
-        amp_neam_vld <= 1'b0;
+        amp_mean_vld <= 1'b0;
 end
 
 assign amp_iq_data_off_code = {~data_IQ[11], data_IQ[10:0]};    // offset code, range [0,4095]

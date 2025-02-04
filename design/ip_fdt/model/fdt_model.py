@@ -85,49 +85,156 @@ class dataProcess:
         sample_data = data[:, col_start:col_end:sample_gap]
         return sample_data
 
+class pressDetectDemo:
+    def __init__(self, param_file, mode):
+        """
+        @param param_file: 参数文件
+        @param mode: FDT检测模式，1-downup检测，2：HeavyLight检测
+        """
+        param = self.__dict__
+        self.mode = mode
+        self.quant_scale = None
+        self.print_log = False
 
-def press_detect_RNN_quantRevert(self, inpu_data, h_0):
-    """
-    模型计算流程，输入归一化->（up/down）->轻重按
-    @param input_data
-    @return : 轻重按，按压或抬起
-    """
+        #解析模型size参数
+        if '\\' in param_file:
+            param_set = param_file.split('\\')[-1].split('_')[2]
+        elif '/' in param_file:
+            param_set = param_file.split('/')[-1].split('_')[2]
 
-    # 1. 输入数据归一化，2N归一化 or 2N校准归一化
-    x_scale = 256 / self.input_quant_scale
-    input_data = input.astype(np.int32)
-    range_N = int(findN_floor(np.ptp(input_data)))
-    range_N = 1 if range_N == 0 else range_N # 避免除以0
-    mean_val = np.mean(input_data).asype(np.int32) # 11bit
-    input_diff = (input_data - mean_val) # 11bit
+        self.c_in = int(param_set.split('-')[0])
+        self.c_out = int(param_set.split('-')[1])
+        self.hidden_size = int(param_set.split('-')[2])
+        self.num_layer = int(param_set.split('-')[3])
 
-    input_scale = input_diff * x_scale # 16bit 若溢出按饱和
-    input_scale = np.clip(input_scale, np.clip(np.int16).min, np.iinfo(np.int16).max)
+        #读取csv参数
+        with open(param_file) as csv_file:
+            csv_reader = csv.reader(csv_file)
+            for csv_row in csv_reader:
+                if len(csv_row) == 2:
+                    param_name, param_data = csv_row[0], float(csv_row[1])
+                    params[param_name] = param_data
+                else:
+                    param_name, param_row, param_col = csv_row[0], int(csv_row[1]), int(csv_row[2])
+                    param_data = csv_row[3:3 + param_row * param_col]
+                    param_data = np.array(list(map(float, param_data)))
+                    params[param_name] = param_data.reshape((param_row, param_col))
 
-    input_norm = input_scale // range_N # 8bit
-    input_norm = np.clip(input_norm, np.iinfo(np.int8).min, np.iinfo(np.int8).max) # 若溢出按饱和 【-128， 127】
+    def RNN_QuantRevert(self, input, h_0):
+        """
+        @param input:
+        @param h_0:t-1时刻GRU的状态输出，初始时状态置0即可，h_0 shape = (num_layer, hidden_size)
+        @return：
+        """
 
-    # 2. RNN输出网络结果0-up，1-down，2-maintain
-    fc_upDown_weight = self.fc_upDown_weight
-    fc_upDown_bias = self.fc_bias 
-    # 2.1 两层L0 --> L1的NN计算 @ RNN_QuantRevert
-    out_RNN, h_0 = self.RNN_QuantRevert(input_norm, h_0)
-    # 2.2 FC层
-    weight_scale = 256 // self.fc_weight_quant_scale
-    out_updown_w = np.matmul(out_RNN, fc_upDown_weight.T) # 16bit
-    out_updown_w = overflow_detect('out_updown_w', out_updown_w, 16, self.print_log)
-    out_updown_w = out_updown_w // weight_scale
-    out_updown_w = overflow_detect('out_updown_w_scale', out_updown_w, 8, self.print_log)
-    out_updown_w = out_updown_w + fc_upDown_bias.T # 16bit
-    out_updown_w = overflow_detect('out_updown', out_updown, 8, self.print_log)
-    # ==> 判断结果
-    res_upDown = np.argmax(out_updown)
+        rnn_weight_ih_l0 = self.rnn_weight_ih_l0
+        rnn_weight_hh_l0 = self.rnn_weight_hh_l0
+        rnn_bias_ih_l0 = self.rnn_bias_ih_l0
+        rnn_bias_hh_l0 = self.rnn_bias_hh_l0
+        rnn_weight_ih_l1 = self.rnn_weight_ih_l1
+        rnn_weight_hh_l1 = self.rnn_weight_hh_l1
+        rnn_bias_ih_l1 = self.rnn_bias_ih_l1
+        rnn_bias_hh_l1 = self.rnn_bias_hh_l1
 
-    return res_upDown, h_0
+        # # ht = ReLu(W_ih·xt + b_ih + W_hh·h_front + b_hh)
+        # # ·为矩阵乘法，*为元素相乘
 
-def press_detect(self, input_data, h_0):
-    res_upDown, h_0 = self.press_detect_RNN_quantRevert(input_data, h_0)
-    return res_upDown, h_0
+        # 1. 计算第一层 layer1
+        h_front_l0 = h_0[0:1]   # t-1时刻的GRU的状态[0：1]
+        ## IH @ INPUT LAYER
+        weight_scale = 256 // self.rnn_weight_ih_l0_quant_scale
+        h_l0_x_ih = np.matmul(input, rnn_weight_ih_l0.T)    # MAC(16bit) = input(8bit) x weight(8bit)
+        h_l0_x_ih = overflow_detect('h_l0_x_ih', h_l0_x_ih, 16, self.print_log) # 饱和处理，20b --> 16b
+        h_l0_x_ih = h_l0_x_ih // weight_scale
+        h_l0_x_ih = overflow_detect('h_l0_x_ih_scale', h_l0_x_ih, 8, self.print_log) # 饱和处理，16b --> 8b
+        h_l0_ih = h_l0_x_ih + rnn_bias_ih_l0.T  # BIAS
+        h_l0_ih = overflow_detect('h_l0_ih', h_l0_ih, 8, self.print_log) # 饱和处理，8b --> 8b
+
+        ## HH @ INPUT LAYER
+        weight_scale = 256 // self.rnn_weight_hh_l0_quant_scale
+        h_l0_x_hh = np.matmul(h_front_l0, rnn_weight_hh_l0.T)    # MAC(16bit) = h_front_l0(8bit) x weight(8bit)
+        h_l0_x_hh = overflow_detect('h_l0_x_hh', h_l0_x_hh, 16, self.print_log) # 饱和处理，20b --> 16b
+        h_l0_x_hh = h_l0_x_hh // weight_scale
+        h_l0_x_hh = overflow_detect('h_l0_x_hh_scale', h_l0_x_hh, 8, self.print_log) # 饱和处理，16b --> 8b
+        h_l0_hh = h_l0_x_hh + rnn_bias_hh_l0.T  # BIAS
+        h_l0_hh = overflow_detect('h_l0_hh', h_l0_hh, 8, self.print_log) # 饱和处理，8b --> 8b
+
+        h_l0_x = h_l0_ih + h_l0_hh  # IH + HH
+        h_l0_x = overflow_detect('h_l0_x', h_l0_x, 8, self.print_log)   # 饱和处理，8b --> 8b
+        h_l0 = ReLU(h_l0_x) # ReLU
+
+        # 2. 计算第一层 layer2
+        h_front_l1 = h_0[1:2]   # t-1时刻的GRU的状态[1:2]
+        ## IH @ HIDDEN LAYER
+        weight_scale = 256 // self.rnn_weight_ih_l1_quant_scale
+        h_l1_x_ih = np.matmul(h_l0, rnn_weight_ih_l1.T)    # MAC(16bit) = h_l0(8bit) x weight(8bit)
+        h_l1_x_ih = overflow_detect('h_l1_x_ih', h_l1_x_ih, 16, self.print_log) # 饱和处理，20b --> 16b
+        h_l1_x_ih = h_l1_x_ih // weight_scale
+        h_l1_x_ih = overflow_detect('h_l1_x_ih_scale', h_l1_x_ih, 8, self.print_log) # 饱和处理，16b --> 8b
+        h_l1_ih = h_l1_x_ih + rnn_bias_ih_l1.T  # BIAS
+        h_l1_ih = overflow_detect('h_l1_ih', h_l1_ih, 8, self.print_log) # 饱和处理，8b --> 8b
+
+        ## HH @ HIDDEN LAYER
+        weight_scale = 256 // self.rnn_weight_hh_l1_quant_scale
+        h_l1_x_hh = np.matmul(h_front_l1, rnn_weight_hh_l1.T)    # MAC(16bit) = h_front_l1(8bit) x weight(8bit)
+        h_l1_x_hh = overflow_detect('h_l1_x_hh', h_l1_x_hh, 16, self.print_log) # 饱和处理，20b --> 16b
+        h_l1_x_hh = h_l1_x_hh // weight_scale
+        h_l1_x_hh = overflow_detect('h_l1_x_hh_scale', h_l1_x_hh, 8, self.print_log) # 饱和处理，16b --> 8b
+        h_l1_hh = h_l1_x_hh + rnn_bias_hh_l1.T  # BIAS
+        h_l1_hh = overflow_detect('h_l1_hh', h_l1_hh, 8, self.print_log) # 饱和处理，8b --> 8b
+
+        h_l1_x = h_l1_ih + h_l1_hh  # IH + HH
+        h_l1_x = overflow_detect('h_l1_x', h_l1_x, 8, self.print_log)   # 饱和处理，8b --> 8b
+        h_l1 = ReLU(h_l1_x) # ReLU
+
+        h_out = np.squeeze([h_l0,h_l1])
+        return h_l1, h_out
+
+
+    def press_detect_RNN_quantRevert(self, inpu_data, h_0):
+        """
+        模型计算流程，输入归一化->（up/down）->轻重按
+        @param input_data
+        @return : 轻重按，按压或抬起
+        """
+
+        # 1. 输入数据归一化，2N归一化 or 2N校准归一化
+        x_scale = 256 / self.input_quant_scale
+        input_data = input.astype(np.int32)
+        range_N = int(findN_floor(np.ptp(input_data)))
+        range_N = 1 if range_N == 0 else range_N # 避免除以0
+        mean_val = np.mean(input_data).asype(np.int32) # 11bit
+        input_diff = (input_data - mean_val) # 11bit
+
+        input_scale = input_diff * x_scale # 16bit 若溢出按饱和
+        input_scale = np.clip(input_scale, np.clip(np.int16).min, np.iinfo(np.int16).max)
+
+        input_norm = input_scale // range_N # 8bit
+        input_norm = np.clip(input_norm, np.iinfo(np.int8).min, np.iinfo(np.int8).max) # 若溢出按饱和 【-128， 127】
+
+        # 2. RNN输出网络结果0-up，1-down，2-maintain
+        fc_upDown_weight = self.fc_upDown_weight
+        fc_upDown_bias = self.fc_bias 
+        # 2.1 两层L0 --> L1的NN计算 @ RNN_QuantRevert
+        out_RNN, h_0 = self.RNN_QuantRevert(input_norm, h_0)
+        # 2.2 FC层
+        weight_scale = 256 // self.fc_weight_quant_scale
+        out_updown_w = np.matmul(out_RNN, fc_upDown_weight.T) # 16bit
+        out_updown_w = overflow_detect('out_updown_w', out_updown_w, 16, self.print_log)
+        out_updown_w = out_updown_w // weight_scale
+        out_updown_w = overflow_detect('out_updown_w_scale', out_updown_w, 8, self.print_log)
+        out_updown_w = out_updown_w + fc_upDown_bias.T # 16bit
+        out_updown_w = overflow_detect('out_updown', out_updown, 8, self.print_log)
+        # ==> 判断结果
+        res_upDown = np.argmax(out_updown)
+
+        return res_upDown, h_0
+
+    def press_detect(self, input_data, h_0):
+        res_upDown, h_0 = self.press_detect_RNN_quantRevert(input_data, h_0)
+        return res_upDown, h_0
+
+
 
 def RunDemo(param_file, data_root, roi_offset, MemSeqLen=5, PADDING_LEN_MARK=4, decision_mode=0, downMemCount=5, upMemCount=3):
     """

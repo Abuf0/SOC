@@ -1,4 +1,4 @@
-module clgate_cell(
+module ckgate_cell(
     input  clkin     ,
     input  enable    ,
     input  scan_en   ,
