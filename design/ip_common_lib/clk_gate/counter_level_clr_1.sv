@@ -77,11 +77,13 @@ else
     $display("counter out 2 error",$time);       
 
 property counter_out_assert_1;
-    @ (posedge clk) $rose(enable) |=>##99 $rose(counter_out) ;
+    @ (posedge clk) disable iff(!rstn)
+    $rose(enable) |=>##99 $rose(counter_out) ;
 endproperty
 
 property counter_out_assert_2;
-    @ (posedge clk) $rose(counter_out) |=> (enable[*100] |-> ##0 $rose(counter_out)) ;
+    @ (posedge clk) disable iff(!rstn)
+    $rose(counter_out) |=> (enable[*100] |-> ##0 $rose(counter_out)) ;
 endproperty
 
 `endif
