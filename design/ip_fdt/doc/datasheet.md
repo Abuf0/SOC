@@ -29,7 +29,6 @@
     - MEAN期间，div根据amp_acc_vld锁存此时的amp_acc，并除以25，求平均，给出amp_mean和amp_mean_vld；
 
 
-
 ### norm_cal
 - 功能
   - 将来自amp_cal的amp_mean存储在data cache中，每4个amp_mean组成64bit，写入data cache的一行；16个就是4行；
