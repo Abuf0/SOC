@@ -635,15 +635,15 @@ logic mem_rd_condition;
 always@(*) begin
     mem_addr_mux = 0;
     case(tcnt)
-        tcnt_num-1 : mem_addr_mux = 0 ;
+        tcnt_num-1 : mem_addr_mux = rg_ifft_flag?   1 : 0 ;
         5'd1 : mem_addr_mux = 8 ;
-        5'd2 : mem_addr_mux = 1 ;
+        5'd2 : mem_addr_mux = rg_ifft_flag?   0 : 1 ;
         5'd4 : mem_addr_mux = 9 ;
         5'd5 : mem_addr_mux = 2 ;
         5'd7 : mem_addr_mux = 10;
-        5'd8 : mem_addr_mux = 4 ;
+        5'd8 : mem_addr_mux = rg_ifft_flag?   5 : 4 ;
         5'd10: mem_addr_mux = 11;
-        5'd11: mem_addr_mux = 5 ;
+        5'd11: mem_addr_mux = rg_ifft_flag?   4 : 5 ;
         5'd13: mem_addr_mux = 12;
         5'd14: mem_addr_mux = 6 ;
         5'd16: mem_addr_mux = 13;
@@ -651,10 +651,10 @@ always@(*) begin
         5'd18: mem_addr_mux = 7 ;
         5'd19: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   2 : 10;
         5'd20: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   6 : 13;
-        5'd21: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   1 : 9 ;
-        5'd22: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   4 : 11;
-        5'd23: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   0 : 8 ;
-        5'd24: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   5 : 12;
+        5'd21: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   (rg_ifft_flag?   0 : 1) : 9 ;
+        5'd22: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   (rg_ifft_flag?   5 : 4) : 11;
+        5'd23: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   (rg_ifft_flag?   1 : 0) : 8 ;
+        5'd24: mem_addr_mux = (state_c == LAST_STAGE && ~last_stage_first_radix)?   (rg_ifft_flag?   4 : 5) : 12;
         default : mem_addr_mux = 0;
     endcase
 end
@@ -669,7 +669,7 @@ always_ff@(posedge clk or negedge rstn) begin
             if(tcnt>=14 && tcnt<=21)
                 mem2_addr <= tcnt-14;
             else if(tcnt == tcnt_num-1)
-                mem2_addr <= 'd0;
+                mem2_addr <= rg_ifft_flag?   1 : 0;
         end
         else begin
             mem2_addr <= mem_addr_mux;
@@ -716,7 +716,7 @@ always_ff@(posedge clk or negedge rstn) begin
             if(tcnt>=14 && tcnt<=21)
                 mem3_addr <= tcnt-14;
             else if(tcnt == tcnt_num-1)
-                mem3_addr <= 'd0;
+                mem3_addr <= rg_ifft_flag?   1 : 0;
         end
         else begin
             mem3_addr <= mem_addr_mux;
