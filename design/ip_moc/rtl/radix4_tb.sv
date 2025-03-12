@@ -31,6 +31,19 @@ logic [DATA_WIDTH-1:0]       lb_wdata               ;
 logic                        lb_wr                  ;
 logic                        lb_rd                  ;
 
+logic                        pre_start              ;
+logic                        pre_done               ;
+logic                        post_start             ;
+logic                        post_done              ;
+logic                        reverse_start          ;
+logic                        reverse_done           ;
+logic [9:0]                  rg_bitrevlen           ;
+
+logic [11:0] fft_len;
+logic need_4by2;
+assign need_4by2 = (rg_fft_len == 32 || rg_fft_len == 128 || rg_fft_len == 512 || rg_fft_len == 2048);
+assign fft_len = need_4by2?  (rg_fft_len>>1) : rg_fft_len;
+
 radix4 # (
     .ADDR_WIDTH (ADDR_WIDTH),
     .DATA_WIDTH (DATA_WIDTH)
@@ -39,7 +52,7 @@ radix4 # (
     .rstn               (rstn                ) ,
     .fft_start          (fft_start           ) ,
     .fft_done           (fft_done            ) ,
-    .rg_fft_len         (rg_fft_len          ) ,
+    .fft_len            (fft_len             ) ,
     .rg_twid            (rg_twid             ) ,
     .rg_ifft_flag       (rg_ifft_flag        ) ,
     .rg_bitreverse_flag (rg_bitreverse_flag  ) ,
@@ -58,7 +71,14 @@ radix4 # (
     .lb_rdata           (lb_rdata            ) ,
     .lb_wdata           (lb_wdata            ) ,
     .lb_wr              (lb_wr               ) ,
-    .lb_rd              (lb_rd               )    
+    .lb_rd              (lb_rd               ) ,
+    .pre_start          (pre_start           ) ,
+    .pre_done           (pre_done            ) ,
+    .post_start         (post_start          ) ,
+    .post_done          (post_done           ) ,
+    .reverse_start      (reverse_start       ) ,
+    .reverse_done       (reverse_done        ) ,
+    .rg_bitrevlen       (rg_bitrevlen        )    
 );
 
 always #(100/2) clk = ~clk;
@@ -70,6 +90,10 @@ initial begin
     rg_twid = 1;
     rg_ifft_flag = 0;
     rg_bitreverse_flag = 0;
+    pre_start     = 0;
+    post_start    = 0;
+    reverse_start = 0;
+    rg_bitrevlen  = 56;
     #133
     rstn = 1;
     #100
@@ -77,13 +101,28 @@ initial begin
     fft_start =1;
     @(negedge clk);
     fft_start = 0;
-    #1000000
+    #400000
+    @(negedge clk);
+    pre_start =1;
+    @(negedge clk);
+    pre_start = 0;
+    #400000
+    @(negedge clk);
+    post_start =1;
+    @(negedge clk);
+    post_start = 0;
+    #400000
+    @(negedge clk);
+    reverse_start =1;
+    @(negedge clk);
+    reverse_start = 0;
+    #400000
     $finish(2);
 end
 
 int i;
-logic [DATA_WIDTH-1:0] DATA_MEM [0:(1 << 7)-1];
-logic [DATA_WIDTH-1:0] WN_MEM [0:(1 << 7)-1];
+logic [DATA_WIDTH-1:0] DATA_MEM [0:(1 << 13)-1];
+logic [DATA_WIDTH-1:0] WN_MEM [0:(1 << 13)-1];
 
 `ifdef DEBUG_MEM
 always_ff@(posedge clk or negedge rstn) begin
