@@ -20,6 +20,9 @@ module radix4#(
     input        [31:0]                 rg_twid             ,
     input                               rg_ifft_flag        ,
     input                               rg_bitreverse_flag  ,
+    input        [ADDR_WIDTH-1:0]       data_base           ,
+    input        [ADDR_WIDTH-1:0]       wn_base             ,
+    input        [ADDR_WIDTH-1:0]       rev_base            ,
     /**************** data memory interface ****************/
     input        [DATA_WIDTH-1:0]       data_rdata          ,
     output logic [DATA_WIDTH-1:0]       data_wdata          ,
@@ -78,9 +81,9 @@ module radix4#(
 );
 parameter RADIX = 4;    // fixed
 parameter OUT_DLY = 10;     // according to pipelined 
-parameter DATA_BASE = 0;
-parameter WN_BASE = 0;
-parameter REV_BASE = 0;
+//parameter DATA_BASE = 0;
+//parameter WN_BASE = 0;
+//parameter REV_BASE = 0;
 parameter PIPE_TIME = 28;
 parameter PRE_TIME = 15;
 parameter POST_TIME = 4;
@@ -121,6 +124,8 @@ logic first_stage_first_radix;
 logic middle_stage_first_radix;
 logic first_radix;
 logic pipe_flag;
+
+logic post_stage_last_radix;
 
 logic [15:0] step;
 logic [15:0] strid;
@@ -307,6 +312,8 @@ assign first_stage_first_radix = (state_c == FIRST_STAGE) && (radix_loop_cnt == 
 assign first_radix = (radix_loop_cnt == 0) && (group_loop_cnt == 0);
 assign middle_stage_first_radix = (state_c == MIDDLE_STAGE) && (radix_loop_cnt == 0) && (group_loop_cnt == 0);
 //assign tcnt_num = last_stage_last_radix?  PIPE_TIME + OUT_DLY : PIPE_TIME;
+assign post_stage_last_radix = (state_c == POST_STAGE) && (radix_loop_cnt == single_num-1);
+
 assign tcnt_num = state_radix4?  PIPE_TIME : 
                   state_pre?    PRE_TIME : 
                   state_post?   POST_TIME : 
@@ -314,7 +321,7 @@ assign tcnt_num = state_radix4?  PIPE_TIME :
 assign radix_num = (state_c == LAST_STAGE)? strid+1 : strid;
 assign group_num = step;
 assign single_num = state_pre?  fft_len : 
-                    state_post? (fft_len << 1) : rg_bitrevlen;
+                    state_post? (fft_len << 1)+1'b1 : (rg_bitrevlen+1'b1);
 
 assign tcnt_loop_end = (tcnt == tcnt_num-1);
 always_ff@(posedge clk or negedge rstn) begin
@@ -393,7 +400,9 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         pipe_flag <= 1'b0;
-    else if(tcnt_loop_end)
+    else if(state_c != state_n)
+        pipe_flag <= 1'b0;
+    else if(tcnt_loop_end && state_radix4)
         pipe_flag <= ~pipe_flag;
 end
 
@@ -436,7 +445,7 @@ end
 always@(*) begin
     add3_a = 'bx;
     if(((tcnt>=0 && tcnt<=7) || (tcnt==tcnt_num-1)) && ~last_stage_last_radix) 
-        add3_a = radix_loop_end?   DATA_BASE : re_addr_a;
+        add3_a = radix_loop_end?   (data_base >> 1) : re_addr_a;
     else if(tcnt>=19 && tcnt<=26 && ~first_stage_first_radix)
         add3_a = re_addr_a_lat;
 end
@@ -466,39 +475,41 @@ always@(*) begin
 end
 
 assign re_addr_next = add3_sum;
-assign re_pre_addr_next = (tcnt == 0 || tcnt == 5 || tcnt == 6 || tcnt == 10)?  re_addr_a : (re_addr_a + fft_len);
+assign re_pre_addr_next = (tcnt == 0 || tcnt == 5 || tcnt == 6 || tcnt == 11)?  re_addr_a : (re_addr_a + fft_len);
 assign re_post_addr_next = re_addr_a;
 // todo //
-//assign rev_addr_next = (tcnt==2 || tcnt==3)?    (tab_rdata >> 2) : 
-//                       (tcnt==0)?   buff2 : buff1;
-assign rev_addr_next = 0;
+assign rev_addr_next = (tcnt==2 || tcnt==3)?    (radix_loop_cnt[0]?  (tab_rdata >> 2)+1'b1 : (tab_rdata >> 2)) : 
+                       (tcnt==0)?   buff2 : buff1;
+//assign rev_addr_next = 0;
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn) 
-        re_addr_a <= DATA_BASE;
+        re_addr_a <= (data_base >> 1);
+    else if(state_c != state_n)
+        re_addr_a <= (data_base >> 1);
     else if(tcnt_loop_end) begin
-        if(state_c != state_n)
-            re_addr_a <= DATA_BASE;
-        else if(state_radix4)  
+        if(state_radix4)  
             re_addr_a <= re_addr_next;
         else if(state_pre || state_post)
             re_addr_a <= re_addr_a + 1'b1;
     end
 end
 assign im_addr_flag = (tcnt>=0 && tcnt<=7)? tcnt[1] : ~tcnt[0];
-assign im_pre_addr_flag = (tcnt>=6)?  1'b1 : 1'b0 ;
+assign im_pre_addr_flag = (tcnt==6 || tcnt==7 || tcnt==11 || tcnt==13) ;
 assign im_post_addr_flag = tcnt[0];
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn) 
-        re_addr_a_lat <= DATA_BASE;
+        re_addr_a_lat <= (data_base >> 1);
     else if(tcnt_loop_end && state_radix4)  
         re_addr_a_lat <= re_addr_a;
 end
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn) 
-        data_addr <= DATA_BASE;
+        data_addr <= data_base;
+    else if(state_c != state_n)
+        data_addr <= data_base;
     else if(state_radix4)
         data_addr <= {re_addr_next[14:0],im_addr_flag};
     else if(state_pre)
@@ -518,7 +529,7 @@ always_ff@(posedge clk or negedge rstn) begin   // todo except last radix
         data_rd <= 1'b1;
     else if(state_post && (tcnt==0 || tcnt==1)) 
         data_rd <= 1'b1;
-    else if(state_rev && (tcnt==2 || tcnt==3))
+    else if(state_rev && (tcnt==2 || tcnt==3) && (radix_loop_cnt != single_num-1))
         data_rd <= 1'b1;
     else 
         data_rd <= 1'b0;
@@ -531,7 +542,7 @@ always_ff@(posedge clk or negedge rstn) begin   // todo except first radix
         data_wr <= 1'b1;
     else if(state_pre && (tcnt==5 || tcnt==11 || tcnt==12 || tcnt==13))
         data_wr <= 1'b1;
-    else if(state_post && (tcnt==2 || tcnt==3) && ~single_loop_end)
+    else if(state_post && (tcnt==2 || tcnt==3) && ~post_stage_last_radix)
         data_wr <= 1'b1;
     else if(state_rev && (tcnt==0 || tcnt==1) && (radix_loop_cnt!=0))
         data_wr <= 1'b1;
@@ -558,29 +569,29 @@ assign wn_addr_co3 = wn_addr_co2 + wn_addr_co1;  // todo : can reuse ADD2
 assign wn_addr_si3 = wn_addr_co3 + 1'b1;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
-        wn_addr_sta <= WN_BASE;
+        wn_addr_sta <= wn_base;
     else if(state_radix4 && (state_c != LAST_STAGE) && tcnt == 14) begin    // condition: >= 13 && < tcnt_num-3
         if(first_radix)
-            wn_addr_sta <= WN_BASE;
+            wn_addr_sta <= wn_base;
         else if(radix_loop_cnt == 0)
             wn_addr_sta <= wn_addr_sta + twid;  // todo : can reuse ADD2
     end
     else if(state_pre) begin
-        if(radix_loop_cnt == 0)
-            wn_addr_sta <= WN_BASE;
+        if(radix_loop_cnt == 0 && ~tcnt_loop_end)
+            wn_addr_sta <= wn_base;
         else if(tcnt_loop_end)
             wn_addr_sta <= wn_addr_sta + 1'b1;
     end
     else if(state_rev) begin
-        if(radix_loop_cnt == 0)
-            wn_addr_sta <= REV_BASE;
-        else if(tcnt_loop_end)
+        if(radix_loop_cnt == 0 && ~tcnt_loop_end)
+            wn_addr_sta <= rev_base;
+        else if(tcnt_loop_end && radix_loop_cnt[0])
             wn_addr_sta <= wn_addr_sta + 2;
     end
 end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
-        wn_addr <= WN_BASE;
+        wn_addr <= wn_base;
     else if((state_radix4 && (state_c != LAST_STAGE)) || last_stage_first_radix) begin
         if(tcnt == tcnt_num-3 || tcnt==9)
             wn_addr <= wn_addr_co3;
@@ -603,7 +614,7 @@ always_ff@(posedge clk or negedge rstn) begin
     end
     else if(state_rev) begin
         if(tcnt==0)
-            wn_addr <= wn_addr_sta;
+            wn_addr <= (radix_loop_cnt==0)?  rev_base : wn_addr_sta;
         else if(tcnt==1)
             wn_addr <= wn_addr_sta + 1'b1;
     end
@@ -616,7 +627,7 @@ always_ff@(posedge clk or negedge rstn) begin
         wn_rd <= 1'b1;
     else if(state_pre && (tcnt==2 || tcnt==3 || tcnt==8 || tcnt==9))    // todo : can always rd??
         wn_rd <= 1'b1;
-    else if(state_rev && (tcnt==0 || tcnt==1))
+    else if(state_rev && (tcnt==0 || tcnt==1) && (radix_loop_cnt != single_num-1))
         wn_rd <= 1'b1;
     else 
         wn_rd <= 1'b0;
@@ -653,6 +664,10 @@ always_ff@(posedge clk or negedge rstn) begin
             buff1 <= signed_data_rdata_shift2;
         else if(tcnt==4 || tcnt==10)
             buff1 <= add1_sum;
+        else if(tcnt==11)
+            buff1 <= mult1_res_sat_shift32;
+        else if(tcnt==12)
+            buff1 <= buff5;
     end
     else if(state_rev) begin
         if(tcnt==2)
@@ -674,6 +689,8 @@ always_ff@(posedge clk or negedge rstn) begin
     else if(state_pre) begin
         if(tcnt==3 || tcnt==9)
             buff2 <= signed_data_rdata_shift2;
+        else if(tcnt==10)
+            buff2 <= mult1_res_sat_shift32;
     end
     else if(state_rev) begin
         if(tcnt==3)
@@ -693,8 +710,10 @@ always_ff@(posedge clk or negedge rstn) begin
             buff3 <= add1_sum;
     end
     else if(state_pre) begin
-        if(tcnt==4 || tcnt==10)
+        if(tcnt==4)
             buff3 <= mult1_res_sat_shift32;
+        else if(tcnt==12)
+            buff3 <= buff2;
     end
 end
 
@@ -749,7 +768,7 @@ always_ff@(posedge clk or negedge rstn) begin
             buff5 <= $signed(mult2_res >>> DATA_WIDTH);
     end
     else if(state_pre) begin
-        if(tcnt==5 || tcnt==11)
+        if(tcnt==5)
             buff5 <= mult1_res_sat_shift32;
     end
 end
@@ -790,7 +809,7 @@ always@(*) begin
     else if(state_pre) begin
         if(tcnt==12 || tcnt==13) begin  // to delete, for debug
             add2_a = buff3;
-            add2_b = (rg_ifft_flag ^ tcnt[0])?  buff5 : -buff5;
+            add2_b = (rg_ifft_flag ^ tcnt[0])?  -buff1 : buff1;
         end
     end
 end
@@ -808,7 +827,7 @@ always@(*) begin
         end
     end
     else if(state_pre) begin
-        if(tcnt==3 || tcnt==4 || tcnt==10 || tcnt==11) begin   // to delete , just for debug
+        if(tcnt==4 || tcnt==5 || tcnt==10 || tcnt==11) begin   // to delete , just for debug
             mult1_a = signed_wn_rdata;
             mult1_b = buff4;
         end

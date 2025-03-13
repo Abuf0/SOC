@@ -16,6 +16,9 @@ logic [31:0]                 rg_twid                ;
 logic                        rg_ifft_flag           ;
 logic                        rg_bitreverse_flag     ;
 logic [9:0]                  rg_bitrevlen           ;
+logic [ADDR_WIDTH-1:0]       rg_data_base           ;
+logic [ADDR_WIDTH-1:0]       rg_wn_base             ;
+logic [ADDR_WIDTH-1:0]       rg_rev_base            ;
 
 logic [DATA_WIDTH-1:0]       data_rdata             ;
 logic [DATA_WIDTH-1:0]       data_wdata             ;
@@ -82,6 +85,9 @@ moce_cfft # (
     .rg_ifft_flag       (rg_ifft_flag        ) ,
     .rg_bitreverse_flag (rg_bitreverse_flag  ) ,
     .rg_bitrevlen       (rg_bitrevlen        ) ,
+    .rg_data_base       (rg_data_base        ) ,
+    .rg_wn_base         (rg_wn_base          ) ,
+    .rg_rev_base        (rg_rev_base         ) ,
     .data_rdata         (data_rdata          ) ,
     .data_wdata         (data_wdata          ) ,
     .data_wmask         (data_wmask          ) ,
@@ -136,11 +142,14 @@ initial begin
     clk=0;
     rstn=0;
     cfft_start = 0;
-    rg_fft_len = 64;
-    rg_twid = 1;
-    rg_ifft_flag = 0;
-    rg_bitreverse_flag = 0;
-    rg_bitrevlen  = 56;
+    rg_fft_len = 128;
+    rg_twid = 2;
+    rg_ifft_flag = 1;
+    rg_bitreverse_flag = 1;
+    rg_bitrevlen  = 112;
+    rg_data_base = 0;
+    rg_wn_base   = 0;
+    rg_rev_base  = 384;
     #133
     rstn = 1;
     #100
@@ -167,7 +176,7 @@ end
 `else
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn) 
-        $readmemb("../model/fft_input_binary.txt",DATA_MEM);
+        $readmemb("../model/fft128r/fft_input_binary.txt",DATA_MEM);
     else if(data_wr)
         DATA_MEM[data_addr] <= data_wdata;
 end
@@ -275,7 +284,7 @@ always_ff@(posedge clk or negedge rstn) begin
 end
 `else
 initial begin
-    $readmemb("../model/fft_twiddle_binary.txt",WN_MEM);
+    $readmemb("../model/fft128r/fft_twiddle_binary.txt",WN_MEM);
 end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)

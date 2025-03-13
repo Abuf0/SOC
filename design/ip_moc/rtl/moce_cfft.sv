@@ -14,6 +14,9 @@ module moce_cfft #(
     input        [31:0]                     rg_twid             ,
     input                                   rg_ifft_flag        ,
     input                                   rg_bitreverse_flag  ,
+    input        [ADDR_WIDTH-1:0]           rg_data_base        ,
+    input        [ADDR_WIDTH-1:0]           rg_wn_base          ,
+    input        [ADDR_WIDTH-1:0]           rg_rev_base         ,
     /**************** data memory interface ****************/
     input        [DATA_WIDTH-1:0]           data_rdata          ,
     output logic [DATA_WIDTH-1:0]           data_wdata          ,
@@ -79,12 +82,19 @@ logic post_done;
 logic reverse_done;
 logic cfft_done_pre;
 
+logic radix4_start_pre;
+logic pre_start_pre;
+logic post_start_pre;
+logic reverse_start_pre;
 logic radix4_start;
 logic pre_start;
 logic post_start;
 logic reverse_start;
 
 logic [11:0] fft_len;
+logic [ADDR_WIDTH-1:0]       data_base ;
+logic [ADDR_WIDTH-1:0]       wn_base   ;
+logic [ADDR_WIDTH-1:0]       rev_base  ;
 
 logic radix4_cnt;
 
@@ -127,10 +137,10 @@ end
 
 assign radix4by2_done = radix4_done && radix4_cnt;
 
-assign pre_start = cfft_start && need_4by2;
-assign radix4_start = ((fft_state_c != RADIX4) && (fft_state_n == RADIX4)) || (need_4by2 && radix4_done && ~radix4by2_done);
-assign post_start = (fft_state_c != POST) && (fft_state_n == POST);
-assign reverse_start = (fft_state_c != REVERSE) && (fft_state_n == REVERSE);
+assign pre_start_pre = cfft_start && need_4by2;
+assign radix4_start_pre = ((fft_state_c != RADIX4) && (fft_state_n == RADIX4)) || (need_4by2 && radix4_done && ~radix4by2_done);
+assign post_start_pre = (fft_state_c != POST) && (fft_state_n == POST);
+assign reverse_start_pre = (fft_state_c != REVERSE) && (fft_state_n == REVERSE);
 
 assign cfft_done_pre = (fft_state_c != IDLE) && (fft_state_n == IDLE);
 
@@ -145,10 +155,52 @@ end
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
+        pre_start <= 1'b0;
+    else if(pre_start_pre)
+        pre_start <= 1'b1;
+    else 
+        pre_start <= 1'b0;
+end
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        radix4_start <= 1'b0;
+    else if(radix4_start_pre)
+        radix4_start <= 1'b1;
+    else 
+        radix4_start <= 1'b0;
+end
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        post_start <= 1'b0;
+    else if(post_start_pre)
+        post_start <= 1'b1;
+    else 
+        post_start <= 1'b0;
+end
+
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        reverse_start <= 1'b0;
+    else if(reverse_start_pre)
+        reverse_start <= 1'b1;
+    else 
+        reverse_start <= 1'b0;
+end
+
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
         radix4_cnt <= 1'b0;
     else if(need_4by2 && radix4_done)
         radix4_cnt <= radix4by2_done?   1'b0 : radix4_cnt + 1'b1;
 end
+
+assign wn_base = rg_wn_base;
+assign rev_base = rg_rev_base;
+assign data_base = radix4_cnt?  (rg_data_base + rg_fft_len) : rg_data_base;
 
 radix4 # (
     .ADDR_WIDTH (ADDR_WIDTH),
@@ -170,6 +222,9 @@ radix4 # (
     .rg_twid            (rg_twid             ) ,
     .rg_ifft_flag       (rg_ifft_flag        ) ,
     .rg_bitreverse_flag (rg_bitreverse_flag  ) ,
+    .data_base          (data_base           ) ,
+    .wn_base            (wn_base             ) ,
+    .rev_base           (rev_base            ) ,
     .data_rdata         (data_rdata          ) ,
     .data_wdata         (data_wdata          ) ,
     .data_wmask         (data_wmask          ) ,
