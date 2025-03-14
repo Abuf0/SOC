@@ -1,5 +1,5 @@
 module moce_cfft #(
-    parameter ADDR_WIDTH = 17,
+    parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32,
     parameter LADDR_WIDTH = 4
 )(
@@ -9,9 +9,9 @@ module moce_cfft #(
     input                                   cfft_start          ,
     output logic                            cfft_done           ,
     /**************** config ****************/
-    input        [9:0]                      rg_bitrevlen        ,
+    input        [11:0]                     rg_bitrevlen        ,
     input        [15:0]                     rg_fft_len          ,
-    input        [31:0]                     rg_twid             ,
+    input        [15:0]                     rg_twid             ,
     input                                   rg_ifft_flag        ,
     input                                   rg_bitreverse_flag  ,
     input        [ADDR_WIDTH-1:0]           rg_data_base        ,
@@ -31,6 +31,26 @@ module moce_cfft #(
     output logic                            wn_wr               ,
     output logic                            wn_rd               ,
     output logic [ADDR_WIDTH-1:0]           wn_addr             ,
+    ///***************** MULT1 interface *********************/
+    //output logic signed [DATA_WIDTH-1:0]    mult1_a             ,
+    //output logic signed [DATA_WIDTH-1:0]    mult1_b             ,
+    //input signed [2*DATA_WIDTH-1:0]         mult1_res           ,
+    ///***************** MULT2 interface *********************/
+    //output logic signed [DATA_WIDTH-1:0]    mult2_a             ,
+    //output logic signed [DATA_WIDTH-1:0]    mult2_b             ,
+    //input signed [2*DATA_WIDTH-1:0]         mult2_res           ,
+    ///***************** ADD1 interface *********************/
+    //output logic signed [DATA_WIDTH-1:0]    add1_a              ,
+    //output logic signed [DATA_WIDTH-1:0]    add1_b              ,
+    //input signed [DATA_WIDTH-1:0]           add1_sum            ,
+    ///***************** ADD2 interface *********************/
+    //output logic signed [DATA_WIDTH-1:0]    add2_a              ,
+    //output logic signed [DATA_WIDTH-1:0]    add2_b              ,
+    //input signed [DATA_WIDTH-1:0]           add2_sum            ,
+    ///***************** ADD3 interface *********************/
+    //output logic signed [DATA_WIDTH-1:0]    add3_a              ,
+    //output logic signed [DATA_WIDTH-1:0]    add3_b              ,
+    //input signed [DATA_WIDTH-1:0]           add3_sum            ,
     /**************** line buffer interface ****************/
     input        [DATA_WIDTH-1:0]           mem1_rdata          ,
     output logic [DATA_WIDTH-1:0]           mem1_wdata          ,
@@ -51,28 +71,32 @@ module moce_cfft #(
     output logic [DATA_WIDTH-1:0]           mem4_wdata          ,
     output logic                            mem4_wr             ,
     output logic                            mem4_rd             ,
-    output logic [LADDR_WIDTH-1:0]          mem4_addr           ,
-    /***************** MULT1 interface *********************/
-    output logic signed [DATA_WIDTH-1:0]    mult1_a             ,
-    output logic signed [DATA_WIDTH-1:0]    mult1_b             ,
-    input signed [2*DATA_WIDTH-1:0]         mult1_res           ,
-    /***************** MULT2 interface *********************/
-    output logic signed [DATA_WIDTH-1:0]    mult2_a             ,
-    output logic signed [DATA_WIDTH-1:0]    mult2_b             ,
-    input signed [2*DATA_WIDTH-1:0]         mult2_res           ,
-    /***************** ADD1 interface *********************/
-    output logic signed [DATA_WIDTH-1:0]    add1_a              ,
-    output logic signed [DATA_WIDTH-1:0]    add1_b              ,
-    input signed [DATA_WIDTH-1:0]           add1_sum            ,
-    /***************** ADD2 interface *********************/
-    output logic signed [DATA_WIDTH-1:0]    add2_a              ,
-    output logic signed [DATA_WIDTH-1:0]    add2_b              ,
-    input signed [DATA_WIDTH-1:0]           add2_sum            ,
-    /***************** ADD3 interface *********************/
-    output logic signed [DATA_WIDTH-1:0]    add3_a              ,
-    output logic signed [DATA_WIDTH-1:0]    add3_b              ,
-    input signed [DATA_WIDTH-1:0]           add3_sum           
+    output logic [LADDR_WIDTH-1:0]          mem4_addr           
 );
+// ---------- behavior model (just for module test) --------//
+logic signed [DATA_WIDTH-1:0] add1_a;
+logic signed [DATA_WIDTH-1:0] add1_b;
+logic signed [DATA_WIDTH-1:0] add1_sum;
+assign add1_sum = add1_a + add1_b;
+logic signed [DATA_WIDTH-1:0] add2_a;
+logic signed [DATA_WIDTH-1:0] add2_b;
+logic signed [DATA_WIDTH-1:0] add2_sum;
+assign add2_sum = add2_a + add2_b;
+logic signed [DATA_WIDTH-1:0] add3_a;
+logic signed [DATA_WIDTH-1:0] add3_b;
+logic signed [DATA_WIDTH-1:0] add3_sum;
+assign add3_sum = add3_a + add3_b;
+
+logic signed [DATA_WIDTH-1:0] mult1_a;
+logic signed [DATA_WIDTH-1:0] mult1_b;
+logic signed [2*DATA_WIDTH-1:0] mult1_res;
+assign mult1_res = mult1_a * mult1_b;
+logic signed [DATA_WIDTH-1:0] mult2_a;
+logic signed [DATA_WIDTH-1:0] mult2_b;
+logic signed [2*DATA_WIDTH-1:0] mult2_res;
+assign mult2_res = mult2_a * mult2_b;
+
+// ----------------------------------------------------//
 
 logic need_4by2;
 logic radix4_done;
@@ -91,7 +115,7 @@ logic pre_start;
 logic post_start;
 logic reverse_start;
 
-logic [11:0] fft_len;
+logic [15:0] fft_len;
 logic [ADDR_WIDTH-1:0]       data_base ;
 logic [ADDR_WIDTH-1:0]       wn_base   ;
 logic [ADDR_WIDTH-1:0]       rev_base  ;

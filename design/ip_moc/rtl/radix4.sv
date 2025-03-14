@@ -15,9 +15,9 @@ module radix4#(
     input                               reverse_start       ,
     output logic                        reverse_done        ,
     /**************** config ****************/
-    input        [9:0]                  rg_bitrevlen        ,
+    input        [11:0]                 rg_bitrevlen        ,
     input        [15:0]                 fft_len             ,   // = 4^M
-    input        [31:0]                 rg_twid             ,
+    input        [15:0]                 rg_twid             ,
     input                               rg_ifft_flag        ,
     input                               rg_bitreverse_flag  ,
     input        [ADDR_WIDTH-1:0]       data_base           ,
@@ -80,10 +80,6 @@ module radix4#(
     input signed [DATA_WIDTH-1:0]           add3_sum           
 );
 parameter RADIX = 4;    // fixed
-parameter OUT_DLY = 10;     // according to pipelined 
-//parameter DATA_BASE = 0;
-//parameter WN_BASE = 0;
-//parameter REV_BASE = 0;
 parameter PIPE_TIME = 28;
 parameter PRE_TIME = 15;
 parameter POST_TIME = 4;
@@ -93,17 +89,17 @@ logic stage_loop_end;   // for one state switch
 logic [2:0] stage_num;// 16,...,4096 = 2,...,6 // stage num in one state
 logic [2:0] stage_cnt; // for middile stage counter// 0,1,2,3,4 // for start&last = 0
 logic group_loop_end;   // for one stage switch
-logic [9:0] group_num;  // group num in one group
-logic [9:0] group_loop_cnt; // for group in one stage // 0~N/4-1
+logic [11:0] group_num;  // group num in one group
+logic [11:0] group_loop_cnt; // for group in one stage // 0~N/4-1
 logic radix_loop_end;   // for one group switch
-logic [9:0] radix_num;  // radix num in one group
-logic [9:0] radix_loop_cnt; // for radix in one group // 0~N/4-1
+logic [11:0] radix_num;  // radix num in one group
+logic [11:0] radix_loop_cnt; // for radix in one group // 0~N/4-1
 logic tcnt_loop_end;   // for one radix 4 swith
 logic [4:0] tcnt_num;   // tcnt num in one radix
 logic [4:0] tcnt;  // for wn 0~5// for data 0~7 
 
 logic single_loop_end;  // pre/post/rev end
-logic [11:0] single_num;
+logic [12:0] single_num;
 
 
 logic state_radix4;
@@ -130,20 +126,19 @@ logic post_stage_last_radix;
 logic [15:0] step;
 logic [15:0] strid;
 logic [15:0] twid;
-logic [15:0] re_addr_next;
+logic [ADDR_WIDTH-1:0] re_addr_next;
 logic im_addr_flag;
-logic trans_flag;
-logic [15:0] re_addr;
+logic [ADDR_WIDTH-1:0] re_addr;
 
-logic [15:0] re_pre_addr_next;
-logic [15:0] re_post_addr_next;
-logic [15:0] rev_addr_next;
+logic [ADDR_WIDTH-1:0] re_pre_addr_next;
+logic [ADDR_WIDTH-1:0] re_post_addr_next;
+logic [ADDR_WIDTH-1:0] rev_addr_next;
 
 logic im_pre_addr_flag;
 logic im_post_addr_flag;
 
-logic [15:0] re_addr_a;
-logic [15:0] re_addr_a_lat;
+logic [ADDR_WIDTH-1:0] re_addr_a;
+logic [ADDR_WIDTH-1:0] re_addr_a_lat;
 
 logic signed [DATA_WIDTH-1:0] signed_data_rdata;
 logic signed [DATA_WIDTH-1:0] signed_wn_rdata;
@@ -296,7 +291,7 @@ end
 
 assign first_stage_done = group_loop_end && (state_c == FIRST_STAGE);
 assign middile_stage_done = group_loop_end && (stage_num != 2) && (stage_cnt == stage_num-2) && (state_c == MIDDLE_STAGE);
-assign last_stage_done = group_loop_end && (state_c == LAST_STAGE);    // 此时的最有一轮的tcnt_num会delay几拍，因为最后一级没有后续pipeline
+assign last_stage_done = group_loop_end && (state_c == LAST_STAGE);    
 assign pre_stage_done = single_loop_end && (state_c == PRE_STAGE);
 assign post_stage_done = single_loop_end && (state_c == POST_STAGE);
 assign rev_stage_done = single_loop_end && (state_c == REV_STAGE);
@@ -311,13 +306,12 @@ assign last_stage_first_radix = (state_c == LAST_STAGE) && (radix_loop_cnt == 0)
 assign first_stage_first_radix = (state_c == FIRST_STAGE) && (radix_loop_cnt == 0) && (group_loop_cnt == 0);
 assign first_radix = (radix_loop_cnt == 0) && (group_loop_cnt == 0);
 assign middle_stage_first_radix = (state_c == MIDDLE_STAGE) && (radix_loop_cnt == 0) && (group_loop_cnt == 0);
-//assign tcnt_num = last_stage_last_radix?  PIPE_TIME + OUT_DLY : PIPE_TIME;
 assign post_stage_last_radix = (state_c == POST_STAGE) && (radix_loop_cnt == single_num-1);
 
 assign tcnt_num = state_radix4?  PIPE_TIME : 
                   state_pre?    PRE_TIME : 
                   state_post?   POST_TIME : 
-                  state_rev?    REV_TIME : PIPE_TIME;   //todo
+                  state_rev?    REV_TIME : PIPE_TIME;  
 assign radix_num = (state_c == LAST_STAGE)? strid+1 : strid;
 assign group_num = step;
 assign single_num = state_pre?  fft_len : 
@@ -443,15 +437,24 @@ always_ff@(posedge clk or negedge rstn) begin
 end
 
 always@(*) begin
+`ifdef DEBUG
     add3_a = 'bx;
     if(((tcnt>=0 && tcnt<=7) || (tcnt==tcnt_num-1)) && ~last_stage_last_radix) 
         add3_a = radix_loop_end?   (data_base >> 1) : re_addr_a;
     else if(tcnt>=19 && tcnt<=26 && ~first_stage_first_radix)
         add3_a = re_addr_a_lat;
+`else
+    if((tcnt>=0 && tcnt<=7) || (tcnt==tcnt_num-1))
+        add3_a = radix_loop_end?   (data_base >> 1) : re_addr_a;
+    else 
+        add3_a = re_addr_a_lat;
+`endif
 end
 
 always@(*) begin
+`ifdef DEBUG
     add3_b = 'bx;
+`endif
     case(tcnt)
         tcnt_num-1 : add3_b = (radix_loop_end)?  (group_loop_cnt+1) : (step << 2);
         5'd0:  add3_b = 0;
@@ -470,17 +473,17 @@ always@(*) begin
         5'd24: add3_b = first_radix?  (step << 3) : (step << 1);
         5'd25: add3_b = first_radix?  ((step << 3) + (step << 2)) : step + (step << 1);
         5'd26: add3_b = first_radix?  ((step << 3) + (step << 2)) : step + (step << 1);
-        //default : add3_b = 0;       
+`ifndef DEBUG
+        default : add3_b = 0;   
+`endif    
     endcase
 end
 
 assign re_addr_next = add3_sum;
 assign re_pre_addr_next = (tcnt == 0 || tcnt == 5 || tcnt == 6 || tcnt == 11)?  re_addr_a : (re_addr_a + fft_len);
 assign re_post_addr_next = re_addr_a;
-// todo //
 assign rev_addr_next = (tcnt==2 || tcnt==3)?    (radix_loop_cnt[0]?  (tab_rdata >> 2)+1'b1 : (tab_rdata >> 2)) : 
                        (tcnt==0)?   buff2 : buff1;
-//assign rev_addr_next = 0;
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn) 
@@ -655,7 +658,6 @@ always_ff@(posedge clk or negedge rstn) begin
     else if(state_radix4) begin
         if(tcnt>=2 && tcnt<=9 && ~tcnt[0])
             buff1 <= (state_c == FIRST_STAGE)?  signed_data_rdata_shift4 : signed_data_rdata;
-        // todo
         else if(tcnt>=13 && tcnt<=19 && tcnt[0])
             buff1 <= mem1_rdata;
     end
@@ -682,7 +684,6 @@ always_ff@(posedge clk or negedge rstn) begin
     else if(state_radix4) begin
         if(tcnt>=3 && tcnt<=10 && tcnt[0])
             buff2 <= (state_c == FIRST_STAGE)?  signed_data_rdata_shift4 : signed_data_rdata;
-        // todo
         else if(tcnt>=14 && tcnt<=20 && ~tcnt[0])
             buff2 <= mem1_rdata;
     end
@@ -705,7 +706,6 @@ always_ff@(posedge clk or negedge rstn) begin
     else if(state_radix4) begin
         if(tcnt>=3 && tcnt<=10)
             buff3 <= add1_sum;
-    // todo
         else if(tcnt>=14 && tcnt<=21)
             buff3 <= add1_sum;
     end
@@ -775,15 +775,20 @@ end
 
 // ADD1 interface //
 always@(*) begin
+`ifdef DEBUG
     add1_a = 'bx;
     add1_b = 'bx;
+`endif
     if(state_radix4) begin
         if(tcnt>=3 && tcnt<=10) begin
             add1_a = buff1;
             add1_b = tcnt[0]?   ((state_c == FIRST_STAGE)?  (-signed_data_rdata_shift4) : (-signed_data_rdata)) : buff2;
         end
-        //todo
+`ifdef DEBUG
         else if(tcnt>=14 && tcnt<=21) begin
+`else 
+        else begin
+`endif
             add1_a = buff1;
             add1_b = tcnt[0]?   buff2 : (-mem1_rdata);
         end
@@ -794,54 +799,106 @@ always@(*) begin
             add1_b = tcnt[0]?   -signed_data_rdata_shift2 : buff2;
         end
     end
+`ifndef DEBUG
+    else begin
+        add1_a = 'sd0;
+        add1_b = 'sd0;
+    end
+`endif
 end
 
 // ADD2 interface //
 always@(*) begin
+`ifdef DEBUG
     add2_a = 'bx;
     add2_b = 'bx;
+`endif
     if(state_radix4) begin
+`ifdef DEBUG
         if(tcnt>=21 && tcnt<=26) begin  // to delete, for debug
+`endif
             add2_a = pipe_flag?  mem2_rdata : mem3_rdata;
             add2_b = (rg_ifft_flag ^ tcnt[0])?   mem4_rdata : -mem4_rdata;
+`ifdef DEBUG 
         end
+`endif    
     end
     else if(state_pre) begin
+`ifdef DEBUG
         if(tcnt==12 || tcnt==13) begin  // to delete, for debug
+`endif
             add2_a = buff3;
             add2_b = (rg_ifft_flag ^ tcnt[0])?  -buff1 : buff1;
+`ifdef DEBUG 
         end
+`endif    
     end
+`ifndef DEBUG
+    else begin
+        add2_a = 'sd0;
+        add2_b = 'sd0;
+    end
+`endif
 end
 
 assign signed_add2_sum_out = (state_c == FIRST_STAGE || middle_stage_first_radix)?  ($signed(add2_sum) <<< 1) : ($signed(add2_sum) >>> 1);
 
 // MULT1 interface //
 always@(*) begin
+`ifdef DEBUG    
     mult1_a = 'bx;
     mult1_b = 'bx;
+`endif
     if(state_radix4) begin
+`ifdef DEBUG
         if(tcnt==1 || tcnt==4 || tcnt==7 || tcnt==10 || tcnt==13 || tcnt==16) begin   // todo delet, just for check
+`endif
             mult1_a = buff4;
             mult1_b = pipe_flag?    mem2_rdata : mem3_rdata;
+`ifdef DEBUG
         end
+`endif
     end
     else if(state_pre) begin
+`ifdef DEBUG
         if(tcnt==4 || tcnt==5 || tcnt==10 || tcnt==11) begin   // to delete , just for debug
+`endif
             mult1_a = signed_wn_rdata;
             mult1_b = buff4;
+`ifdef DEBUG    
         end
+`endif
     end
+`ifndef DEBUG
+    else begin
+        mult1_a = 'sd0;
+        mult1_b = 'sd0;
+    end
+`endif
 end
 
 // MULT2 interface //
 always@(*) begin
+`ifdef DEBUG
     mult2_a = 'bx;
     mult2_b = 'bx;
-    if(tcnt==1 || tcnt==4 || tcnt==7 || tcnt==10 || tcnt==13 || tcnt==16) begin   // todo delet, just for check
-        mult2_a = buff5;
-        mult2_b = pipe_flag?    mem2_rdata : mem3_rdata;
+`endif
+    if(state_radix4) begin
+`ifdef DEBUG
+        if(tcnt==1 || tcnt==4 || tcnt==7 || tcnt==10 || tcnt==13 || tcnt==16) begin   // todo delet, just for check
+`endif
+            mult2_a = buff5;
+            mult2_b = pipe_flag?    mem2_rdata : mem3_rdata;
+`ifdef DEBUG
+        end
+`endif
     end
+`ifndef DEBUG
+    else begin
+        mult2_a = 'sd0;
+        mult2_b = 'sd0;
+    end
+`endif
 end
 // M1 interface //
 always_ff@(posedge clk or negedge rstn) begin

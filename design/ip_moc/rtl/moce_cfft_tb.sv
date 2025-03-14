@@ -1,9 +1,8 @@
 `timescale 1ns/10ps
 module moce_cfft_tb();
 `define SIM
-//`define DEBUG_WN
-//`define DEBUG_MEM
-parameter ADDR_WIDTH = 16;
+`define DEBUG
+parameter ADDR_WIDTH = 32;
 parameter DATA_WIDTH = 32;
 parameter LADDR_WIDTH = 4;
 
@@ -12,10 +11,10 @@ logic                        rstn                   ;
 logic                        cfft_start             ;
 logic                        cfft_done              ;
 logic [15:0]                 rg_fft_len             ;
-logic [31:0]                 rg_twid                ;
+logic [15:0]                 rg_twid                ;
 logic                        rg_ifft_flag           ;
 logic                        rg_bitreverse_flag     ;
-logic [9:0]                  rg_bitrevlen           ;
+logic [11:0]                 rg_bitrevlen           ;
 logic [ADDR_WIDTH-1:0]       rg_data_base           ;
 logic [ADDR_WIDTH-1:0]       rg_wn_base             ;
 logic [ADDR_WIDTH-1:0]       rg_rev_base            ;
@@ -100,6 +99,25 @@ moce_cfft # (
     .wn_wr              (wn_wr               ) ,
     .wn_rd              (wn_rd               ) ,
     .wn_addr            (wn_addr             ) ,
+
+    /******************************************/
+    //.mult1_a            (mult1_a             ) ,
+    //.mult1_b            (mult1_b             ) ,
+    //.mult1_res          (mult1_res           ) ,
+    //.mult2_a            (mult2_a             ) ,
+    //.mult2_b            (mult2_b             ) ,
+    //.mult2_res          (mult2_res           ) ,
+    //.add1_a             (add1_a              ) ,
+    //.add1_b             (add1_b              ) ,
+    //.add1_sum           (add1_sum            ) ,
+    //.add2_a             (add2_a              ) ,
+    //.add2_b             (add2_b              ) ,
+    //.add2_sum           (add2_sum            ) ,
+    //.add3_a             (add3_a              ) ,
+    //.add3_b             (add3_b              ) ,
+    //.add3_sum           (add3_sum            ) ,
+    /******************************************/
+
     .mem1_rdata         (mem1_rdata          ) ,
     .mem1_wdata         (mem1_wdata          ) ,
     .mem1_addr          (mem1_addr           ) ,
@@ -119,22 +137,7 @@ moce_cfft # (
     .mem4_wdata         (mem4_wdata          ) ,
     .mem4_addr          (mem4_addr           ) ,
     .mem4_wr            (mem4_wr             ) ,
-    .mem4_rd            (mem4_rd             ) ,
-    .mult1_a            (mult1_a             ) ,
-    .mult1_b            (mult1_b             ) ,
-    .mult1_res          (mult1_res           ) ,
-    .mult2_a            (mult2_a             ) ,
-    .mult2_b            (mult2_b             ) ,
-    .mult2_res          (mult2_res           ) ,
-    .add1_a             (add1_a              ) ,
-    .add1_b             (add1_b              ) ,
-    .add1_sum           (add1_sum            ) ,
-    .add2_a             (add2_a              ) ,
-    .add2_b             (add2_b              ) ,
-    .add2_sum           (add2_sum            ) ,
-    .add3_a             (add3_a              ) ,
-    .add3_b             (add3_b              ) ,
-    .add3_sum           (add3_sum            ) 
+    .mem4_rd            (mem4_rd             ) 
 );
 
 always #(100/2) clk = ~clk;
@@ -157,7 +160,7 @@ initial begin
     cfft_start =1;
     @(negedge clk);
     cfft_start = 0;
-    #1000000
+    #100000000
     $finish(2);
 end
 
@@ -165,22 +168,12 @@ int i;
 logic [DATA_WIDTH-1:0] DATA_MEM [0:(1 << 13)-1];
 logic [DATA_WIDTH-1:0] WN_MEM [0:(1 << 13)-1];
 
-`ifdef DEBUG_MEM
-always_ff@(posedge clk or negedge rstn) begin
-    if(~rstn) begin
-        $readmemh("../model/fft_input_debug.txt",DATA_MEM);
-    end
-    else if(data_wr)
-        DATA_MEM[data_addr] <= data_wdata;
-end
-`else
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn) 
         $readmemb("../model/fft128r/fft_input_binary.txt",DATA_MEM);
     else if(data_wr)
         DATA_MEM[data_addr] <= data_wdata;
 end
-`endif
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
@@ -273,16 +266,6 @@ end
 
 `endif
 
-`ifdef DEBUG_WN
-always_ff@(posedge clk or negedge rstn) begin
-    if(~rstn)
-        wn_rdata <= 'd0;
-    else if(wn_rd)
-        wn_rdata <= 32'h8000;
-    else
-        wn_rdata <= 'dx;
-end
-`else
 initial begin
     $readmemb("../model/fft128r/fft_twiddle_binary.txt",WN_MEM);
 end
@@ -294,7 +277,7 @@ always_ff@(posedge clk or negedge rstn) begin
     else
         wn_rdata <= 'dx;
 end
-`endif
+
 initial begin
     $fsdbDumpfile("moce_cfft_tb.fsdb");
     $fsdbDumpvars();
