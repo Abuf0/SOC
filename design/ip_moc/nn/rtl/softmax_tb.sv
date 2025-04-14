@@ -1,7 +1,7 @@
 `timescale  1ns / 10ps
 
 module tb_softmax;
-
+`define SIM
 // softmax Parameters
 parameter PERIOD   = 10            ;
 parameter DATA_WB  = 8             ;
@@ -31,8 +31,8 @@ logic [15:0] rg_inc                       = 0 ;
 logic [15:0] rg_outh                      = 0 ;
 logic [15:0] rg_outw                      = 0 ;
 logic [15:0] rg_outc                      = 0 ;
-logic [DATA_WD-1:0]  mem_src_rdata         = 0 ;
-logic [DATA_WD-1:0]  mem_dest_rdata        = 0 ;
+logic [DATA_WD-1:0]  mem_src_rdata         ;
+logic [DATA_WD-1:0]  mem_dest_rdata        ;
 logic softmax_start                        = 0 ;
 
 // softmax Outputs
@@ -48,6 +48,79 @@ logic [ADDR_WD-1:0]  mem_dest_addr   ;
 logic [DATA_WD-1:-0] mem_dest_wdata  ;
 logic                softmax_done    ;
 
+logic [DATA_WD-1:0] SRC_MEM [0:(1 << 13)-1];
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn) 
+        $readmemb("../model/softmax/softmax_input_binary.txt",SRC_MEM);
+    else if(mem_src_wr)
+        SRC_MEM[mem_src_addr] <= mem_src_wdata;
+end
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        mem_src_rdata <= 'd0;
+    else if(mem_src_rd) begin
+        mem_src_rdata <= SRC_MEM[mem_src_addr];
+    end
+end
+
+logic [DATA_WD-1:0] DEST_MEM [0:(1 << 13)-1];
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(mem_dest_wr) begin
+        case(mem_dest_wmask)
+            8'b00000001:    DEST_MEM[mem_dest_addr] <= {DEST_MEM[mem_dest_addr][63:8], mem_dest_wdata[7:0]};
+            8'b00000011:    DEST_MEM[mem_dest_addr] <= {DEST_MEM[mem_dest_addr][63:16], mem_dest_wdata[15:0]};
+            8'b00000111:    DEST_MEM[mem_dest_addr] <= {DEST_MEM[mem_dest_addr][63:24], mem_dest_wdata[23:0]};
+            8'b00001111:    DEST_MEM[mem_dest_addr] <= {DEST_MEM[mem_dest_addr][63:32], mem_dest_wdata[31:0]};
+            8'b00011111:    DEST_MEM[mem_dest_addr] <= {DEST_MEM[mem_dest_addr][63:40], mem_dest_wdata[39:0]};
+            8'b00111111:    DEST_MEM[mem_dest_addr] <= {DEST_MEM[mem_dest_addr][63:48], mem_dest_wdata[47:0]};
+            8'b01111111:    DEST_MEM[mem_dest_addr] <= {DEST_MEM[mem_dest_addr][63:56], mem_dest_wdata[55:0]};
+            8'b11111111:    DEST_MEM[mem_dest_addr] <= {mem_dest_wdata[63:0]};
+        endcase
+    end
+end
+
+`ifdef SIM
+    integer  output_file_bin;
+    integer  output_file_dec;
+    int j;
+    logic [ADDR_WD-1:0] index;
+    initial begin
+        output_file_bin = $fopen("../rtl/softmax_output_binary.txt","w+");
+        output_file_dec = $fopen("../rtl/softmax_output_dec.txt","w+");
+        index <= 0;
+        @(posedge softmax_done);
+        for(j=0;j<1000;j=j+1) begin
+            @(negedge clk);
+            $fwrite(output_file_bin,"%b\n",DEST_MEM[index]);
+            //$fwrite(output_file_dec,"%d\t",DEST_MEM[index][7:0]);
+            //$fwrite(output_file_dec,"%d\t",DEST_MEM[index][15:8]);
+            //$fwrite(output_file_dec,"%d\t",DEST_MEM[index][23:16]);
+            //$fwrite(output_file_dec,"%d\t",DEST_MEM[index][31:24]);
+            //$fwrite(output_file_dec,"%d\t",DEST_MEM[index][39:32]);
+            //$fwrite(output_file_dec,"%d\t",DEST_MEM[index][47:40]);
+            //$fwrite(output_file_dec,"%d\t",DEST_MEM[index][55:48]);
+            //$fwrite(output_file_dec,"%d\n",DEST_MEM[index][63:56]);
+            $fwrite(output_file_dec,"%d\t",DEST_MEM[index][63:56]);
+            $fwrite(output_file_dec,"%d\t",DEST_MEM[index][55:48]);
+            $fwrite(output_file_dec,"%d\t",DEST_MEM[index][47:40]);
+            $fwrite(output_file_dec,"%d\t",DEST_MEM[index][39:32]);
+            $fwrite(output_file_dec,"%d\t",DEST_MEM[index][31:24]);
+            $fwrite(output_file_dec,"%d\t",DEST_MEM[index][23:16]);
+            $fwrite(output_file_dec,"%d\t",DEST_MEM[index][15:8]);
+            $fwrite(output_file_dec,"%d\n",DEST_MEM[index][7:0]);
+
+            index <= index+1;
+        end
+            $fclose(output_file_bin);
+            $fclose(output_file_dec);
+    end
+
+`endif
+
+
 
 initial
 begin
@@ -58,22 +131,24 @@ initial
 begin
     #(PERIOD*3.3) rstn  =  1;
     repeat(5) begin @(negedge clk); end
-    rg_batch   = 2 ;
-    rg_inw     = 2 ;
-    rg_inh     = 2 ;
-    rg_inc     = 10 ;  
-    rg_dim       = 1;
+    rg_batch     = 2  ;    // 2    // 1    // 1    // 1  // 2  // 1     //  2  // 2  
+    rg_inw       = 9  ;    // 3    // 2    // 3    // 3  // 5  // 2     //  9  // 9  
+    rg_inh       = 9  ;    // 3    // 2    // 3    // 3  // 5  // 2     //  9  // 9  
+    rg_inc       = 27 ;    // 40   // 24   // 24   // 19 // 6  // 21    //  27 // 27 
+    rg_dim       = 2  ;    // 1    // 2    // 3    // 2  // 3  // 1     //  1  // 2  
+    rg_src_base  = 2  ;                                                 //  3  // 2  
+    rg_dest_base = 1  ;                                                 //  5  // 1  
     rg_llmulbzp  = 0;
     rg_llmultsc  = 1;
     rg_llshift   = 1;
-    rg_inmultsc  = 1;
-    rg_inshift   = 1;
+    rg_inmultsc  = 100000000;
+    rg_inshift   = 30;
     @(negedge clk);
     softmax_start = 1;
     @(negedge clk);
     softmax_start = 0;
 
-    #(PERIOD*10000)
+    #(PERIOD*1000000)
     $finish(2);
 end
 
@@ -164,6 +239,13 @@ logic signed [DATA_WIDTH-1:0]  one_result [0:N-1]  ;
 logic                       one_result_vld ;
 logic signed [DATA_WIDTH-1:0]  one_mul_sat_m1  [0:N-1] ;
 logic signed [DATA_WIDTH-1:0]  one_mul_sat_m2  [0:N-1] ;
+logic [2:0] ClzTable [0:15];
+
+logic exp_sat_sel;
+logic exp_add_sel;
+logic one_mul_sat_sel;
+assign ClzTable = {3'd4, 3'd3, 3'd2, 3'd2, 3'd1, 3'd1, 3'd1, 3'd1, 3'd0, 3'd0, 3'd0, 3'd0, 3'd0, 3'd0, 3'd0, 3'd0};
+
 
 initial
 begin
@@ -231,14 +313,15 @@ mul_sat #(
     .mult_a    (mult_a                  ),
     .mult_b    (mult_b                  )
 );
-
+/*
 clz #(
     .DATA_WD ( DATA_WIDTH ))
  u_clz (
     .data_in    ( data_in          ),
+    .ClzTable   ( ClzTable[0:15]   ),
     .zero_cnt   ( zero_cnt         )
 );
-
+*/
 exp_on_neg #(
     .DATA_WD ( DATA_WIDTH ),
     .N       ( N       ))
@@ -248,8 +331,9 @@ exp_on_neg #(
     .start_trig  ( exp_start                ),
     .val         ( exp_in_val         [0:N-1]   ),
     .mul_sat_res (  exp_mul_sat_res[0:N-1]   ),
+    .add_sel     ( exp_add_sel          ),
     .add_sum     ( add_sum     [0:N-1]   ),
-
+    .mul_sat_sel ( exp_sat_sel               ),
     .result      ( exp_result      [0:N-1]   ),
     .result_vld  ( exp_result_vld            ),
     .mul_sat_m1  ( exp_mul_sat_m1  [0:N-1]   ),
@@ -263,7 +347,7 @@ mul_sat #(
  u_mul_sat_exp (
     .clk       ( clk                    ),
     .rstn      ( rstn                   ),
-    .enable    ( 1             ),
+    .enable    ( exp_sat_sel             ),
     .m1        ( exp_mul_sat_m1[0]                     ),
     .m2        ( exp_mul_sat_m2[0]                     ),
     .mult_res  (exp_mult_res                ),
@@ -282,7 +366,7 @@ onedivonepx #(
     .start_trig   ( one_start                ),
     .val          ( one_in_val [0:N-1]                      ),
     .mul_sat_res  ( one_mul_sat_res [0:N-1]      ),
-
+    .mul_sat_sel  ( one_mul_sat_sel              ),
     .result       ( one_result      [0:N-1]      ),
     .result_vld   ( one_result_vld               ),
     .mul_sat_m1   ( one_mul_sat_m1  [0:N-1]      ),
@@ -294,7 +378,7 @@ mul_sat #(
  u_mul_sat_one (
     .clk       ( clk                    ),
     .rstn      ( rstn                   ),
-    .enable    ( 1             ),
+    .enable    ( one_mul_sat_sel             ),
     .m1        ( one_mul_sat_m1[0]                     ),
     .m2        ( one_mul_sat_m2[0]                     ),
     .mult_res  ( one_mult_res                ),

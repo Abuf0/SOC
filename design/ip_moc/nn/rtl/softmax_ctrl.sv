@@ -160,6 +160,7 @@ logic signed [INT64_WD-1:0] result64_tmp [0:N-1];
 logic [7:0] data_out [0:N-1];
 logic [N-1:0] data_out_vld;
 logic [N-1:0] mask; // todo
+logic [N-1:0] mask_d1; // todo
 
 logic dim_vld;
 logic last_dim_c;
@@ -296,6 +297,13 @@ always_ff@(posedge clk or negedge rstn) begin
         find_max_on_d <= {find_max_on_d[3:0], find_max_on};
 end
 
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        mask_d1 <= 8'hff;
+    else if(softmax_on)
+        mask_d1 <= mask;
+end
+
 assign find_max_d1 = ~find_max_on_d[0] & find_max_on_d[1];
 assign find_max_d2 = ~find_max_on_d[1] & find_max_on_d[2];
 assign find_max_d3 = ~find_max_on_d[2] & find_max_on_d[3];
@@ -314,6 +322,22 @@ assign data_max_tmp4 = (data_max[6] > data_max[7])? data_max[6] : data_max[7];
 genvar i;
 generate
     for(i=0; i<N; i=i+1) begin
+        always_ff@(posedge clk or negedge rstn) begin
+            if(~rstn)
+                mask[i] <= 1'b1;
+            else if(softmax_on) begin
+                if(rg_dim == 1 && (i >= rg_inc[OFFSET-1:0]) && last_dim_c)
+                    mask[i] <= 1'b0;
+                else if(rg_dim != 1 &&(i >= rg_inc[OFFSET-1:0]) && last_x_c)
+                    mask[i] <= 1'b0;
+                else
+                    mask[i] <= 1'b1;
+            end
+            else
+                mask[i] <= 1'b1;
+        end
+
+
         assign data_in[i] = mem_src_rdata[i*8+7 : i*8];
         always_ff@(posedge clk or negedge rstn) begin
             if(~rstn)
@@ -321,7 +345,7 @@ generate
             else if(find_max_clr)
                 data_max[i] <= 'd0;
             else if(find_max_on_d[1] && data_in_vld)
-                data_max[i] <= (data_in[i] > data_max[i])?  data_in[i] : data_max[i];
+                data_max[i] <= mask_d1[i]?   ((data_in[i] > data_max[i])?  data_in[i] : data_max[i]) : data_max[i];
             else if(find_max_d2 && dim_c_flag && i==0)
                 data_max[i] <= (data_max_tmp1 > data_max_tmp2)?  data_max_tmp1 : data_max_tmp2;
             else if(find_max_d3 && dim_c_flag && i==0)
@@ -364,7 +388,7 @@ generate
                 else if(stage_cnt == 1) // mul_sat = MUL_SAT(Diff * Mask, InMult)
                     result_tmp[i] <= mul_sat_res[i];
                 else if(stage_cnt == 2 && exp_result_vld)   // sum_delta = DIV_POW2(exp, ACCUM_BITS)
-                    result_tmp[i] <= exp_result[i][ACCUM_BITS-1]?  (exp_result[i][INT32_WD-1]?  (exp_result[i] >>> ACCUM_BITS)-1 : (exp_result[i] >>> ACCUM_BITS)+1) : (exp_result[i] >>> ACCUM_BITS);
+                    result_tmp[i] <= mask[i]?   (exp_result[i][ACCUM_BITS-1]?  (exp_result[i][INT32_WD-1]?  (exp_result[i] >>> ACCUM_BITS)-1 : (exp_result[i] >>> ACCUM_BITS)+1) : (exp_result[i] >>> ACCUM_BITS)) : 'sd0;
                 else if(stage_cnt >= 4 && stage_cnt < 11 && dim_c_flag && last_dim_c && i==0)
                     result_tmp[i] <= sum[stage_cnt-3];
             end
@@ -402,7 +426,7 @@ generate
         always_ff@(posedge clk or negedge rstn) begin
             if(~rstn)
                 data_out_vld[i] <= 1'b0;
-            else if(state_cal_res && stage_end)
+            else if(state_cal_res && stage_end && mask[i])
                 data_out_vld[i] <=  1'b1;
             else
                 data_out_vld[i] <= 1'b0;                 
@@ -587,7 +611,7 @@ assign mem_dest_wmask = data_out_vld;
 
 
 assign stage_time = state_diff_sum?  STAGE_PRD :
-                    (state_cal_res && cal_res_skip)?    8 : 20; // todo
+                    (state_cal_res && cal_res_skip)?    8 : 8; // todo
 assign stage_end = (stage_cnt == stage_time-1);
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
