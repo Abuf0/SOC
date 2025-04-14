@@ -2,6 +2,7 @@
 
 module tb_softmax;
 `define SIM
+//`define DUAL_MEM
 // softmax Parameters
 parameter PERIOD   = 10            ;
 parameter DATA_WB  = 8             ;
@@ -33,6 +34,7 @@ logic [15:0] rg_outw                      = 0 ;
 logic [15:0] rg_outc                      = 0 ;
 logic [DATA_WD-1:0]  mem_src_rdata         ;
 logic [DATA_WD-1:0]  mem_dest_rdata        ;
+logic [DATA_WD-1:0]  mem_rdata        ;
 logic softmax_start                        = 0 ;
 
 // softmax Outputs
@@ -46,8 +48,14 @@ logic                mem_dest_wr     ;
 logic [DATA_WB-1:0]  mem_dest_wmask  ;
 logic [ADDR_WD-1:0]  mem_dest_addr   ;
 logic [DATA_WD-1:-0] mem_dest_wdata  ;
+logic                mem_rd      ;
+logic                mem_wr      ;
+logic [DATA_WB-1:0]  mem_wmask   ;
+logic [ADDR_WD-1:0]  mem_addr    ;
+logic [DATA_WD-1:-0] mem_wdata   ;
 logic                softmax_done    ;
 
+`ifdef DUAL_MEM
 logic [DATA_WD-1:0] SRC_MEM [0:(1 << 13)-1];
 
 always_ff@(posedge clk or negedge rstn) begin
@@ -81,6 +89,37 @@ always_ff@(posedge clk or negedge rstn) begin
         endcase
     end
 end
+
+`else
+
+logic [DATA_WD-1:0] DEST_MEM [0:(1 << 13)-1];
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        $readmemb("../model/softmax/softmax_input_binary.txt",DEST_MEM);
+    else if(mem_wr) begin
+        case(mem_wmask)
+            8'b00000001:    DEST_MEM[mem_addr] <= {DEST_MEM[mem_addr][63:8] , mem_wdata[7:0]};
+            8'b00000011:    DEST_MEM[mem_addr] <= {DEST_MEM[mem_addr][63:16], mem_wdata[15:0]};
+            8'b00000111:    DEST_MEM[mem_addr] <= {DEST_MEM[mem_addr][63:24], mem_wdata[23:0]};
+            8'b00001111:    DEST_MEM[mem_addr] <= {DEST_MEM[mem_addr][63:32], mem_wdata[31:0]};
+            8'b00011111:    DEST_MEM[mem_addr] <= {DEST_MEM[mem_addr][63:40], mem_wdata[39:0]};
+            8'b00111111:    DEST_MEM[mem_addr] <= {DEST_MEM[mem_addr][63:48], mem_wdata[47:0]};
+            8'b01111111:    DEST_MEM[mem_addr] <= {DEST_MEM[mem_addr][63:56], mem_wdata[55:0]};
+            8'b11111111:    DEST_MEM[mem_addr] <= {mem_wdata[63:0]};
+        endcase
+    end
+end
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        mem_rdata <= 'd0;
+    else if(mem_rd) begin
+        mem_rdata <= DEST_MEM[mem_addr];
+    end
+end
+
+`endif
 
 `ifdef SIM
     integer  output_file_bin;
@@ -175,20 +214,29 @@ softmax #(
     .rg_outh         ( rg_outh                       ),
     .rg_outw         ( rg_outw                       ),
     .rg_outc         ( rg_outc                       ),
-    .mem_src_rdata   ( mem_src_rdata                 ),
-    .mem_dest_rdata  ( mem_dest_rdata                ),
     .softmax_start   ( softmax_start                 ),
-
+    `ifdef DUAL_MEM
+    .mem_src_rdata   ( mem_src_rdata                 ),
     .mem_src_rd      ( mem_src_rd                    ),
     .mem_src_wr      ( mem_src_wr                    ),
     .mem_src_wmask   ( mem_src_wmask                 ),
     .mem_src_addr    ( mem_src_addr                  ),
     .mem_src_wdata   ( mem_src_wdata                 ),
+
+    .mem_dest_rdata  ( mem_dest_rdata                ),
     .mem_dest_rd     ( mem_dest_rd                   ),
     .mem_dest_wr     ( mem_dest_wr                   ),
     .mem_dest_wmask  ( mem_dest_wmask                ),
     .mem_dest_addr   ( mem_dest_addr                 ),
     .mem_dest_wdata  ( mem_dest_wdata                ),
+    `else
+    .mem_rdata  ( mem_rdata                ),
+    .mem_rd     ( mem_rd                   ),
+    .mem_wr     ( mem_wr                   ),
+    .mem_wmask  ( mem_wmask                ),
+    .mem_addr   ( mem_addr                 ),
+    .mem_wdata  ( mem_wdata                ),
+    `endif
     .softmax_done    ( softmax_done                  )
 );
 

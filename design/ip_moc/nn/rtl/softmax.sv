@@ -22,20 +22,29 @@ module softmax #(
     input [15:0]                rg_outh         ,
     input [15:0]                rg_outw         ,
     input [15:0]                rg_outc         ,
+    `ifdef DUAL_MEM
     /* Source memory interface */
     output logic                mem_src_rd      ,
     output logic                mem_src_wr      ,
     output logic [DATA_WB-1:0]  mem_src_wmask   ,
     output logic [ADDR_WD-1:0]  mem_src_addr    ,
-    output logic [DATA_WD-1:-0] mem_src_wdata   ,
+    output logic [DATA_WD-1:0] mem_src_wdata   ,
     input [DATA_WD-1:0]         mem_src_rdata   ,
     /* Dest memory interface */
     output logic                mem_dest_rd     ,
     output logic                mem_dest_wr     ,
     output logic [DATA_WB-1:0]  mem_dest_wmask  ,
     output logic [ADDR_WD-1:0]  mem_dest_addr   ,
-    output logic [DATA_WD-1:-0] mem_dest_wdata  ,
+    output logic [DATA_WD-1:0] mem_dest_wdata  ,
     input [DATA_WD-1:0]         mem_dest_rdata  ,
+    `else
+    output logic                mem_rd      ,
+    output logic                mem_wr      ,
+    output logic [DATA_WB-1:0]  mem_wmask   ,
+    output logic [ADDR_WD-1:0]  mem_addr    ,
+    output logic [DATA_WD-1:0] mem_wdata   ,
+    input [DATA_WD-1:0]         mem_rdata   ,
+    `endif
     /* control */
     input                       softmax_start   ,
     output logic                softmax_done        
@@ -163,8 +172,6 @@ softmax_ctrl #(
     .rg_outh         ( rg_outh                       ),
     .rg_outw         ( rg_outw                       ),
     .rg_outc         ( rg_outc                       ),
-    .mem_src_rdata   ( mem_src_rdata                 ),
-    .mem_dest_rdata  ( mem_dest_rdata                ),
     .softmax_start   ( softmax_start                 ),
 
     .add_sel         ( ctrl_add_sel              ),
@@ -203,18 +210,28 @@ softmax_ctrl #(
     .zero_cnt        ( zero_cnt[0:N-1]           ),
     .clz_start       ( clz_start                 ),
     .clz_vld         ( clz_vld                   ),
-
+    `ifdef DUAL_MEM
+    .mem_src_rdata   ( mem_src_rdata                 ),
     .mem_src_rd      ( mem_src_rd                    ),
     .mem_src_wr      ( mem_src_wr                    ),
     .mem_src_wmask   ( mem_src_wmask                 ),
     .mem_src_addr    ( mem_src_addr                  ),
     .mem_src_wdata   ( mem_src_wdata                 ),
+
+    .mem_dest_rdata  ( mem_dest_rdata                ),
     .mem_dest_rd     ( mem_dest_rd                   ),
     .mem_dest_wr     ( mem_dest_wr                   ),
     .mem_dest_wmask  ( mem_dest_wmask                ),
     .mem_dest_addr   ( mem_dest_addr                 ),
     .mem_dest_wdata  ( mem_dest_wdata                ),
-
+    `else
+    .mem_rdata   ( mem_rdata                 ),
+    .mem_rd      ( mem_rd                    ),
+    .mem_wr      ( mem_wr                    ),
+    .mem_wmask   ( mem_wmask                 ),
+    .mem_addr    ( mem_addr                  ),
+    .mem_wdata   ( mem_wdata                 ),
+    `endif
 
     .softmax_done    ( softmax_done                  )
 );

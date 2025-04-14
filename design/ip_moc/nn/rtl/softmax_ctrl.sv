@@ -65,20 +65,29 @@ module softmax_ctrl #(
     input [$clog2(INT32_WD):0]           zero_cnt[0:N-1]      ,
     output logic                         clz_start            ,
     input                                clz_vld              ,
+    `ifdef DUAL_MEM
     /* Source memory interface */
     output logic                mem_src_rd      ,
     output logic                mem_src_wr      ,
     output logic [DATA_WB-1:0]  mem_src_wmask   ,
     output logic [ADDR_WD-1:0]  mem_src_addr    ,
-    output logic [DATA_WD-1:-0] mem_src_wdata   ,
+    output logic [DATA_WD-1:0] mem_src_wdata   ,
     input [DATA_WD-1:0]         mem_src_rdata   ,
     /* Dest memory interface */
     output logic                mem_dest_rd     ,
     output logic                mem_dest_wr     ,
     output logic [DATA_WB-1:0]  mem_dest_wmask  ,
     output logic [ADDR_WD-1:0]  mem_dest_addr   ,
-    output logic [DATA_WD-1:-0] mem_dest_wdata  ,
+    output logic [DATA_WD-1:0] mem_dest_wdata  ,
     input [DATA_WD-1:0]         mem_dest_rdata  ,
+    `else
+    output logic                mem_rd      ,
+    output logic                mem_wr      ,
+    output logic [DATA_WB-1:0]  mem_wmask   ,
+    output logic [ADDR_WD-1:0]  mem_addr    ,
+    output logic [DATA_WD-1:0] mem_wdata   ,
+    input [DATA_WD-1:0]         mem_rdata   ,
+    `endif
     /* control */
     input                       softmax_start   ,
     output logic                softmax_done    
@@ -167,6 +176,29 @@ logic last_dim_c;
 logic last_x_c;
 logic cal_res_skip;
 logic last_xy;
+
+`ifndef DUAL_MEM
+    logic                mem_src_rd      ;
+    logic                mem_src_wr      ;
+    logic [DATA_WB-1:0]  mem_src_wmask   ;
+    logic [ADDR_WD-1:0]  mem_src_addr    ;
+    logic [DATA_WD-1:0]  mem_src_wdata   ;
+    logic [DATA_WD-1:0]  mem_src_rdata   ;
+    logic                mem_dest_rd     ;
+    logic                mem_dest_wr     ;
+    logic [DATA_WB-1:0]  mem_dest_wmask  ;
+    logic [ADDR_WD-1:0]  mem_dest_addr   ;
+    logic [DATA_WD-1:0]  mem_dest_wdata  ;
+    logic [DATA_WD-1:0]  mem_dest_rdata  ;
+
+    assign mem_rd = mem_src_rd;
+    assign mem_src_rdata = mem_rdata;
+    assign mem_wr = mem_dest_wr;
+    assign mem_wdata = mem_dest_wdata;
+    assign mem_wmask = mem_dest_wmask;
+    assign mem_addr = mem_wr?   mem_dest_addr : mem_src_addr;
+`endif
+
 
 typedef enum logic [3:0] {IDLE, INIT, FIND_MAX, DIFF_SUM, GET_SHIFT, CAL_RES, DONE, WAIT} state_t;
 state_t state_c,state_n;
@@ -621,6 +653,7 @@ assign mem_dest_wr = |data_out_vld;
 assign mem_dest_wdata = {data_out[7], data_out[6], data_out[5], data_out[4], data_out[3], data_out[2], data_out[1], data_out[0]};
 assign mem_dest_wmask = data_out_vld;
 assign mem_dest_rd = 1'b0;
+
 
 assign stage_time = state_diff_sum?  STAGE_PRD :
                     (state_cal_res && cal_res_skip)?    8 : 8; // todo
