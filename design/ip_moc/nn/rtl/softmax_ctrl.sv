@@ -166,6 +166,7 @@ logic dim_vld;
 logic last_dim_c;
 logic last_x_c;
 logic cal_res_skip;
+logic last_xy;
 
 typedef enum logic [3:0] {IDLE, INIT, FIND_MAX, DIFF_SUM, GET_SHIFT, CAL_RES, DONE, WAIT} state_t;
 state_t state_c,state_n;
@@ -255,7 +256,7 @@ assign dim_vld = ((state_find_max) || (state_diff_sum && stage_end) || (state_ca
 assign dim_loop_end = (dim_cnt == dim_num-1) && dim_vld;   // todo state latency
 assign last_dim_c = (dim_cnt == dim_num-1);
 assign last_x_c = (x_cnt == x_num-1);
-
+assign last_xy = (y_cnt == y_num-1) && last_x_c;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         dim_cnt <= 'd0;
@@ -325,7 +326,7 @@ generate
         always_ff@(posedge clk or negedge rstn) begin
             if(~rstn)
                 mask[i] <= 1'b1;
-            else if(softmax_on) begin
+            else if(softmax_on && (|rg_inc[OFFSET-1:0])) begin
                 if(rg_dim == 1 && (i >= rg_inc[OFFSET-1:0]) && last_dim_c)
                     mask[i] <= 1'b0;
                 else if(rg_dim != 1 &&(i >= rg_inc[OFFSET-1:0]) && last_x_c)
@@ -524,7 +525,7 @@ assign mem_src_addr_next = (rg_dim == 1)?   (mem_src_addr + 1) :
                            (rg_dim == 3)?   (mem_src_addr + c8_num) : 'd0;
 
 assign mem_src_addr_head_next = (rg_dim == 1)?   (mem_src_addr_head + c8_num) :
-                                (rg_dim == 2)?   (last_x_c?  (mem_src_addr_head + 1) : (mem_src_addr_head + 1)) :  // todo pre-cal
+                                (rg_dim == 2)?   (mem_src_addr_head + 1) :  // todo pre-cal
                                 (rg_dim == 3)?   (last_x_c?  (mem_src_addr_head + 1 - c8_num + c8_num * rg_inw) : (mem_src_addr_head + 1)) : 'd0;
 
 always_ff@(posedge clk or negedge rstn) begin   // todo
@@ -532,8 +533,12 @@ always_ff@(posedge clk or negedge rstn) begin   // todo
         mem_src_addr_head <= 'd0;
     else if(init_done)
         mem_src_addr_head <= rg_src_base;
-    else if(get_shift_end) 
-        mem_src_addr_head <= mem_src_addr_head_next;
+    else if(get_shift_end) begin
+        if(last_xy)
+            mem_src_addr_head <= mem_src_addr + 1;
+        else 
+            mem_src_addr_head <= mem_src_addr_head_next;
+    end
 end
 
 always_ff@(posedge clk or negedge rstn) begin   // todo
@@ -593,8 +598,12 @@ always_ff@(posedge clk or negedge rstn) begin   // todo
         mem_dest_addr_head <= 'd0;
     else if(init_done)
         mem_dest_addr_head <= rg_dest_base;
-    else if(cal_res_end) 
-        mem_dest_addr_head <= mem_dest_addr_head_next;
+    else if(cal_res_end) begin
+        if(last_xy)
+            mem_dest_addr_head <= mem_dest_addr + 1;
+        else
+            mem_dest_addr_head <= mem_dest_addr_head_next;
+    end
 end
 
 always_ff@(posedge clk or negedge rstn) begin   // todo
