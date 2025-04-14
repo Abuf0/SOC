@@ -562,6 +562,10 @@ always_ff@(posedge clk or negedge rstn) begin   // todo
         mem_src_rd <= 1'b0;
 end
 
+assign mem_src_wr = 1'b0;
+assign mem_src_wmask = 'd0;
+assign mem_src_wdata = 'd0;
+
 always_ff@(posedge clk or negedge rstn) begin   // todo
     if(~rstn)
         data_in_vld <= 1'b0;
@@ -572,7 +576,6 @@ always_ff@(posedge clk or negedge rstn) begin   // todo
 end
 
 // dest memory interface //
-// source memory interface //
 logic [ADDR_WD-1:0] mem_dest_addr_next;
 logic [ADDR_WD-1:0] mem_dest_addr_head;
 logic [ADDR_WD-1:0] mem_dest_addr_head_next;
@@ -608,7 +611,7 @@ end
 assign mem_dest_wr = |data_out_vld;
 assign mem_dest_wdata = {data_out[7], data_out[6], data_out[5], data_out[4], data_out[3], data_out[2], data_out[1], data_out[0]};
 assign mem_dest_wmask = data_out_vld;
-
+assign mem_dest_rd = 1'b0;
 
 assign stage_time = state_diff_sum?  STAGE_PRD :
                     (state_cal_res && cal_res_skip)?    8 : 8; // todo
