@@ -128,6 +128,7 @@ logic state_find_max;
 logic state_diff_sum;
 logic state_cal_res;
 logic state_shift;
+logic state_init;
 
 logic find_max_on;
 logic [4:0]find_max_on_d;
@@ -155,6 +156,21 @@ logic add_data_sel;
 
 logic mul_sat_diff_sel;
 logic mul_sat_cal_sel;
+
+logic [ADDR_WD-1:0] dim2_step;
+logic [ADDR_WD-1:0] dim3_step;
+
+logic [ADDR_WD-1:0] mem_src_addr_next;
+logic [ADDR_WD-1:0] mem_src_addr_head;
+logic [ADDR_WD-1:0] mem_src_addr_head_next;
+logic [ADDR_WD-1:0] mem_dest_addr_next;
+logic [ADDR_WD-1:0] mem_dest_addr_head;
+logic [ADDR_WD-1:0] mem_dest_addr_head_next;
+
+logic src_head_add_sel;
+logic src_addr_add_sel;
+logic dest_head_add_sel;
+logic dest_addr_add_sel;
 
 logic [7:0] data_in [0:DATA_WB-1];
 logic data_in_vld;
@@ -223,6 +239,7 @@ always@(*) begin
     endcase
 end
 
+assign state_init = (state_c == INIT);
 assign state_find_max = (state_c == FIND_MAX);
 assign state_diff_sum = (state_c == DIFF_SUM);
 assign state_cal_res = (state_c == CAL_RES);
@@ -387,24 +404,22 @@ generate
                 data_max[i] <= (data_max[0] > data_max_tmp4)?  data_max[0] : data_max_tmp4;
         end
 
+        if(i>3) begin
         assign add_a[i] =   add_diff_sel?   data_in[i] :
-                            add_sum_sel?    sum[i] :          // todo
-                            add_param_sel?  'sd0 :          // todo 
-                            add_data_sel?   'sd0 : 'sd0;    // todo
+                            add_sum_sel?    sum[i] : 'sd0;         // todo
 
         assign add_b[i] =   add_diff_sel?   -data_max[i] :
-                            add_sum_sel?    result_tmp[i] :          // todo
-                            add_param_sel?  'sd0 :          // todo 
-                            add_data_sel?   'sd0 : 'sd0;    // todo
-
+                            add_sum_sel?    result_tmp[i] : 'sd0;         // todo
+        end
         assign mul_sat_m1[i] = mul_sat_diff_sel?    (result_tmp[i] <<< (57 - rg_inshift)) : // todo pre cal
                                mul_sat_cal_sel?     exp_result[i] : 'sd0;    // todo
 
         assign mul_sat_m2[i] = mul_sat_diff_sel?    rg_inmultsc : 
-                               mul_sat_cal_sel?     shift_scale[i] : 'sd0;    // todo
-
+                               mul_sat_cal_sel?     shift_scale[i] : 'sd0;    
+        if(i>1) begin
         assign mult_a[i] = mult_sel?    'sd0 : 'sd0;    // todo
         assign mult_b[i] = mult_sel?    'sd0 : 'sd0;    // todo
+        end
 
         assign add64_a[i] = add64_sel?    result64_tmp[i] : 'sd0;   
         assign add64_b[i] = add64_sel?    rg_llmulbzp : 'sd0;   
@@ -547,24 +562,69 @@ end
 
 assign one_start = (state_shift && clz_vld);
 
+assign mult_a[0] = mult_sel?    c8_num : 'sd0;   
+assign mult_b[0] = mult_sel?    rg_inw : 'sd0;   
+assign mult_a[1] = mult_sel?    c8_num : 'sd0;   
+assign mult_b[1] = mult_sel?    (rg_inw-1) : 'sd0;   
+
+assign add_a[0] =   add_diff_sel?   data_in[0] :
+                    add_sum_sel?    sum[0] : 
+                    src_head_add_sel?   mem_src_addr_head : 'sd0;        
+assign add_b[0] =   add_diff_sel?   -data_max[0] :
+                    add_sum_sel?    result_tmp[0] : 
+                    src_head_add_sel?   ((rg_dim == 1)?  c8_num : (1 + dim3_step)) : 'sd0;        
+
+assign add_a[1] =   add_diff_sel?   data_in[1] :
+                    add_sum_sel?    sum[1] : 
+                    src_addr_add_sel?   mem_src_addr : 'sd0;        
+assign add_b[1] =   add_diff_sel?   -data_max[1] :
+                    add_sum_sel?    result_tmp[1] : 
+                    src_addr_add_sel?   ((rg_dim == 2)?  dim2_step : c8_num) : 'sd0;    
+
+assign add_a[2] =   add_diff_sel?   data_in[2] :
+                    add_sum_sel?    sum[2] : 
+                    dest_head_add_sel?   mem_dest_addr_head : 'sd0;        
+assign add_b[2] =   add_diff_sel?   -data_max[2] :
+                    add_sum_sel?    result_tmp[2] : 
+                    dest_head_add_sel?   ((rg_dim == 1)?  c8_num : (1 + dim3_step)) : 'sd0;        
+
+assign add_a[3] =   add_diff_sel?   data_in[3] :
+                    add_sum_sel?    sum[3] : 
+                    dest_addr_add_sel?   mem_dest_addr : 'sd0;        
+assign add_b[3] =   add_diff_sel?   -data_max[3] :
+                    add_sum_sel?    result_tmp[3] : 
+                    dest_addr_add_sel?   ((rg_dim == 2)?  dim2_step : c8_num) : 'sd0;    
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn) begin
+        dim2_step <= 'd0;
+        dim3_step <= 'd0;
+    end
+    else if(init_done) begin
+        dim2_step <= mult_res[0];
+        dim3_step <= mult_res[1];
+    end
+end
+
 // source memory interface //
-logic [ADDR_WD-1:0] mem_src_addr_next;
-logic [ADDR_WD-1:0] mem_src_addr_head;
-logic [ADDR_WD-1:0] mem_src_addr_head_next;
+assign src_head_add_sel = get_shift_end;
+assign src_addr_add_sel = exp_result_vld || find_max_on_d[0];
+assign dest_head_add_sel = cal_res_end;
+assign dest_addr_add_sel = |data_out_vld;
 
-assign mem_src_addr_next = (rg_dim == 1)?   (mem_src_addr + 1) :
-                           (rg_dim == 2)?   (mem_src_addr + c8_num * rg_inw) :  // todo pre-cal
-                           (rg_dim == 3)?   (mem_src_addr + c8_num) : 'd0;
+assign mem_src_addr_next = (rg_dim == 1)?   (mem_src_addr + 1) : add_sum[1];
+                           //(rg_dim == 2)?   (mem_src_addr + dim2_step) :  // todo pre-cal
+                           //(rg_dim == 3)?   (mem_src_addr + c8_num) : 'd0;
 
-assign mem_src_addr_head_next = (rg_dim == 1)?   (mem_src_addr_head + c8_num) :
-                                (rg_dim == 2)?   (mem_src_addr_head + 1) :  // todo pre-cal
-                                (rg_dim == 3)?   (last_x_c?  (mem_src_addr_head + 1 - c8_num + c8_num * rg_inw) : (mem_src_addr_head + 1)) : 'd0;
+assign mem_src_addr_head_next = //(rg_dim == 1)?   (mem_src_addr_head + c8_num) :
+                                (rg_dim == 2)?   (mem_src_addr_head + 1) :  add_sum[0];
+                                //(rg_dim == 3)?   (last_x_c?  (mem_src_addr_head + 1 + dim3_step) : (mem_src_addr_head + 1)) : 'd0;
 
-always_ff@(posedge clk or negedge rstn) begin   // todo
+always_ff@(posedge clk or negedge rstn) begin  
     if(~rstn)
         mem_src_addr_head <= 'd0;
     else if(init_done)
-        mem_src_addr_head <= rg_src_base;
+        mem_src_addr_head <= rg_src_base[ADDR_WD-1:OFFSET];
     else if(get_shift_end) begin
         if(last_xy)
             mem_src_addr_head <= mem_src_addr + 1;
@@ -573,11 +633,11 @@ always_ff@(posedge clk or negedge rstn) begin   // todo
     end
 end
 
-always_ff@(posedge clk or negedge rstn) begin   // todo
+always_ff@(posedge clk or negedge rstn) begin   
     if(~rstn)
         mem_src_addr <= 'd0;
     else if(init_done)
-        mem_src_addr <= rg_src_base;
+        mem_src_addr <= rg_src_base[ADDR_WD-1:OFFSET];
     else if(find_max_on_d[0] & state_find_max)
         mem_src_addr <= mem_src_addr_next;
     else if(find_max_d3 || (get_shift_end && ~cal_res_skip) || (cal_res_end))    // todo
@@ -586,7 +646,7 @@ always_ff@(posedge clk or negedge rstn) begin   // todo
         mem_src_addr <= mem_src_addr_next;
 end
 
-always_ff@(posedge clk or negedge rstn) begin   // todo
+always_ff@(posedge clk or negedge rstn) begin   
     if(~rstn)
         mem_src_rd <= 1'b0;
     else if(state_find_max)
@@ -603,7 +663,7 @@ assign mem_src_wr = 1'b0;
 assign mem_src_wmask = 'd0;
 assign mem_src_wdata = 'd0;
 
-always_ff@(posedge clk or negedge rstn) begin   // todo
+always_ff@(posedge clk or negedge rstn) begin   
     if(~rstn)
         data_in_vld <= 1'b0;
     else if(mem_src_rd)
@@ -613,23 +673,20 @@ always_ff@(posedge clk or negedge rstn) begin   // todo
 end
 
 // dest memory interface //
-logic [ADDR_WD-1:0] mem_dest_addr_next;
-logic [ADDR_WD-1:0] mem_dest_addr_head;
-logic [ADDR_WD-1:0] mem_dest_addr_head_next;
 
-assign mem_dest_addr_next = (rg_dim == 1)?   (mem_dest_addr + 1) :
-                            (rg_dim == 2)?   (mem_dest_addr + c8_num * rg_inw) :  // todo pre-cal
-                            (rg_dim == 3)?   (mem_dest_addr + c8_num) : 'd0;
+assign mem_dest_addr_next = (rg_dim == 1)?   (mem_dest_addr + 1) : add_sum[3];
+                            //(rg_dim == 2)?   (mem_dest_addr + dim2_step) :  // todo pre-cal
+                            //(rg_dim == 3)?   (mem_dest_addr + c8_num) : 'd0;
 
-assign mem_dest_addr_head_next = (rg_dim == 1)?   (mem_dest_addr_head + c8_num) :
-                                 (rg_dim == 2)?   (last_x_c?  (mem_dest_addr_head + 1) : (mem_dest_addr_head + 1)) :  // todo pre-cal
-                                 (rg_dim == 3)?   (last_x_c?  (mem_dest_addr_head + 1 - c8_num + c8_num * rg_inw) : (mem_dest_addr_head + 1)) : 'd0;
+assign mem_dest_addr_head_next = //(rg_dim == 1)?   (mem_dest_addr_head + c8_num) :
+                                 (rg_dim == 2)?   (mem_dest_addr_head + 1) :  add_sum[2];// todo pre-cal
+                                 //(rg_dim == 3)?   (last_x_c?  (mem_dest_addr_head + 1 + dim3_step) : (mem_dest_addr_head + 1)) : 'd0;
 
 always_ff@(posedge clk or negedge rstn) begin   // todo
     if(~rstn)
         mem_dest_addr_head <= 'd0;
     else if(init_done)
-        mem_dest_addr_head <= rg_dest_base;
+        mem_dest_addr_head <= rg_dest_base[ADDR_WD-1:OFFSET];
     else if(cal_res_end) begin
         if(last_xy)
             mem_dest_addr_head <= mem_dest_addr + 1;
@@ -638,14 +695,14 @@ always_ff@(posedge clk or negedge rstn) begin   // todo
     end
 end
 
-always_ff@(posedge clk or negedge rstn) begin   // todo
+always_ff@(posedge clk or negedge rstn) begin  
     if(~rstn)
         mem_dest_addr <= 'd0;
     else if(init_done)
-        mem_dest_addr <= rg_dest_base;
-    else if(get_shift_end)    // todo
+        mem_dest_addr <= rg_dest_base[ADDR_WD-1:OFFSET];
+    else if(get_shift_end)    
         mem_dest_addr <= mem_dest_addr_head;
-    else if(|data_out_vld)   // todo
+    else if(|data_out_vld)   
         mem_dest_addr <= mem_dest_addr_next;
 end
 
@@ -691,16 +748,17 @@ assign add_sum_sel   = (state_diff_sum && stage_cnt>2);
 assign add_param_sel = (state_shift && stage_cnt==1);
 assign add_data_sel  = (state_cal_res && stage_cnt>4);
 
-assign add_sel = (add_diff_sel || add_sum_sel || add_param_sel || add_data_sel);
+//assign add_sel = (add_diff_sel || add_sum_sel || add_param_sel || add_data_sel);
+assign add_sel = (add_diff_sel || add_sum_sel || src_addr_add_sel || src_head_add_sel || dest_addr_add_sel || dest_head_add_sel);
 
 assign mul_sat_diff_sel = (state_diff_sum && stage_cnt==1) || (state_cal_res && ~cal_res_skip && stage_cnt ==2); 
 assign mul_sat_cal_sel = (state_cal_res && ~cal_res_skip && stage_cnt ==3 && exp_result_vld) || (state_cal_res && cal_res_skip && stage_cnt ==2);   // todo cal skip
 
 assign mul_sat_sel = (mul_sat_diff_sel || mul_sat_cal_sel);
 
-assign mult64_sel = (state_cal_res && ~cal_res_skip && stage_cnt == 4); // todo
-assign add64_sel = (state_cal_res && ~cal_res_skip && stage_cnt == 5); // todo
+assign mult64_sel = (state_cal_res && ~cal_res_skip && stage_cnt == 4);
+assign add64_sel = (state_cal_res && ~cal_res_skip && stage_cnt == 5); 
 
-assign mult_sel = 0;
+assign mult_sel = state_init;
 endmodule
 

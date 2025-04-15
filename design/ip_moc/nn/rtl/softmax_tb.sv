@@ -170,13 +170,13 @@ initial
 begin
     #(PERIOD*3.3) rstn  =  1;
     repeat(5) begin @(negedge clk); end
-    rg_batch     = 2  ;    // 2    // 1    // 1    // 1  // 2  // 1     //  2  // 2  //  3 
+    rg_batch     = 3  ;    // 2    // 1    // 1    // 1  // 2  // 1     //  2  // 2  //  3 
     rg_inw       = 3  ;    // 3    // 2    // 3    // 3  // 5  // 2     //  9  // 9  //  5 
     rg_inh       = 3  ;    // 3    // 2    // 3    // 3  // 5  // 2     //  9  // 9  //  5 
-    rg_inc       = 11 ;    // 40   // 24   // 24   // 19 // 6  // 21    //  27 // 27 //  14
+    rg_inc       = 33 ;    // 40   // 24   // 24   // 19 // 6  // 21    //  27 // 27 //  14
     rg_dim       = 1  ;    // 1    // 2    // 3    // 2  // 3  // 1     //  1  // 2  //  3 
-    rg_src_base  = 0  ;                                                 //  3  // 2  //  0 
-    rg_dest_base = 0  ;                                                 //  5  // 1  //  0 
+    rg_src_base  = 0  ;                                                 //  3  // 2  //  0  // TODO [3:0]
+    rg_dest_base = 0  ;                                                 //  5  // 1  //  0  // TODO [3:0]
     rg_llmulbzp  = 0;
     rg_llmultsc  = 1;
     rg_llshift   = 1;
