@@ -57,7 +57,7 @@ module moce_cfft #(
     output logic [DATA_WIDTH-1:0]           mem1_wdata          ,
     output logic                            mem1_wr             ,
     output logic                            mem1_rd             ,
-    output logic [LADDR_WIDTH-1:0]          mem1_addr           ,
+    output logic [LADDR_WIDTH-2:0]          mem1_addr           ,
     input        [DATA_WIDTH-1:0]           mem2_rdata          ,
     output logic [DATA_WIDTH-1:0]           mem2_wdata          ,
     output logic                            mem2_wr             ,
@@ -72,7 +72,7 @@ module moce_cfft #(
     output logic [DATA_WIDTH-1:0]           mem4_wdata          ,
     output logic                            mem4_wr             ,
     output logic                            mem4_rd             ,
-    output logic [LADDR_WIDTH-1:0]          mem4_addr           
+    output logic [LADDR_WIDTH-2:0]          mem4_addr           
 );
 // ---------- behavior model (just for module test) --------//
 logic signed [DATA_WIDTH-1:0] add1_a;

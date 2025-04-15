@@ -36,7 +36,7 @@ logic [ADDR_WIDTH-1:0]       wn_addr                ;
 
 logic [DATA_WIDTH-1:0]       mem1_rdata             ;
 logic [DATA_WIDTH-1:0]       mem1_wdata             ;
-logic [LADDR_WIDTH-1:0]      mem1_addr              ;
+logic [LADDR_WIDTH-2:0]      mem1_addr              ;
 logic                        mem1_wr                ;
 logic                        mem1_rd                ;
 logic [DATA_WIDTH-1:0]       mem2_rdata             ;
@@ -51,7 +51,7 @@ logic                        mem3_wr                ;
 logic                        mem3_rd                ;
 logic [DATA_WIDTH-1:0]       mem4_rdata             ;
 logic [DATA_WIDTH-1:0]       mem4_wdata             ;
-logic [LADDR_WIDTH-1:0]      mem4_addr              ;
+logic [LADDR_WIDTH-2:0]      mem4_addr              ;
 logic                        mem4_wr                ;
 logic                        mem4_rd                ;
 
@@ -193,7 +193,7 @@ assign add1_sum = add1_a + add1_b;
 assign add2_sum = add2_a + add2_b;
 assign add3_sum = add3_a + add3_b;
 
-logic [DATA_WIDTH-1:0] mem1_array [0:(1<<LADDR_WIDTH)-1];
+logic [DATA_WIDTH-1:0] mem1_array [0:(1<<3)-1];
 always_ff@(posedge clk or negedge rstn) begin
     if(mem1_wr)
         mem1_array[mem1_addr] <= mem1_wdata;
@@ -206,7 +206,7 @@ always_ff@(posedge clk or negedge rstn) begin
         mem1_rdata <= mem1_array[mem1_addr];
 end
 
-logic [DATA_WIDTH-1:0] mem2_array [0:(1<<LADDR_WIDTH)-1];
+logic [DATA_WIDTH-1:0] mem2_array [0:(1<<4)-1];
 always_ff@(posedge clk or negedge rstn) begin
     if(mem2_wr)
         mem2_array[mem2_addr] <= mem2_wdata;
@@ -219,7 +219,7 @@ always_ff@(posedge clk or negedge rstn) begin
         mem2_rdata <= mem2_array[mem2_addr];
 end
 
-logic [DATA_WIDTH-1:0] mem3_array [0:(1<<LADDR_WIDTH)-1];
+logic [DATA_WIDTH-1:0] mem3_array [0:(1<<4)-1];
 always_ff@(posedge clk or negedge rstn) begin
     if(mem3_wr)
         mem3_array[mem3_addr] <= mem3_wdata;
@@ -232,7 +232,7 @@ always_ff@(posedge clk or negedge rstn) begin
         mem3_rdata <= mem3_array[mem3_addr];
 end
 
-logic [DATA_WIDTH-1:0] mem4_array [0:(1<<LADDR_WIDTH)-1];
+logic [DATA_WIDTH-1:0] mem4_array [0:(1<<3)-1];
 always_ff@(posedge clk or negedge rstn) begin
     if(mem4_wr)
         mem4_array[mem4_addr] <= mem4_wdata;

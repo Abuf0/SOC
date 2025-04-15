@@ -45,7 +45,7 @@ module radix4#(
     output logic [DATA_WIDTH-1:0]           mem1_wdata          ,
     output logic                            mem1_wr             ,
     output logic                            mem1_rd             ,
-    output logic [LADDR_WIDTH-1:0]          mem1_addr           ,
+    output logic [LADDR_WIDTH-2:0]          mem1_addr           ,
     input        [DATA_WIDTH-1:0]           mem2_rdata          ,
     output logic [DATA_WIDTH-1:0]           mem2_wdata          ,
     output logic                            mem2_wr             ,
@@ -60,7 +60,7 @@ module radix4#(
     output logic [DATA_WIDTH-1:0]           mem4_wdata          ,
     output logic                            mem4_wr             ,
     output logic                            mem4_rd             ,
-    output logic [LADDR_WIDTH-1:0]          mem4_addr           ,
+    output logic [LADDR_WIDTH-2:0]          mem4_addr           ,
     /***************** MULT1 interface *********************/
     output logic signed [DATA_WIDTH-1:0]    mult1_a             ,
     output logic signed [DATA_WIDTH-1:0]    mult1_b             ,
@@ -1163,13 +1163,13 @@ always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem4_addr <= 'd0;
     else if(state_radix4) begin
-            if(tcnt>=0 && tcnt<=16) mem4_addr <= mem_addr_mux;
-            else if(tcnt == 19)  mem4_addr <= 13;
-            else if(tcnt == 20)  mem4_addr <= 10;
-            else if(tcnt == 21)  mem4_addr <= 11;
-            else if(tcnt == 22)  mem4_addr <= 9;
-            else if(tcnt == 23)  mem4_addr <= 12;
-            else if(tcnt == 24)  mem4_addr <= 8;
+            if(tcnt>=0 && tcnt<=16) mem4_addr <= mem_addr_mux - 8;
+            else if(tcnt == 19)  mem4_addr <= 5;
+            else if(tcnt == 20)  mem4_addr <= 2;
+            else if(tcnt == 21)  mem4_addr <= 3;
+            else if(tcnt == 22)  mem4_addr <= 1;
+            else if(tcnt == 23)  mem4_addr <= 4;
+            else if(tcnt == 24)  mem4_addr <= 0;
         end
 end
 
