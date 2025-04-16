@@ -103,6 +103,7 @@ logic [4:0] tcnt;  // for wn 0~5// for data 0~7
 logic [12:0] move_cnt;
 logic [12:0] move_num;
 logic rw_flag;
+logic wait_cnt;
 
 logic single_loop_end;  // pre/post/rev end
 logic [12:0] single_num;
@@ -113,10 +114,12 @@ logic state_pre;
 logic state_post;
 logic state_rev;
 logic state_move;
+logic state_wait;
 
 logic first_stage_done;
 logic middile_stage_done;
 logic last_stage_done;
+logic wait_done;
 logic pre_stage_done;
 logic post_stage_done;
 logic rev_stage_done;
@@ -274,7 +277,7 @@ end
 
 
 // FSM
-typedef enum logic  [3:0] {IDLE, FIRST_STAGE, MIDDLE_STAGE, LAST_STAGE,PRE_STAGE,POST_STAGE,REV_STAGE,MOVE_STAGE} state_t;
+typedef enum logic  [3:0] {IDLE, FIRST_STAGE, MIDDLE_STAGE, LAST_STAGE,PRE_STAGE,POST_STAGE,REV_STAGE,MOVE_STAGE, WAIT} state_t;
 state_t state_c,state_n;
 
 always_ff @( posedge clk or negedge rstn ) begin
@@ -292,9 +295,10 @@ always @(*) begin
                                 post_start?             POST_STAGE :
                                 reverse_start?          REV_STAGE : 
                                 move_start?             MOVE_STAGE : IDLE;
-        FIRST_STAGE : state_n = first_stage_done?       ((stage_num == 2)?  LAST_STAGE : MIDDLE_STAGE) : FIRST_STAGE;
+        FIRST_STAGE : state_n = first_stage_done?       ((stage_num == 2)?  WAIT : MIDDLE_STAGE) : FIRST_STAGE;
         MIDDLE_STAGE: state_n = middile_stage_done?     LAST_STAGE : MIDDLE_STAGE;
         LAST_STAGE :  state_n = last_stage_done?        IDLE : LAST_STAGE;
+        WAIT :        state_n = wait_done?              LAST_STAGE : WAIT;
         PRE_STAGE :   state_n = pre_stage_done?         IDLE : PRE_STAGE;
         POST_STAGE :  state_n = post_stage_done?        IDLE : POST_STAGE;
         REV_STAGE :   state_n = rev_stage_done?         IDLE : REV_STAGE;
@@ -310,12 +314,14 @@ assign pre_stage_done = single_loop_end && (state_c == PRE_STAGE);
 assign post_stage_done = single_loop_end && (state_c == POST_STAGE);
 assign rev_stage_done = single_loop_end && (state_c == REV_STAGE);
 assign move_stage_done_pre = (move_cnt == move_num-1) && rw_flag && (state_c == MOVE_STAGE);
+assign wait_done = tcnt_loop_end && (state_c == WAIT) && wait_cnt;
 
 assign state_radix4 = (state_c == FIRST_STAGE || state_c == MIDDLE_STAGE || state_c == LAST_STAGE);
 assign state_pre = (state_c == PRE_STAGE);
 assign state_post = (state_c == POST_STAGE);
 assign state_rev = (state_c == REV_STAGE);
 assign state_move = (state_c == MOVE_STAGE);
+assign state_wait = (state_c == WAIT);
 
 assign last_stage_last_radix = (state_c == LAST_STAGE) && (radix_loop_cnt == radix_num-1) && (group_loop_cnt == group_num-1);
 assign last_stage_first_radix = (state_c == LAST_STAGE) && (radix_loop_cnt == 0) && (group_loop_cnt == group_num-1);
@@ -331,7 +337,8 @@ assign tcnt_num = state_radix4?  PIPE_TIME :
 assign radix_num = (state_c == LAST_STAGE)? strid+1 : strid;
 assign group_num = step;
 assign single_num = state_pre?  fft_len : 
-                    state_post? (fft_len << 1)+1'b1 : (rg_bitrevlen+1'b1);
+                    state_post? (fft_len << 1)+1'b1 : 
+                    state_rev?  (rg_bitrevlen+1'b1) : 2;
 assign move_num = (fft_len << 1);   // re & im
 
 assign tcnt_loop_end = (tcnt == tcnt_num-1);
@@ -379,6 +386,17 @@ always_ff@(posedge clk or negedge rstn) begin
         move_cnt <= 'd0;
     else if(state_c == MOVE_STAGE && rw_flag)
         move_cnt <= (move_cnt == move_num-1)?   'd0 : (move_cnt+1'b1);
+end
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        wait_cnt <= 'd0;
+    else if(tcnt_loop_end) begin
+        if(state_wait)
+            wait_cnt <= ~wait_cnt;
+        else
+            wait_cnt <= 'd0;
+    end
 end
 
 always_ff@(posedge clk or negedge rstn) begin
@@ -447,10 +465,10 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         pipe_flag <= 1'b0;
+    else if(tcnt_loop_end && (state_radix4 || state_wait))
+        pipe_flag <= ~pipe_flag;
     else if(state_c != state_n)
         pipe_flag <= 1'b0;
-    else if(tcnt_loop_end && state_radix4)
-        pipe_flag <= ~pipe_flag;
 end
 
 always_ff@(posedge clk or negedge rstn) begin   // N/4, N/16, N/64, ...
@@ -584,7 +602,7 @@ always_ff@(posedge clk or negedge rstn) begin
         data_addr <= 'd0;   // fix
     else if(state_c != state_n)
         data_addr <= src_data_base;
-    else if(state_radix4)
+    else if(state_radix4 || state_wait)
         data_addr <= {re_addr_next[14:0],im_addr_flag};
     else if(state_pre)
         data_addr <= {re_pre_addr_next[14:0],im_pre_addr_flag};
@@ -616,7 +634,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin   // todo except first radix
     if(~rstn)
         data_wr <= 1'b0;
-    else if((tcnt >= 19 && tcnt<=26) && (state_radix4) && ~first_stage_first_radix)
+    else if((tcnt >= 19 && tcnt<=26) && (state_radix4 || (state_wait && ~wait_cnt)) && ~(stage_num == 2 && last_stage_first_radix) && ~first_stage_first_radix)
         data_wr <= 1'b1;
     else if(state_pre && (tcnt==5 || tcnt==11 || tcnt==12 || tcnt==13))
         data_wr <= 1'b1;
@@ -658,7 +676,7 @@ always_ff@(posedge clk or negedge rstn) begin
         wn_addr_sta <= 'd0;
     else if(reverse_start)
         wn_addr_sta <= rev_base;
-    else if(state_radix4 && (state_c != LAST_STAGE) && tcnt == 14) begin    // condition: >= 13 && < tcnt_num-3
+    else if((state_radix4 || state_wait) && (state_c != LAST_STAGE) && tcnt == 14) begin    // condition: >= 13 && < tcnt_num-3
         if(first_radix)
             wn_addr_sta <= 'd0;
         else if(radix_loop_cnt == 0)
@@ -680,7 +698,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         wn_addr <= 'd0; // fix
-    else if((state_radix4 && (state_c != LAST_STAGE)) || last_stage_first_radix) begin
+    else if(((state_radix4 || state_wait) && (state_c != LAST_STAGE)) || last_stage_first_radix) begin
         if(tcnt == tcnt_num-3 || tcnt==9)
             wn_addr <= wn_addr_co3;
         else if(tcnt == tcnt_num-2 || tcnt==10)
@@ -711,7 +729,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         wn_rd <= 1'b0;
-    else if(state_radix4 && ((tcnt >= tcnt_num-3) || (tcnt<=13)) && ~(state_c == LAST_STAGE && ~last_stage_first_radix))
+    else if((state_radix4 || (state_wait && ~wait_cnt)) && ((tcnt >= tcnt_num-3) || (tcnt<=13)) && ~(state_c == LAST_STAGE && ~last_stage_first_radix))
         wn_rd <= 1'b1;
     else if(state_pre && (tcnt==2 || tcnt==3 || tcnt==8 || tcnt==9))    // todo : can always rd??
         wn_rd <= 1'b1;
@@ -741,7 +759,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         buff1 <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(tcnt>=2 && tcnt<=9 && ~tcnt[0])
             buff1 <= (state_c == FIRST_STAGE)?  signed_data_rdata_shift4 : signed_data_rdata;
         else if(tcnt>=13 && tcnt<=19 && tcnt[0])
@@ -767,7 +785,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         buff2 <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(tcnt>=3 && tcnt<=10 && tcnt[0])
             buff2 <= (state_c == FIRST_STAGE)?  signed_data_rdata_shift4 : signed_data_rdata;
         else if(tcnt>=14 && tcnt<=20 && ~tcnt[0])
@@ -789,7 +807,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         buff3 <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(tcnt>=3 && tcnt<=10)
             buff3 <= add1_sum;
         else if(tcnt>=14 && tcnt<=21)
@@ -809,13 +827,13 @@ assign mult1_res_sat_shift32 = mult1_res[DATA_WIDTH-1]?  (mult1_res >>> DATA_WID
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         buff4 <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if((tcnt == tcnt_num-1) || tcnt==2 || tcnt==5 || tcnt==8 || tcnt==11 || tcnt==14)
             buff4 <= signed_wn_rdata;
         else if(tcnt==1 || tcnt==4 || tcnt==7 || tcnt==10 || tcnt==13 || tcnt== 16)
             buff4 <= $signed(mult1_res >>> DATA_WIDTH);
         else if(tcnt>=19 && tcnt <=26) begin
-            if(state_c == LAST_STAGE && ~last_stage_first_radix) begin
+            if((state_c == LAST_STAGE && ~last_stage_first_radix)) begin
                 buff4 <= pipe_flag?  mem2_rdata : mem3_rdata;
             end
             else begin
@@ -841,13 +859,13 @@ always_ff@(posedge clk or negedge rstn) begin
     end
 end
 assign signed_xa_ya_sum = (pipe_flag?  mem2_rdata : mem3_rdata);
-assign signed_xa_ya_out = (state_c == FIRST_STAGE || middle_stage_first_radix)?  signed_xa_ya_sum : (signed_xa_ya_sum>>>2);
+assign signed_xa_ya_out = (state_c == FIRST_STAGE || state_wait || middle_stage_first_radix)?  signed_xa_ya_sum : (signed_xa_ya_sum>>>2);
 
 // BUFFER5 //
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         buff5 <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(tcnt == 0 || tcnt==3 || tcnt==6 || tcnt==9 || tcnt==12 || tcnt==15)
             buff5 <= signed_wn_rdata;
         else if(tcnt==1 || tcnt==4 || tcnt==7 || tcnt==10 || tcnt==13 || tcnt== 16)
@@ -865,7 +883,7 @@ always@(*) begin
     add1_a = 'bx;
     add1_b = 'bx;
 `endif
-    if(state_radix4) begin
+    if(state_radix4 || state_wait) begin
         if(tcnt>=3 && tcnt<=10) begin
             add1_a = buff1;
             add1_b = tcnt[0]?   ((state_c == FIRST_STAGE)?  (-signed_data_rdata_shift4) : (-signed_data_rdata)) : buff2;
@@ -899,7 +917,7 @@ always@(*) begin
     add2_a = 'bx;
     add2_b = 'bx;
 `endif
-    if(state_radix4) begin
+    if(state_radix4 || state_wait) begin
 `ifdef DEBUG
         if(tcnt>=21 && tcnt<=26) begin  // to delete, for debug
 `endif
@@ -927,7 +945,7 @@ always@(*) begin
 `endif
 end
 
-assign signed_add2_sum_out = (state_c == FIRST_STAGE || middle_stage_first_radix)?  ($signed(add2_sum) <<< 1) : ($signed(add2_sum) >>> 1);
+assign signed_add2_sum_out = (state_c == FIRST_STAGE || state_wait || middle_stage_first_radix)?  ($signed(add2_sum) <<< 1) : ($signed(add2_sum) >>> 1);
 
 // MULT1 interface //
 always@(*) begin
@@ -935,7 +953,7 @@ always@(*) begin
     mult1_a = 'bx;
     mult1_b = 'bx;
 `endif
-    if(state_radix4) begin
+    if(state_radix4 || state_wait) begin
 `ifdef DEBUG
         if(tcnt==1 || tcnt==4 || tcnt==7 || tcnt==10 || tcnt==13 || tcnt==16) begin   // todo delet, just for check
 `endif
@@ -969,7 +987,7 @@ always@(*) begin
     mult2_a = 'bx;
     mult2_b = 'bx;
 `endif
-    if(state_radix4) begin
+    if(state_radix4 || state_wait) begin
 `ifdef DEBUG
         if(tcnt==1 || tcnt==4 || tcnt==7 || tcnt==10 || tcnt==13 || tcnt==16) begin   // todo delet, just for check
 `endif
@@ -990,7 +1008,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem1_addr <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(tcnt>=3 && tcnt<=10)
             mem1_addr <= tcnt-3;
         else if(tcnt == 11)
@@ -1016,7 +1034,7 @@ assign mem1_wdata = buff3;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem1_wr <= 1'b0;
-    else if((tcnt>=3 && tcnt<=10) && state_radix4) 
+    else if((tcnt>=3 && tcnt<=10) && (state_radix4 || state_wait)) 
         mem1_wr <= 1'b1;
     else
         mem1_wr <= 1'b0;
@@ -1025,7 +1043,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem1_rd <= 1'b0;
-    else if((tcnt>=11 && tcnt<=18) && state_radix4) 
+    else if((tcnt>=11 && tcnt<=18) && (state_radix4 || state_wait)) 
         mem1_rd <= 1'b1;
     else
         mem1_rd <= 1'b0;
@@ -1068,7 +1086,7 @@ assign mem_rd_condition = (tcnt==2 || tcnt==5 || tcnt==8 || tcnt==11 || tcnt==14
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem2_addr <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(~pipe_flag) begin
             if(tcnt>=14 && tcnt<=21)
                 mem2_addr <= tcnt-14;
@@ -1086,7 +1104,7 @@ assign mem2_wdata = pipe_flag?  buff4 : buff3;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem2_wr <= 1'b0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(~pipe_flag && tcnt >=14 && tcnt<=21)
             mem2_wr <= 1'b1;
         else if(pipe_flag && mem_wr_condition)
@@ -1101,7 +1119,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem2_rd <= 1'b0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if((pipe_flag && mem_rd_condition) || (~pipe_flag && (tcnt==tcnt_num-1 )))
             mem2_rd <= 1'b1;
         else
@@ -1115,7 +1133,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem3_addr <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(pipe_flag) begin
             if(tcnt>=14 && tcnt<=21)
                 mem3_addr <= tcnt-14;
@@ -1133,7 +1151,7 @@ assign mem3_wdata = pipe_flag?  buff3 : buff4;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem3_wr <= 1'b0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(pipe_flag && tcnt >=14 && tcnt<=21)
             mem3_wr <= 1'b1;
         else if(~pipe_flag && mem_wr_condition)
@@ -1148,7 +1166,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem3_rd <= 1'b0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if((~pipe_flag && mem_rd_condition) || (pipe_flag && (tcnt==tcnt_num-1 )))
             mem3_rd <= 1'b1;
         else
@@ -1162,7 +1180,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem4_addr <= 'd0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
             if(tcnt>=0 && tcnt<=16) mem4_addr <= mem_addr_mux - 8;
             else if(tcnt == 19)  mem4_addr <= 5;
             else if(tcnt == 20)  mem4_addr <= 2;
@@ -1178,7 +1196,7 @@ assign mem4_wdata = buff5;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem4_wr <= 1'b0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(mem_wr_condition && tcnt>=0 && tcnt<=16)
             mem4_wr <= 1'b1;
         else
@@ -1191,7 +1209,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem4_rd <= 1'b0;
-    else if(state_radix4) begin
+    else if(state_radix4 || state_wait) begin
         if(tcnt>=19 && tcnt<=24)
             mem4_rd <= 1'b1;
         else
