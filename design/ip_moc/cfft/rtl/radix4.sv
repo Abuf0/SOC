@@ -527,7 +527,7 @@ always@(*) begin
     add3_b = 'bx;
 `endif
     case(tcnt)
-        tcnt_num-1 : add3_b = (radix_loop_end)?  (group_loop_cnt+1) : (step << 2);
+        tcnt_num-1 : add3_b = (group_loop_end?)  0 : ((radix_loop_end)?  (group_loop_cnt+1) : (step << 2));
         5'd0:  add3_b = 0;
         5'd1:  add3_b = (step << 1);
         5'd2:  add3_b = step;
