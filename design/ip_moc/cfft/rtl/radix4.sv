@@ -100,8 +100,8 @@ logic [11:0] radix_loop_cnt; // for radix in one group // 0~N/4-1
 logic tcnt_loop_end;   // for one radix 4 swith
 logic [4:0] tcnt_num;   // tcnt num in one radix
 logic [4:0] tcnt;  // for wn 0~5// for data 0~7 
-logic [12:0] move_cnt;
-logic [12:0] move_num;
+logic [13:0] move_cnt;
+logic [13:0] move_num;
 logic rw_flag;
 logic wait_cnt;
 
@@ -327,7 +327,7 @@ assign last_stage_last_radix = (state_c == LAST_STAGE) && (radix_loop_cnt == rad
 assign last_stage_first_radix = (state_c == LAST_STAGE) && (radix_loop_cnt == 0) && (group_loop_cnt == group_num-1);
 assign first_stage_first_radix = (state_c == FIRST_STAGE) && (radix_loop_cnt == 0) && (group_loop_cnt == 0);
 assign first_radix = (radix_loop_cnt == 0) && (group_loop_cnt == 0);
-assign middle_stage_first_radix = (state_c == MIDDLE_STAGE) && (radix_loop_cnt == 0) && (group_loop_cnt == 0);
+assign middle_stage_first_radix = (state_c == MIDDLE_STAGE) && (stage_cnt == 1) && (radix_loop_cnt == 0) && (group_loop_cnt == 0);
 assign post_stage_last_radix = (state_c == POST_STAGE) && (radix_loop_cnt == single_num-1);
 
 assign tcnt_num = state_radix4?  PIPE_TIME : 
@@ -527,7 +527,7 @@ always@(*) begin
     add3_b = 'bx;
 `endif
     case(tcnt)
-        tcnt_num-1 : add3_b = (group_loop_end?)  0 : ((radix_loop_end)?  (group_loop_cnt+1) : (step << 2));
+        tcnt_num-1 : add3_b = (group_loop_end)?  0 : ((radix_loop_end)?  (group_loop_cnt+1) : (step << 2));
         5'd0:  add3_b = 0;
         5'd1:  add3_b = (step << 1);
         5'd2:  add3_b = step;
@@ -777,7 +777,7 @@ always_ff@(posedge clk or negedge rstn) begin
     end
     else if(state_rev) begin
         if(tcnt==2)
-            buff1 <= (tab_rdata >>> 2);
+            buff1 <= (radix_loop_cnt[0]?  (tab_rdata >> 2)+1'b1 : (tab_rdata >> 2));
     end
 end
 
@@ -799,7 +799,7 @@ always_ff@(posedge clk or negedge rstn) begin
     end
     else if(state_rev) begin
         if(tcnt==3)
-            buff2 <= (tab_rdata >>> 2);
+            buff2 <= (radix_loop_cnt[0]?  (tab_rdata >> 2)+1'b1 : (tab_rdata >> 2));
     end
 end
 
