@@ -84,9 +84,9 @@ module radix4#(
 );
 parameter RADIX = 4;    // fixed
 parameter PIPE_TIME = 28;
-parameter PRE_TIME = 15;
+parameter PRE_TIME = 17;
 parameter POST_TIME = 4;
-parameter REV_TIME = 4;
+parameter REV_TIME = 5;
 
 logic stage_loop_end;   // for one state switch
 logic [2:0] stage_num;// 16,...,4096 = 2,...,6 // stage num in one state
@@ -165,13 +165,16 @@ logic signed [DATA_WIDTH-1:0] signed_xa_ya_out;
 logic signed [DATA_WIDTH-1:0] mult1_res_sat_shift32;
 logic [DATA_WIDTH-1:0] tab_rdata;
 
+logic [DATA_WIDTH-1:0] buff0;
 logic [DATA_WIDTH-1:0] buff1;
 logic [DATA_WIDTH-1:0] buff2;
 logic [DATA_WIDTH-1:0] buff3;
 logic [DATA_WIDTH-1:0] buff4;
 logic [DATA_WIDTH-1:0] buff5;
+logic [DATA_WIDTH-1:0] buff6;
 
-assign signed_data_rdata = $signed(data_rdata);
+//assign signed_data_rdata = $signed(data_rdata);
+assign signed_data_rdata = $signed(buff0);
 assign signed_wn_rdata = $signed(wn_rdata);
 assign signed_data_rdata_shift4 = (signed_data_rdata >>> 4);
 assign signed_data_rdata_shift2 = (signed_data_rdata >>> 2);
@@ -551,9 +554,9 @@ always@(*) begin
 end
 
 assign re_addr_next = add3_sum;
-assign re_pre_addr_next = (tcnt == 0 || tcnt == 5 || tcnt == 6 || tcnt == 11)?  re_addr_a : (re_addr_a + fft_len);
+assign re_pre_addr_next = (tcnt == 0 || tcnt == 6 || tcnt == 7 || tcnt == 13)?  re_addr_a : (re_addr_a + fft_len);
 assign re_post_addr_next = re_addr_a;
-assign rev_addr_next = (tcnt==2 || tcnt==3)?    (radix_loop_cnt[0]?  (tab_rdata >> 2)+1'b1 : (tab_rdata >> 2)) : 
+assign rev_addr_next = (tcnt==3 || tcnt==4)?    (radix_loop_cnt[0]?  (buff6 >> 2)+1'b1 : (buff6 >> 2)) : 
                        (tcnt==0)?   buff2 : buff1;
 
 always_ff@(posedge clk or negedge rstn) begin
@@ -569,7 +572,7 @@ always_ff@(posedge clk or negedge rstn) begin
     end
 end
 assign im_addr_flag = (tcnt>=0 && tcnt<=7)? tcnt[1] : ~tcnt[0];
-assign im_pre_addr_flag = (tcnt==6 || tcnt==7 || tcnt==11 || tcnt==13) ;
+assign im_pre_addr_flag = (tcnt==7 || tcnt==8 || tcnt==13 || tcnt==15) ;
 assign im_post_addr_flag = tcnt[0];
 
 always_ff@(posedge clk or negedge rstn) begin
@@ -619,11 +622,11 @@ always_ff@(posedge clk or negedge rstn) begin   // todo except last radix
         data_rd <= 1'b0;
     else if(~(|tcnt[4:3]) && (state_radix4) && ~last_stage_last_radix)
         data_rd <= 1'b1;
-    else if(state_pre && (tcnt==0 || tcnt==1 || tcnt==6 || tcnt==7))
+    else if(state_pre && (tcnt==0 || tcnt==1 || tcnt==7 || tcnt==8))
         data_rd <= 1'b1;
     else if(state_post && (tcnt==0 || tcnt==1)) 
         data_rd <= 1'b1;
-    else if(state_rev && (tcnt==2 || tcnt==3) && (radix_loop_cnt != single_num-1))
+    else if(state_rev && (tcnt==3 || tcnt==4) && (radix_loop_cnt != single_num-1))
         data_rd <= 1'b1;
     else if(state_move)
         data_rd <= ~rw_flag;
@@ -636,7 +639,7 @@ always_ff@(posedge clk or negedge rstn) begin   // todo except first radix
         data_wr <= 1'b0;
     else if((tcnt >= 19 && tcnt<=26) && (state_radix4 || (state_wait && ~wait_cnt)) && ~(stage_num == 2 && last_stage_first_radix) && ~first_stage_first_radix)
         data_wr <= 1'b1;
-    else if(state_pre && (tcnt==5 || tcnt==11 || tcnt==12 || tcnt==13))
+    else if(state_pre && (tcnt==6 || tcnt==13 || tcnt==14 || tcnt==15))
         data_wr <= 1'b1;
     else if(state_post && (tcnt==2 || tcnt==3) && ~post_stage_last_radix)
         data_wr <= 1'b1;
@@ -713,9 +716,9 @@ always_ff@(posedge clk or negedge rstn) begin
             wn_addr <= wn_addr_si1;
     end
     else if(state_pre) begin
-        if(tcnt==2 || tcnt==8)
+        if(tcnt==2 || tcnt==9)
             wn_addr <= {wn_addr_sta,1'b0};
-        else if(tcnt==3 || tcnt==9)
+        else if(tcnt==3 || tcnt==10)
             wn_addr <= {wn_addr_sta,1'b1};
     end
     else if(state_rev) begin
@@ -731,7 +734,7 @@ always_ff@(posedge clk or negedge rstn) begin
         wn_rd <= 1'b0;
     else if((state_radix4 || (state_wait && ~wait_cnt)) && ((tcnt >= tcnt_num-3) || (tcnt<=13)) && ~(state_c == LAST_STAGE && ~last_stage_first_radix))
         wn_rd <= 1'b1;
-    else if(state_pre && (tcnt==2 || tcnt==3 || tcnt==8 || tcnt==9))    // todo : can always rd??
+    else if(state_pre && (tcnt==2 || tcnt==3 || tcnt==9 || tcnt==10))    // todo : can always rd??
         wn_rd <= 1'b1;
     else if(state_rev && (tcnt==0 || tcnt==1) && (radix_loop_cnt != single_num-1))
         wn_rd <= 1'b1;
@@ -754,30 +757,42 @@ always@(*) begin
 end
 
 // PIPE 0
-
+// BUFFER0 //
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        buff0 <= 'd0;
+    else if(state_radix4 || state_wait) begin
+        if(tcnt >=2 && tcnt <=9)
+            buff0 <= data_rdata;
+    end
+    else if(state_pre) begin
+        if(tcnt==2 || tcnt==3 || tcnt==9 || tcnt==10)
+            buff0 <= data_rdata;
+    end
+end
 // BUFFER1 //
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         buff1 <= 'd0;
     else if(state_radix4 || state_wait) begin
-        if(tcnt>=2 && tcnt<=9 && ~tcnt[0])
+        if(tcnt>=3 && tcnt<=10 && tcnt[0])
             buff1 <= (state_c == FIRST_STAGE)?  signed_data_rdata_shift4 : signed_data_rdata;
-        else if(tcnt>=13 && tcnt<=19 && tcnt[0])
+        else if(tcnt>=14 && tcnt<=20 && ~tcnt[0])
             buff1 <= mem1_rdata;
     end
     else if(state_pre) begin
-        if(tcnt==2 || tcnt==8)
+        if(tcnt==3 || tcnt==10)
             buff1 <= signed_data_rdata_shift2;
-        else if(tcnt==4 || tcnt==10)
+        else if(tcnt==5 || tcnt==12)
             buff1 <= add1_sum;
-        else if(tcnt==11)
+        else if(tcnt==13)
             buff1 <= mult1_res_sat_shift32;
-        else if(tcnt==12)
+        else if(tcnt==14)
             buff1 <= buff5;
     end
     else if(state_rev) begin
-        if(tcnt==2)
-            buff1 <= (radix_loop_cnt[0]?  (tab_rdata >> 2)+1'b1 : (tab_rdata >> 2));
+        if(tcnt==3)
+            buff1 <= (radix_loop_cnt[0]?  (buff6 >> 2)+1'b1 : (buff6 >> 2));
     end
 end
 
@@ -786,20 +801,20 @@ always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         buff2 <= 'd0;
     else if(state_radix4 || state_wait) begin
-        if(tcnt>=3 && tcnt<=10 && tcnt[0])
+        if(tcnt>=4 && tcnt<=11 && ~tcnt[0])
             buff2 <= (state_c == FIRST_STAGE)?  signed_data_rdata_shift4 : signed_data_rdata;
-        else if(tcnt>=14 && tcnt<=20 && ~tcnt[0])
+        else if(tcnt>=15 && tcnt<=21 && tcnt[0])
             buff2 <= mem1_rdata;
     end
     else if(state_pre) begin
-        if(tcnt==3 || tcnt==9)
+        if(tcnt==4 || tcnt==11)
             buff2 <= signed_data_rdata_shift2;
-        else if(tcnt==10)
+        else if(tcnt==12)
             buff2 <= mult1_res_sat_shift32;
     end
     else if(state_rev) begin
-        if(tcnt==3)
-            buff2 <= (radix_loop_cnt[0]?  (tab_rdata >> 2)+1'b1 : (tab_rdata >> 2));
+        if(tcnt==4)
+            buff2 <= (radix_loop_cnt[0]?  (buff6 >> 2)+1'b1 : (buff6 >> 2));
     end
 end
 
@@ -808,15 +823,15 @@ always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         buff3 <= 'd0;
     else if(state_radix4 || state_wait) begin
-        if(tcnt>=3 && tcnt<=10)
+        if(tcnt>=4 && tcnt<=11)
             buff3 <= add1_sum;
-        else if(tcnt>=14 && tcnt<=21)
+        else if(tcnt>=15 && tcnt<=22)
             buff3 <= add1_sum;
     end
     else if(state_pre) begin
-        if(tcnt==4)
+        if(tcnt==5)
             buff3 <= mult1_res_sat_shift32;
-        else if(tcnt==12)
+        else if(tcnt==14)
             buff3 <= buff2;
     end
 end
@@ -842,20 +857,20 @@ always_ff@(posedge clk or negedge rstn) begin
         end
     end
     else if(state_pre) begin
-        if(tcnt==3 || tcnt==9)
+        if(tcnt==4 || tcnt==11)
             buff4 <= add1_sum;
-        else if(tcnt==5 || tcnt==11)
+        else if(tcnt==6 || tcnt==13)
             buff4 <= buff1;
-        else if(tcnt==12 || tcnt==13)
+        else if(tcnt==14 || tcnt==15)
             buff4 <= (add2_sum << 1);
     end
     else if(state_post) begin
         if(tcnt==2 || tcnt==3)
-            buff4 <= (signed_data_rdata <<< 1);
+            buff4 <= ($signed(data_rdata) <<< 1);
     end
     else if(state_rev) begin
         if(tcnt==0 || tcnt==1)
-            buff4 <= signed_data_rdata;
+            buff4 <= $signed(data_rdata);
     end
 end
 assign signed_xa_ya_sum = (pipe_flag?  mem2_rdata : mem3_rdata);
@@ -872,11 +887,18 @@ always_ff@(posedge clk or negedge rstn) begin
             buff5 <= $signed(mult2_res >>> DATA_WIDTH);
     end
     else if(state_pre) begin
-        if(tcnt==5)
+        if(tcnt==6)
             buff5 <= mult1_res_sat_shift32;
     end
 end
-
+// BUFFER6 //
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
+        buff6 <= 'd0;
+    else if(state_pre || state_rev) begin
+        buff6 <= $signed(wn_rdata);
+    end
+end
 // ADD1 interface //
 always@(*) begin
 `ifdef DEBUG
@@ -884,23 +906,23 @@ always@(*) begin
     add1_b = 'bx;
 `endif
     if(state_radix4 || state_wait) begin
-        if(tcnt>=3 && tcnt<=10) begin
+        if(tcnt>=4 && tcnt<=11) begin
             add1_a = buff1;
-            add1_b = tcnt[0]?   ((state_c == FIRST_STAGE)?  (-signed_data_rdata_shift4) : (-signed_data_rdata)) : buff2;
+            add1_b = ~tcnt[0]?   ((state_c == FIRST_STAGE)?  (-signed_data_rdata_shift4) : (-signed_data_rdata)) : buff2;
         end
 `ifdef DEBUG
-        else if(tcnt>=14 && tcnt<=21) begin
+        else if(tcnt>=15 && tcnt<=22) begin
 `else 
         else begin
 `endif
             add1_a = buff1;
-            add1_b = tcnt[0]?   buff2 : (-mem1_rdata);
+            add1_b = ~tcnt[0]?   buff2 : (-mem1_rdata);
         end
     end
     else if(state_pre) begin
-        if((tcnt>=3 && tcnt<=4) || (tcnt>=9 && tcnt <=10)) begin    // to delete, for debug
+        if((tcnt>=4 && tcnt<=5) || (tcnt>=11 && tcnt <=12)) begin    // to delete, for debug
             add1_a = buff1;
-            add1_b = tcnt[0]?   -signed_data_rdata_shift2 : buff2;
+            add1_b = (tcnt==4 || tcnt==11)?   -signed_data_rdata_shift2 : buff2;
         end
     end
 `ifndef DEBUG
@@ -929,7 +951,7 @@ always@(*) begin
     end
     else if(state_pre) begin
 `ifdef DEBUG
-        if(tcnt==12 || tcnt==13) begin  // to delete, for debug
+        if(tcnt==14 || tcnt==15) begin  // to delete, for debug
 `endif
             add2_a = buff3;
             add2_b = (rg_ifft_flag ^ tcnt[0])?  -buff1 : buff1;
@@ -965,9 +987,9 @@ always@(*) begin
     end
     else if(state_pre) begin
 `ifdef DEBUG
-        if(tcnt==4 || tcnt==5 || tcnt==10 || tcnt==11) begin   // to delete , just for debug
+        if(tcnt==5 || tcnt==6 || tcnt==12 || tcnt==13) begin   // to delete , just for debug
 `endif
-            mult1_a = signed_wn_rdata;
+            mult1_a = buff6;
             mult1_b = buff4;
 `ifdef DEBUG    
         end
@@ -1009,23 +1031,23 @@ always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem1_addr <= 'd0;
     else if(state_radix4 || state_wait) begin
-        if(tcnt>=3 && tcnt<=10)
-            mem1_addr <= tcnt-3;
-        else if(tcnt == 11)
-            mem1_addr <= 0;
+        if(tcnt>=4 && tcnt<=11)
+            mem1_addr <= tcnt-4;
         else if(tcnt == 12)
-            mem1_addr <= 2;
+            mem1_addr <= 0;
         else if(tcnt == 13)
-            mem1_addr <= 1;
+            mem1_addr <= 2;
         else if(tcnt == 14)
-            mem1_addr <= 5;
+            mem1_addr <= 1;
         else if(tcnt == 15)
-            mem1_addr <= 6;
+            mem1_addr <= 5;
         else if(tcnt == 16)
-            mem1_addr <= 4;
+            mem1_addr <= 6;
         else if(tcnt == 17)
-            mem1_addr <= 7;
+            mem1_addr <= 4;
         else if(tcnt == 18)
+            mem1_addr <= 7;
+        else if(tcnt == 19)
             mem1_addr <= 3;
     end
 end
@@ -1034,7 +1056,7 @@ assign mem1_wdata = buff3;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem1_wr <= 1'b0;
-    else if((tcnt>=3 && tcnt<=10) && (state_radix4 || state_wait)) 
+    else if((tcnt>=4 && tcnt<=11) && (state_radix4 || state_wait)) 
         mem1_wr <= 1'b1;
     else
         mem1_wr <= 1'b0;
@@ -1043,7 +1065,7 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem1_rd <= 1'b0;
-    else if((tcnt>=11 && tcnt<=18) && (state_radix4 || state_wait)) 
+    else if((tcnt>=12 && tcnt<=19) && (state_radix4 || state_wait)) 
         mem1_rd <= 1'b1;
     else
         mem1_rd <= 1'b0;
@@ -1088,8 +1110,8 @@ always_ff@(posedge clk or negedge rstn) begin
         mem2_addr <= 'd0;
     else if(state_radix4 || state_wait) begin
         if(~pipe_flag) begin
-            if(tcnt>=14 && tcnt<=21)
-                mem2_addr <= tcnt-14;
+            if(tcnt>=15 && tcnt<=22)
+                mem2_addr <= tcnt-15;
             else if(tcnt == tcnt_num-1)
                 mem2_addr <= rg_ifft_flag?   1 : 0;
         end
@@ -1105,7 +1127,7 @@ always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem2_wr <= 1'b0;
     else if(state_radix4 || state_wait) begin
-        if(~pipe_flag && tcnt >=14 && tcnt<=21)
+        if(~pipe_flag && tcnt >=15 && tcnt<=22)
             mem2_wr <= 1'b1;
         else if(pipe_flag && mem_wr_condition)
             mem2_wr <= 1'b1;
@@ -1135,8 +1157,8 @@ always_ff@(posedge clk or negedge rstn) begin
         mem3_addr <= 'd0;
     else if(state_radix4 || state_wait) begin
         if(pipe_flag) begin
-            if(tcnt>=14 && tcnt<=21)
-                mem3_addr <= tcnt-14;
+            if(tcnt>=15 && tcnt<=22)
+                mem3_addr <= tcnt-15;
             else if(tcnt == tcnt_num-1)
                 mem3_addr <= rg_ifft_flag?   1 : 0;
         end
@@ -1152,7 +1174,7 @@ always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         mem3_wr <= 1'b0;
     else if(state_radix4 || state_wait) begin
-        if(pipe_flag && tcnt >=14 && tcnt<=21)
+        if(pipe_flag && tcnt >=15 && tcnt<=22)
             mem3_wr <= 1'b1;
         else if(~pipe_flag && mem_wr_condition)
             mem3_wr <= 1'b1;
