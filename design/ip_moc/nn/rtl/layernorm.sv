@@ -77,6 +77,7 @@ logic [7:0] batch_cnt;
 logic [2:0] param_stage_cnt;
 
 logic [OFFSET:0] pre_cnt_delta;
+logic [OFFSET:0] pre_cnt_delta_pre;
 logic [OFFSET:0] post_cnt_delta;
 
 logic t_end;
@@ -119,7 +120,7 @@ logic [INT32_WD-1:0] size_inv;
 logic [INT32_WD-1:0] sqrt_inv;
 logic signed [INT64_WD-1:0] mean;
 logic signed [INT64_WD-1:0] mean_mod;
-logic signed [2*INT64_WD-1:0] mean_pow2;
+logic signed [INT64_WD-1:0] mean_pow2;
 logic signed [INT64_WD-1:0] var_value;
 logic signed [INT32_WD-1:0] sum;
 logic signed [INT64_WD-1:0] sqsum;
@@ -246,6 +247,8 @@ always_ff @( posedge clk or negedge rstn ) begin
 end
 assign pre_cnt_next = pre_cnt + pre_cnt_delta;
 assign pre_cnt_delta = DATA_WB - total_pre_cnt[OFFSET-1:0];
+//assign pre_cnt_delta_pre = DATA_WB - total_pre_cnt[OFFSET-1:0];
+//assign pre_cnt_delta = (pre_cnt + pre_cnt_delta_pre >= rg_normsize)?   (rg_normsize - pre_cnt) : pre_cnt_delta_pre;
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -360,7 +363,7 @@ generate
         always_ff @( posedge clk or negedge rstn ) begin
             if(~rstn)
                 puchin_mask[k] <= 1'b1;
-            else if(state_loop && tcnt == 2) begin
+            else if((state_loop && tcnt == 2) || init_done) begin
                 if((pre_cnt + k >= rg_normsize) || (k < total_pre_cnt[OFFSET-1:0]) || pre_stall_d1)
                     puchin_mask[k] <= 1'b0;
                 else 
