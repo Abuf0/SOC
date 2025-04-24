@@ -82,7 +82,7 @@ begin
     @(negedge clk);
     layernorm_start = 0;
 
-    #(PERIOD*10000)
+    #(PERIOD*100000)
     $finish(2);
 end
 
@@ -99,7 +99,7 @@ endgenerate
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
-        $readmemb("../model/layernorm/layernorm_input_binary.txt",DEST_MEM);
+        $readmemb("../model/layernorm/case_n15/layernorm_input_binary.txt",DEST_MEM);
     else if(data_mem_wr) begin
         DEST_MEM[data_mem_addr] <= {dest_wdata[7],dest_wdata[6],dest_wdata[5],dest_wdata[4],dest_wdata[3],dest_wdata[2],dest_wdata[1],dest_wdata[0]};
         //case(data_mem_wmask)
@@ -116,7 +116,7 @@ always_ff@(posedge clk or negedge rstn) begin
 end
 
 initial begin
-    $readmemb("../model/layernorm/layernorm_coef_binary.txt",COEF_MEM);
+    $readmemb("../model/layernorm/case_n15/layernorm_coef_binary.txt",COEF_MEM);
 end
 
 always_ff@(posedge clk or negedge rstn) begin

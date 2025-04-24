@@ -283,7 +283,7 @@ always_ff @( posedge clk or negedge rstn ) begin
         index_head_post <= 'd0;
     else if(layernorm_start)
         index_head_post <= 'd0;
-    else if(post_loop_end && ~post_stall)
+    else if(post_loop_end && ~post_stall && ~first_loop)
         index_head_post <= index_head_post + rg_normsize;
 end
 
@@ -364,20 +364,36 @@ generate
             if(~rstn)
                 puchin_mask[k] <= 1'b1;
             else if((state_loop && tcnt == 2) || init_done) begin
-                if((pre_cnt + k >= rg_normsize) || (k < total_pre_cnt[OFFSET-1:0]) || pre_stall_d1)
-                    puchin_mask[k] <= 1'b0;
-                else 
-                    puchin_mask[k] <= 1'b1;
+                if(rg_normsize <= (DATA_WB - total_pre_cnt[OFFSET-1:0])) begin
+                    if((k >= total_pre_cnt[OFFSET-1:0] + rg_normsize) || (k < total_pre_cnt[OFFSET-1:0]) || pre_stall_d1)
+                        puchin_mask[k] <= 1'b0;
+                    else 
+                        puchin_mask[k] <= 1'b1;
+                end
+                else begin
+                    if((pre_cnt + k >= rg_normsize) || (k < total_pre_cnt[OFFSET-1:0]) || pre_stall_d1)
+                        puchin_mask[k] <= 1'b0;
+                    else 
+                        puchin_mask[k] <= 1'b1;
+                end
             end
         end
         always_ff @( posedge clk or negedge rstn ) begin
             if(~rstn)
                 puchout_mask[k] <= 1'b1;
             else if(state_loop && tcnt == 1) begin
-                if((post_cnt + k >= rg_normsize) || (k < total_post_cnt[OFFSET-1:0]))
-                    puchout_mask[k] <= 1'b0;
-                else 
-                    puchout_mask[k] <= 1'b1;
+                if(rg_normsize <= (DATA_WB - total_post_cnt[OFFSET-1:0])) begin
+                    if((k >= total_post_cnt[OFFSET-1:0] + rg_normsize) || (k < total_post_cnt[OFFSET-1:0]))
+                        puchout_mask[k] <= 1'b0;
+                    else 
+                        puchout_mask[k] <= 1'b1;
+                end
+                else begin
+                    if((post_cnt + k >= rg_normsize) || (k < total_post_cnt[OFFSET-1:0]))
+                        puchout_mask[k] <= 1'b0;
+                    else 
+                        puchout_mask[k] <= 1'b1;
+                end
             end
         end
     end
@@ -740,15 +756,14 @@ always_ff @( posedge clk or negedge rstn ) begin
     //    coef_mem_rd <= 1'b0;
     //else if(((state_loop && (tcnt ==  PIPE_TIME-1) && (tcnt + 1 < total_post_cnt_next[OFFSET-1:0]) && ~post_loop_end) || param_done) && ~first_loop) // todo with first loop
     //    coef_mem_rd <= 1'b1;
-    else if((post_cnt + tcnt + 1 > rg_normsize-1) || ( (|total_post_cnt[OFFSET-1:0]) && (tcnt + 1 < total_post_cnt[OFFSET-1:0])))
+    else if(state_loop && (rg_normsize <= (DATA_WB - total_post_cnt[OFFSET-1:0])) && ((tcnt + 1 < total_post_cnt[OFFSET-1:0]) || ((tcnt + 1 >= total_post_cnt[OFFSET-1:0] + rg_normsize)) ))
         coef_mem_rd <= 1'b0;
-    else if(param_done && (total_post_cnt[OFFSET-1:0] == 1))
+    else if(state_loop && (rg_normsize > (DATA_WB - total_post_cnt[OFFSET-1:0])) && ((post_cnt + tcnt + 1 > rg_normsize-1) || ( (tcnt + 1 < total_post_cnt[OFFSET-1:0]))))
+        coef_mem_rd <= 1'b0;
+    else if(param_done && (total_post_cnt[OFFSET-1:0] != 0))
         coef_mem_rd <= 1'b0;
     else if(~first_loop && (state_loop || param_done))
         coef_mem_rd <= 1'b1;
-    //    ((post_cnt + k >= rg_normsize) || (k < total_post_cnt[OFFSET-1:0]))
-    //else if(wait_end)
-    //    coef_mem_rd <= 1'b0;
 end
 
 always_ff @( posedge clk or negedge rstn ) begin
@@ -756,16 +771,6 @@ always_ff @( posedge clk or negedge rstn ) begin
         coef_mem_addr <= 'd0;
     else if(layernorm_start || post_loop_end)
         coef_mem_addr <= rg_coef_base;
-    //else if(state_loop && ~first_loop && ~post_stall_d1) begin
-    //    if(puchout_mask[tcnt])
-    //        coef_mem_addr <= (coef_mem_addr == (rg_coef_base + rg_normsize - 1))?   rg_coef_base : coef_mem_addr + 1;   // todo pre cal
-    //end
-    //else if((t_end & ~first_loop) || (wait_end && ~first_wait_loop)) begin
-    //    if(post_cnt_next >= rg_normsize)
-    //        coef_mem_addr <= rg_coef_base;
-    //    else 
-    //        coef_mem_addr <= rg_coef_base + {post_cnt_next[15:OFFSET], {OFFSET{1'b0}}};
-    //end
     else if(coef_mem_rd) // else if(coef_mem_rd && c_loop_end) // todo with parameter size
         coef_mem_addr <= coef_mem_addr + 1'b1;
 end    
