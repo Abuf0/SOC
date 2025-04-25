@@ -62,6 +62,8 @@ logic param_done;
 logic layernorm_on;
 logic config_fail;
 
+logic layernorm_start_d1;
+
 logic state_init;
 logic state_loop;
 logic state_param;
@@ -110,6 +112,10 @@ logic [INT32_WD-1:0]  divisor     ;
 logic [INT32_WD-1:0]  div_result  ;
 logic [INT32_WD-1:0]  remainder   ;
 logic                 div_out_vld ;
+
+logic init_stage_cnt;
+logic [INT32_WD-1:0]  total_size  ;
+logic [INT32_WD-1:0]  count_num   ;
                                                             
 logic [INT64_WD-1:0]  sqrt_in     ;        
 logic [INT32_WD-1:0]  sqrt_out    ;
@@ -157,6 +163,7 @@ logic [DATA_WD-1:0] data_mem_addr_post;
 logic [DATA_WD-1:0] data_mem_addr_pre_next;
 logic [DATA_WD-1:0] data_mem_addr_post_next;
 
+// todo with width
 logic [15:0] total_pre_cnt;
 logic [15:0] pre_cnt_next;
 logic [15:0] total_post_cnt;
@@ -164,11 +171,72 @@ logic [15:0] total_post_cnt_d1;
 logic [15:0] total_post_cnt_next;
 logic [15:0] post_cnt_next;
 logic [15:0] index_head_pre;
+logic [15:0] index_head_pre_next;
 logic [15:0] index_head_post;
+logic [15:0] index_head_post_next;
 logic pre_stall;
 logic post_stall;
 logic pre_stall_d1;
 logic post_stall_d1;
+
+logic add4_sel [0:2];
+logic mult1_sel [0:2];
+logic mult2_sel [0:2];
+
+// ADD behavior model //
+logic signed [INT32_WD-1:0] add1_a;
+logic signed [INT32_WD-1:0] add1_b;
+logic signed [INT32_WD-1:0] add1_sum;
+logic signed [INT32_WD-1:0] add2_a;
+logic signed [INT32_WD-1:0] add2_b;
+logic signed [INT32_WD-1:0] add2_sum;
+logic signed [INT32_WD-1:0] add3_a;
+logic signed [INT32_WD-1:0] add3_b;
+logic signed [INT32_WD-1:0] add3_sum;
+logic signed [INT64_WD-1:0] add4_a;
+logic signed [INT64_WD-1:0] add4_b;
+logic signed [INT64_WD-1:0] add4_sum;
+logic signed [INT32_WD-1:0] add5_a;
+logic signed [INT32_WD-1:0] add5_b;
+logic signed [INT32_WD-1:0] add5_sum;
+logic signed [INT64_WD-1:0] add6_a;
+logic signed [INT64_WD-1:0] add6_b;
+logic signed [INT64_WD-1:0] add6_sum;
+logic signed [INT32_WD-1:0] add7_a;
+logic signed [INT32_WD-1:0] add7_b;
+logic signed [INT32_WD-1:0] add7_sum;
+logic signed [INT32_WD-1:0] add8_a;
+logic signed [INT32_WD-1:0] add8_b;
+logic signed [INT32_WD-1:0] add8_sum;
+logic signed [INT32_WD-1:0] add9_a;
+logic signed [INT32_WD-1:0] add9_b;
+logic signed [INT32_WD-1:0] add9_sum;
+logic signed [INT32_WD-1:0] add10_a;
+logic signed [INT32_WD-1:0] add10_b;
+assign add1_sum = add1_a + add1_b;
+assign add2_sum = add2_a + add2_b;
+assign add3_sum = add3_a + add3_b;
+assign add4_sum = add4_a + add4_b;
+assign add5_sum = add5_a + add5_b;
+assign add6_sum = add6_a + add6_b;
+assign add7_sum = add7_a + add7_b;
+assign add8_sum = add8_a + add8_b;
+assign add9_sum = add9_a + add9_b;
+
+// MULT behavior model //
+logic signed [INT32_WD-1:0]   mult1_a;
+logic signed [INT32_WD-1:0]   mult1_b;
+logic signed [2*INT32_WD-1:0] mult1_res;
+logic signed [INT64_WD-1:0]   mult2_a;
+logic signed [INT64_WD-1:0]   mult2_b;
+logic signed [2*INT64_WD-1:0] mult2_res;
+logic signed [INT64_WD-1:0]   mult3_a;
+logic signed [INT64_WD-1:0]   mult3_b;
+logic signed [2*INT64_WD-1:0] mult3_res;
+assign mult1_res = mult1_a * mult1_b;
+assign mult2_res = mult2_a * mult2_b;
+assign mult3_res = mult3_a * mult3_b;
+
 
 typedef enum logic [2:0] {IDLE, INIT, LOOP, WAIT, PARAM, DONE, FAIL} state_t;
 state_t state_c, state_n;
@@ -200,13 +268,13 @@ assign layernorm_done = (state_c == DONE);
 assign layernorm_fail = (state_c == FAIL);
 
 assign config_fail = (rg_normsize == 0);    // todo confirm others
-assign init_done = state_init && div_out_vld;
+assign init_done = state_init && init_stage_cnt && div_out_vld;
 assign param_done = state_param && div_out_vld;
 
 assign first_loop = state_loop && (c_cnt == 0) && (batch_cnt == 0);
 assign last_loop =  state_loop && (c_cnt == c_num-1) && (batch_cnt == rg_batch-1);
-assign loop_end = pp_loop_end; // todo
-assign last_loop_end = batch_loop_end;  // todo
+assign loop_end = pp_loop_end; 
+assign last_loop_end = batch_loop_end;  
 assign last_batch = state_loop && (batch_cnt == rg_batch-1);
 assign first_tcnt_loop = state_loop && (post_cnt == 0);
 assign first_wait_loop = state_wait && (c_cnt == 1) && (batch_cnt == 0);
@@ -219,9 +287,6 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(layernorm_done || layernorm_fail)
         last_loop_wait_end <= 1'b0;
 end
-// todo
-// loop_end 
-// last_loop_end 
 
 assign t_end = state_loop && (tcnt == PIPE_TIME-1);
 assign wait_end = state_wait && (tcnt == 5);
@@ -245,7 +310,7 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(t_end && ~last_loop && ~pre_stall)
         pre_cnt <= pre_loop_end?    'd0 : pre_cnt_next;
 end
-assign pre_cnt_next = pre_cnt + pre_cnt_delta;
+assign pre_cnt_next = pre_cnt + pre_cnt_delta;  // todo max ADD8
 assign pre_cnt_delta = DATA_WB - total_pre_cnt[OFFSET-1:0];
 //assign pre_cnt_delta_pre = DATA_WB - total_pre_cnt[OFFSET-1:0];
 //assign pre_cnt_delta = (pre_cnt + pre_cnt_delta_pre >= rg_normsize)?   (rg_normsize - pre_cnt) : pre_cnt_delta_pre;
@@ -256,8 +321,13 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(layernorm_start)
         index_head_pre <= 'd0;
     else if(pre_loop_end && ~pre_stall)
-        index_head_pre <= index_head_pre + rg_normsize;
+        index_head_pre <= index_head_pre_next; 
 end
+//assign index_head_pre_next = index_head_pre + rg_normsize; // todo ADD32
+assign index_head_pre_next = add1_sum;
+
+assign add1_a = index_head_pre;
+assign add1_b = rg_normsize;
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -265,7 +335,7 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(layernorm_start)
         total_pre_cnt <= 'd0;
     else if(t_end && ~last_loop && ~pre_stall)
-        total_pre_cnt <= pre_loop_end?    (index_head_pre + rg_normsize) : ({(total_pre_cnt[15:OFFSET]+1),{OFFSET{1'b0}}});
+        total_pre_cnt <= pre_loop_end?    (index_head_pre_next) : ({(total_pre_cnt[15:OFFSET]+1),{OFFSET{1'b0}}});
 end
 
 assign post_loop_end = t_end && (post_cnt_next >= rg_normsize);
@@ -275,7 +345,7 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(t_end && ~first_loop && ~post_stall)
         post_cnt <= post_loop_end?    'd0 : post_cnt_next;
 end
-assign post_cnt_next = post_cnt + post_cnt_delta;
+assign post_cnt_next = post_cnt + post_cnt_delta;   // todo max ADD8
 assign post_cnt_delta = DATA_WB - total_post_cnt[OFFSET-1:0];
 
 always_ff @( posedge clk or negedge rstn ) begin
@@ -284,8 +354,13 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(layernorm_start)
         index_head_post <= 'd0;
     else if(post_loop_end && ~post_stall && ~first_loop)
-        index_head_post <= index_head_post + rg_normsize;
+        index_head_post <= index_head_post_next;
 end
+//assign index_head_post_next = index_head_post + rg_normsize;    // todo ADD32
+assign index_head_post_next = add2_sum;
+
+assign add2_a = index_head_post;
+assign add2_b = rg_normsize;
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -296,8 +371,7 @@ always_ff @( posedge clk or negedge rstn ) begin
         total_post_cnt <= total_post_cnt_next;
 end
 
-// todo pre cal
-assign total_post_cnt_next = post_loop_end?    (index_head_post + rg_normsize) : ({(total_post_cnt[15:OFFSET]+1),{OFFSET{1'b0}}});
+assign total_post_cnt_next = post_loop_end?    (index_head_post_next) : ({(total_post_cnt[15:OFFSET]+1),{OFFSET{1'b0}}});
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -306,8 +380,8 @@ always_ff @( posedge clk or negedge rstn ) begin
         total_post_cnt_d1 <= total_post_cnt;
 end
 
-assign c_num = last_batch?  (rg_inc * rg_inw * rg_inh / rg_normsize + 1) : (rg_inc * rg_inw * rg_inh / rg_normsize);  // todo
-assign c_loop_end = pp_loop_end && (c_cnt == c_num-1);  // todo
+assign c_num = last_batch?  (count_num + 1) : (count_num);  
+assign c_loop_end = pp_loop_end && (c_cnt == c_num-1); 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         c_cnt <= 'd0;
@@ -365,7 +439,7 @@ generate
                 puchin_mask[k] <= 1'b1;
             else if((state_loop && tcnt == 2) || init_done) begin
                 if(rg_normsize <= (DATA_WB - total_pre_cnt[OFFSET-1:0])) begin
-                    if((k >= total_pre_cnt[OFFSET-1:0] + rg_normsize) || (k < total_pre_cnt[OFFSET-1:0]) || pre_stall_d1)
+                    if((k >= total_pre_cnt[OFFSET-1:0] + rg_normsize) || (k < total_pre_cnt[OFFSET-1:0]) || pre_stall_d1)   // todo max ADD9
                         puchin_mask[k] <= 1'b0;
                     else 
                         puchin_mask[k] <= 1'b1;
@@ -383,7 +457,7 @@ generate
                 puchout_mask[k] <= 1'b1;
             else if(state_loop && tcnt == 1) begin
                 if(rg_normsize <= (DATA_WB - total_post_cnt[OFFSET-1:0])) begin
-                    if((k >= total_post_cnt[OFFSET-1:0] + rg_normsize) || (k < total_post_cnt[OFFSET-1:0]))
+                    if((k >= total_post_cnt[OFFSET-1:0] + rg_normsize) || (k < total_post_cnt[OFFSET-1:0])) // todo max ADD9
                         puchout_mask[k] <= 1'b0;
                     else 
                         puchout_mask[k] <= 1'b1;
@@ -430,9 +504,13 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(param_done)
         puchin_mod <= 'sd0;
     else if((state_loop && ~(pre_cnt==0 && (tcnt < 3))) || (state_wait && ~sum_lat)) begin
-        puchin_mod <= puchin[tcnt] - rg_inzp;  // ADD32
+        //puchin_mod <= puchin[tcnt] - rg_inzp;  // todo ADD32
+        puchin_mod <= add9_sum;
     end
 end
+
+assign add9_a = puchin[tcnt];
+assign add9_b = -rg_inzp;
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -447,9 +525,13 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(param_done)
         sum <= 'sd0;
     else if(state_loop || (state_wait && ~sum_lat)) begin
-        sum <= sum + puchin_mod;    // ADD32
+        //sum <= sum + puchin_mod;    // todo ADD32
+        sum <= add3_sum;
     end
 end
+
+assign add3_a = sum;
+assign add3_b = puchin_mod;
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -457,9 +539,12 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(param_done)
         puchin_mod_pow2 <= 'sd0;
     else if(state_loop || (state_wait && ~sum_lat)) begin
-        puchin_mod_pow2 <= puchin_mod * puchin_mod; // MULT32X32
+        //puchin_mod_pow2 <= puchin_mod * puchin_mod; // todo MULT32X32   // mult1_sel[0]
+        puchin_mod_pow2 <= mult1_res;
     end
 end
+
+assign mult1_sel[0] = (state_loop || state_wait);
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -467,8 +552,27 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(param_done)
         sqsum <= 'sd0;
     else if(state_loop || (state_wait && ~sqsum_lat)) begin
-        sqsum <= sqsum + puchin_mod_pow2;    // ADD64
+        //sqsum <= sqsum + puchin_mod_pow2;    // todo ADD64  // add4_sel[0]
+        sqsum <= add4_sum;
     end
+end
+
+assign add4_sel[0] = (state_loop || state_wait);
+
+always_ff @( posedge clk or negedge rstn ) begin
+    if(~rstn)
+        init_stage_cnt <= 1'b0;
+    else if(layernorm_start)
+        init_stage_cnt <= 1'b0;
+    else if(state_init && div_out_vld)
+        init_stage_cnt <= 1'b1;
+end
+
+always_ff @( posedge clk or negedge rstn ) begin
+    if(~rstn)
+        layernorm_start_d1 <= 1'b0;
+    else
+        layernorm_start_d1 <= layernorm_start;
 end
 
 assign param_stage_end = state_param && div_out_vld;//(param_stage_cnt == param_stage_num-1);
@@ -487,33 +591,56 @@ always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         mean <= 'sd0;
     else if(state_param && param_stage_cnt == 0)  
-        mean <= sum * size_inv; // MULT32X32
+        //mean <= sum * size_inv; // todo MULT32X32   // mult1_sel[1]
+        mean <= mult1_res;
 end
+assign mult1_sel[1] = (state_param && param_stage_cnt == 0);
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         mean_mod <= 'sd0;
     else if(state_param && param_stage_cnt == 1)  
-        mean_mod <= (mean >>> (SHIFT_N >> 1)) + (rg_inzp <<< (SHIFT_N >> 1)); // ADD32
+        //mean_mod <= (mean >>> (SHIFT_N >> 1)) + (rg_inzp <<< (SHIFT_N >> 1)); // todo ADD64 // add4_sel[1]
+        mean_mod <= add4_sum;
 end
+
+assign add4_sel[1] = (state_param && param_stage_cnt == 1);
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         mean_pow2 <= 'sd0;
     else if(state_param && param_stage_cnt == 1)  
-        mean_pow2 <= mean * mean;   // MULT64X64
+        //mean_pow2 <= mean * mean;   // todo MULT64X64   // mult2_sel[0] 
+        mean_pow2 <= mult2_res;
 end
+assign mult2_sel[0] = (state_param && param_stage_cnt == 1);
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         var_value <= 'sd0;
     else if(state_param) begin
         if(param_stage_cnt == 0)
-            var_value <= sqsum * size_inv;    // MULT64X32
+            //var_value <= sqsum * size_inv;    // todo MULT64X32 // mult2_sel[1] 
+            var_value <= mult2_res;
         else if(param_stage_cnt == 2)
-            var_value <= var_value - (mean_pow2 >>> SHIFT_N);    // ADD64
+            //var_value <= var_value - (mean_pow2 >>> SHIFT_N);    // todo ADD64  // add4_sel[2]
+            var_value <= add4_sum;
     end
 end
+
+assign add4_sel[2] = (state_param && param_stage_cnt == 2);
+
+assign add4_a = add4_sel[2]?    var_value :
+                add4_sel[1]?     (mean >>> (SHIFT_N >> 1)) : sqsum;
+assign add4_b = add4_sel[2]?    - (mean_pow2 >>> SHIFT_N) : 
+                add4_sel[1]?    (rg_inzp <<< (SHIFT_N >> 1)) : puchin_mod_pow2;
+
+assign mult2_sel[1] = (state_param && param_stage_cnt == 0);
+
+assign mult2_a = mult2_sel[0]?  mean :
+                 mult2_sel[1]?  sqsum : multsc;
+assign mult2_b = mult2_sel[0]?  mean :
+                 mult2_sel[1]?  size_inv : sqrt_inv;
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -535,7 +662,7 @@ assign param_div_start = (state_param && sqrt_out_vld);
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         div_in_vld <= 1'b0;
-    else if(layernorm_start || param_div_start)  
+    else if(layernorm_start || param_div_start || (state_init && ~init_stage_cnt && div_out_vld))  
         div_in_vld <= 1'b1;
     else
         div_in_vld <= 1'b0;
@@ -543,9 +670,31 @@ end
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
+        total_size <= 'd0;
+    //else if(layernorm_start)
+    //    total_size <= rg_inh * rg_inw;  // todo MULT32  // mult1_sel[2]
+    //else if(layernorm_start_d1)
+    //    total_size <= total_size * rg_inc;
+    else if(layernorm_start || layernorm_start_d1)
+        total_size <= mult1_res;
+end
+assign mult1_sel[2] = layernorm_start;
+
+assign mult1_a = mult1_sel[0]?  puchin_mod : 
+                 mult1_sel[1]?  sum :
+                 mult1_sel[2]?  rg_inh : total_size;
+
+assign mult1_b = mult1_sel[0]?  puchin_mod :
+                 mult1_sel[1]?  size_inv :
+                 mult1_sel[2]?  rg_inw : rg_inc;
+
+always_ff @( posedge clk or negedge rstn ) begin
+    if(~rstn)
         dividend <= 'd0;
     else if(layernorm_start || param_div_start)   
         dividend <= ( 1 << SHIFT_N );
+    else if(state_init && div_out_vld)
+        dividend <= total_size;
 end
 
 always_ff @( posedge clk or negedge rstn ) begin
@@ -560,8 +709,15 @@ end
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         size_inv <= 'd0;
-    else if(init_done)   
+    else if(state_init && ~init_stage_cnt && div_out_vld)   
         size_inv <= div_result;
+end
+
+always_ff @( posedge clk or negedge rstn ) begin
+    if(~rstn)
+        count_num <= 'd0;
+    else if(state_init && init_stage_cnt && div_out_vld)   
+        count_num <= div_result;
 end
 
 always_ff @( posedge clk or negedge rstn ) begin
@@ -600,9 +756,13 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(wait_end)
         puchin_cal_mean <= 'sd0;
     else if((state_loop && ~(post_cnt==0 && (tcnt<2))) || state_wait) begin
-        puchin_cal_mean <= (puchin_cal[tcnt] <<< (SHIFT_N >> 1)) - mean_mod;  // ADD32
+        //puchin_cal_mean <= (puchin_cal[tcnt] <<< (SHIFT_N >> 1)) - mean_mod;  // todo ADD32
+        puchin_cal_mean <= add5_sum;
     end
 end
+
+assign add5_a = (puchin_cal[tcnt] <<< (SHIFT_N >> 1));
+assign add5_b = - mean_mod;
 
 //assign multsc = 100;  //param_lat[135:72];
 //assign mulbzp = 0;  //param_lat[71:8];
@@ -651,17 +811,29 @@ always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         mult_coef <= 'sd0;
     else if(state_loop || state_wait)
-        mult_coef <= multsc * sqrt_inv; // MULT64X32
+        //mult_coef <= multsc * sqrt_inv; // todo MULT64X32 // mult2_sel[2] 
+        mult_coef <= mult2_res;
 end
+
+assign mult2_sel[2] = (state_loop || state_wait);
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         mult <= 'sd0;
     else if(state_loop || state_wait)
-        mult <= mult_coef * puchin_cal_mean; // MULT64X64
+        //mult <= mult_coef * puchin_cal_mean; // todo MULT64X64
+        mult <= mult3_res;
 end
 
-assign puchout_mod = (((mult >>> SHIFT_N) + mulbzp_d2) >>> puchshift_d2);   // ADD64
+assign mult3_a = mult_coef;
+assign mult3_b = puchin_cal_mean;
+
+//assign puchout_mod = (((mult >>> SHIFT_N) + mulbzp_d2) >>> puchshift_d2);   // todo ADD64
+assign puchout_mod = (add6_sum >>> puchshift_d2);
+
+assign add6_a = (mult >>> SHIFT_N);
+assign add6_b = mulbzp_d2;
+
 assign puchout_int32 = {puchout_mod[INT64_WD-1], puchout_mod[INT32_WD-2:0]};
 
 assign puchout = (puchout_int32 < $signed(puchout_min))?  puchout_min :
@@ -712,17 +884,27 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(layernorm_start)
         data_mem_addr <= (rg_src_data_base >> OFFSET);
     else if(state_loop && (tcnt == 0))
-        data_mem_addr <= ((rg_src_data_base + total_pre_cnt)>> OFFSET);
+        //data_mem_addr <= ((rg_src_data_base + total_pre_cnt)>> OFFSET);
+        data_mem_addr <= (add7_sum >> OFFSET);
     else if(state_loop && (tcnt == PIPE_TIME-1) || param_done) begin
         if(t_end && ~first_loop && ~post_stall)
-            data_mem_addr <= ((rg_src_data_base + total_post_cnt_next)>> OFFSET);   // todo
+            //data_mem_addr <= ((rg_src_data_base + total_post_cnt_next)>> OFFSET);   // todo
+            data_mem_addr <= (add8_sum >> OFFSET);
         else
-            data_mem_addr <= ((rg_src_data_base + total_post_cnt)>> OFFSET); 
+            //data_mem_addr <= ((rg_src_data_base + total_post_cnt)>> OFFSET); 
+            data_mem_addr <= (add7_sum >> OFFSET);
     end
-    else if(((state_loop && ~first_tcnt_loop && ~first_loop) || (state_wait && ~first_wait_loop && ~wait_no_write)) && tcnt == 3)
-        data_mem_addr <= ((rg_dest_data_base + total_post_cnt_d1)>> OFFSET);
-    // todo
+    else if(((state_loop && ~first_tcnt_loop && ~first_loop) || (state_wait && ~first_wait_loop && ~wait_no_write)) && (tcnt == 3))
+        //data_mem_addr <= ((rg_dest_data_base + total_post_cnt_d1)>> OFFSET);
+        data_mem_addr <= (add7_sum >> OFFSET);
 end
+
+assign add7_a = (tcnt == 3)?    rg_dest_data_base : rg_src_data_base;
+assign add7_b = (tcnt == 3)?                  total_post_cnt_d1 :
+                (state_loop && tcnt == 0)?    total_pre_cnt : total_post_cnt;
+
+assign add8_a = rg_src_data_base;
+assign add8_b = total_post_cnt_next;
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -765,17 +947,18 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if(~first_loop && (state_loop || param_done))
         coef_mem_rd <= 1'b1;
 end
+// todo consider ADD32 for coef_mem_rd condition
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         coef_mem_addr <= 'd0;
     else if(layernorm_start || post_loop_end)
         coef_mem_addr <= rg_coef_base;
-    else if(coef_mem_rd) // else if(coef_mem_rd && c_loop_end) // todo with parameter size
+    else if(coef_mem_rd)
         coef_mem_addr <= coef_mem_addr + 1'b1;
 end    
 
-
+// todo replace divider with common ips
 divider_u32 #(
     .DATA_WD(INT32_WD)
 ) u_divider_u32 (
