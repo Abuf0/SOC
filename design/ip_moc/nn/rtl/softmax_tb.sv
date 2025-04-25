@@ -56,11 +56,11 @@ logic [DATA_WD-1:-0] mem_wdata   ;
 logic                softmax_done    ;
 
 `ifdef DUAL_MEM
-logic [DATA_WD-1:0] SRC_MEM [0:(1 << 13)-1];
+logic [DATA_WD-1:0] SRC_MEM [0:(1 << 8)-1];
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn) 
-        $readmemb("../model/softmax/softmax_input_binary.txt",SRC_MEM);
+        $readmemb("../model/softmax/case_dim1/softmax_input_binary.txt",SRC_MEM);
     else if(mem_src_wr)
         SRC_MEM[mem_src_addr] <= mem_src_wdata;
 end
@@ -73,7 +73,7 @@ always_ff@(posedge clk or negedge rstn) begin
     end
 end
 
-logic [DATA_WD-1:0] DEST_MEM [0:(1 << 13)-1];
+logic [DATA_WD-1:0] DEST_MEM [0:(1 << 8)-1];
 
 always_ff@(posedge clk or negedge rstn) begin
     if(mem_dest_wr) begin
@@ -92,11 +92,11 @@ end
 
 `else
 
-logic [DATA_WD-1:0] DEST_MEM [0:(1 << 13)-1];
+logic [DATA_WD-1:0] DEST_MEM [0:(1 << 8)-1];
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
-        $readmemb("../model/softmax/softmax_input_binary.txt",DEST_MEM);
+        $readmemb("../model/softmax/case_dim1/softmax_input_binary.txt",DEST_MEM);
     else if(mem_wr) begin
         case(mem_wmask)
             8'b00000001:    DEST_MEM[mem_addr] <= {DEST_MEM[mem_addr][63:8] , mem_wdata[7:0]};
@@ -170,11 +170,11 @@ initial
 begin
     #(PERIOD*3.3) rstn  =  1;
     repeat(5) begin @(negedge clk); end
-    rg_batch     = 3  ;    // 2    // 1    // 1    // 1  // 2  // 1     //  2  // 2  //  3 
-    rg_inw       = 3  ;    // 3    // 2    // 3    // 3  // 5  // 2     //  9  // 9  //  5 
-    rg_inh       = 3  ;    // 3    // 2    // 3    // 3  // 5  // 2     //  9  // 9  //  5 
-    rg_inc       = 33 ;    // 40   // 24   // 24   // 19 // 6  // 21    //  27 // 27 //  14
-    rg_dim       = 1  ;    // 1    // 2    // 3    // 2  // 3  // 1     //  1  // 2  //  3 
+    rg_batch     = 3  ;  // 3   //  3   // 1  // 2    // 1    // 1    // 2  // 1     //  2  // 2  
+    rg_inw       = 3  ;  // 5   //  3   // 3  // 3    // 2    // 3    // 5  // 2     //  9  // 9  
+    rg_inh       = 3  ;  // 5   //  3   // 3  // 3    // 2    // 3    // 5  // 2     //  9  // 9  
+    rg_inc       = 33 ;  // 14  //  33  // 19 // 40   // 24   // 24   // 6  // 21    //  27 // 27 
+    rg_dim       = 1  ;  // 3   //  1   // 2  // 1    // 2    // 3    // 3  // 1     //  1  // 2  
     rg_src_base  = 0  ;                                                 //  3  // 2  //  0  // TODO [3:0]
     rg_dest_base = 0  ;                                                 //  5  // 1  //  0  // TODO [3:0]
     rg_llmulbzp  = 0;
