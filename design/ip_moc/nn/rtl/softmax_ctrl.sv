@@ -534,7 +534,7 @@ generate
             if(~rstn)
                 bitsover[i] <= 'd0;
             else if(state_shift && clz_vld)
-                bitsover[i] <= (dim_c_flag)?  (35 - headroom[0]) : (35 - headroom[i]);
+                bitsover[i] <= (dim_c_flag)?  (27 - headroom[0]) : (27 - headroom[i]);
         end        
 
         assign one_in_val[i] = (sum[i] << headroom[i]) - (1 << 31);
