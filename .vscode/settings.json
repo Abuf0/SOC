@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "compare": "c",
+        "bitset": "c",
+        "stdint.h": "c",
+        "random": "c",
+        "cstdint": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "cstdlib": "c",
+        "moc_nn.h": "c",
+        "functional": "c",
+        "algorithm": "c",
+        "format": "c",
+        "cmath": "c"
+    }
+}

@@ -1,0 +1,240 @@
+Magic 271485
+Revision 2010.10
+
+; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
+viewPort -4 -3 1680 945 154 65
+
+; File list:
+; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
+openDirFile -d / "" "/mrvl2g/socp4s/usbdev0/usbdev0/wa/huanght/usbdev0/MAIN/lab0/ahb_bus/ahb_master/dump.fsdb"
+
+; file time scale:
+; fileTimeScale ### s|ms|us|ns|ps
+
+; signal spacing:
+signalSpacing 3
+
+; windowTimeUnit is used for zoom, cursor & marker
+; waveform viewport range
+zoom 0.000000 11175.000000
+cursor 255.000000
+marker 0.000000
+
+; user define markers
+; userMarker time_pos marker_name color linestyle
+; visible top row signal index
+top 0
+; marker line index
+markerPos 169
+
+; event list
+; addEvent event_name event_expression
+; curEvent event_name
+
+
+
+COMPLEX_EVENT_BEGIN
+
+
+COMPLEX_EVENT_END
+
+
+
+; toolbar current search type
+; curSTATUS search_type
+curSTATUS ByChange
+
+
+addGroup "G1"
+activeDirFile "" "/mrvl2g/socp4s/usbdev0/usbdev0/wa/huanght/usbdev0/MAIN/lab0/ahb_bus/ahb_master/dump.fsdb"
+addSignal -h 15 -UNSIGNED -HEX /top/master_if/HADDR[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HTRANS[1:0]
+addSignal -h 15 -holdScope HWRITE
+addSignal -h 15 -UNSIGNED -HEX -holdScope HBURST[2:0]
+addSignal -h 15 -holdScope HBUSREQ
+addSignal -h 15 -holdScope HCLK
+addSignal -h 15 -holdScope HGRANT
+addSignal -h 15 -holdScope HLOCK
+addSignal -h 15 -UNSIGNED -HEX -holdScope HPROT[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HRDATA[31:0]
+addSignal -h 15 -holdScope HREADY
+addSignal -h 15 -holdScope HRESETn
+addSignal -h 15 -UNSIGNED -HEX -holdScope HRESP[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HSIZE[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HWDATA[31:0]
+addGroup "G2"
+addSignal -h 15 -UNSIGNED -HEX /top/slave_if/HADDR[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HBURST[2:0]
+addSignal -h 15 -holdScope HCLK
+addSignal -h 15 -holdScope HMASTERLOCK
+addSignal -h 15 -UNSIGNED -HEX -holdScope HMASTER[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HPROT[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HRDATA[31:0]
+addSignal -h 15 -holdScope HREADY
+addSignal -h 15 -holdScope HRESETn
+addSignal -h 15 -UNSIGNED -HEX -holdScope HRESP[1:0]
+addSignal -h 15 -holdScope HSEL
+addSignal -h 15 -UNSIGNED -HEX -holdScope HSIZE[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HSPLIT[15:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HTRANS[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope HWDATA[31:0]
+addSignal -h 15 -holdScope HWRITE
+addSignal -h 15 -UNSIGNED -HEX /top/bus0/burst_count[3:0]
+addSignal -h 15 -holdScope clk
+addSignal -h 15 -UNSIGNED -HEX -holdScope data_mux[3:0]
+addSignal -h 15 -holdScope grant_enable
+addSignal -h 15 -UNSIGNED -HEX -holdScope grant_id[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope haddr[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope hburst[2:0]
+addSignal -h 15 -holdScope hbusrt
+addSignal -h 15 -UNSIGNED -HEX -holdScope hmaster[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope hmaster_r[3:0]
+addSignal -h 15 -holdScope hmasterlock
+addSignal -h 15 -UNSIGNED -HEX -holdScope hprot[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope hrdata[31:0]
+addSignal -h 15 -holdScope hready
+addSignal -h 15 -UNSIGNED -HEX -holdScope hresp[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope hsel[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope hsize[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope hsplit[15:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope htrans[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope hwdata[31:0]
+addSignal -h 15 -holdScope hwrite
+addSignal -h 15 -holdScope lock_detect_n
+addSignal -h 15 -holdScope lock_or
+addSignal -h 15 -holdScope lock_or_r
+addSignal -h 15 -UNSIGNED -HEX -holdScope maddr0[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope maddr1[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope maddr2[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope maddr3[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mask[15:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mburst0[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mburst1[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mburst2[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mburst3[2:0]
+addSignal -h 15 -holdScope mbusreq0
+addSignal -h 15 -holdScope mbusreq1
+addSignal -h 15 -holdScope mbusreq2
+addSignal -h 15 -holdScope mbusreq3
+addSignal -h 15 -holdScope mgrant0
+addSignal -h 15 -holdScope mgrant1
+addSignal -h 15 -holdScope mgrant2
+addSignal -h 15 -holdScope mgrant3
+addSignal -h 15 -holdScope mlock0
+addSignal -h 15 -holdScope mlock1
+addSignal -h 15 -holdScope mlock2
+addSignal -h 15 -holdScope mlock3
+addSignal -h 15 -UNSIGNED -HEX -holdScope mprot0[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mprot1[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mprot2[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mprot3[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mrdata0[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mrdata1[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mrdata2[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mrdata3[31:0]
+addSignal -h 15 -holdScope mrdta2
+addSignal -h 15 -holdScope mready0
+addSignal -h 15 -holdScope mready1
+addSignal -h 15 -holdScope mready2
+addSignal -h 15 -holdScope mready3
+addSignal -h 15 -UNSIGNED -HEX -holdScope mresp0[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mresp1[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mresp2[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mresp3[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope msize0[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope msize1[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope msize2[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope msize3[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mtrans0[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mtrans1[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mtrans2[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mtrans3[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mwdata0[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mwdata1[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mwdata2[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope mwdata3[31:0]
+addSignal -h 15 -holdScope mwrite0
+addSignal -h 15 -holdScope mwrite1
+addSignal -h 15 -holdScope mwrite2
+addSignal -h 15 -holdScope mwrite3
+addSignal -h 15 -holdScope rst_n
+addSignal -h 15 -UNSIGNED -HEX -holdScope saddr0[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope saddr1[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope saddr2[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope saddr3[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sburst0[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sburst1[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sburst2[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sburst3[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope slave_sel[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope smaster0[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope smaster1[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope smaster2[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope smaster3[3:0]
+addSignal -h 15 -holdScope smasterlock0
+addSignal -h 15 -holdScope smasterlock1
+addSignal -h 15 -holdScope smasterlock2
+addSignal -h 15 -holdScope smasterlock3
+addSignal -h 15 -UNSIGNED -HEX -holdScope split_or[15:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sprot0[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sprot1[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sprot2[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sprot3[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope srdata0[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope srdata1[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope srdata2[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope srdata3[31:0]
+addSignal -h 15 -holdScope sready0
+addSignal -h 15 -holdScope sready1
+addSignal -h 15 -holdScope sready2
+addSignal -h 15 -holdScope sready3
+addSignal -h 15 -UNSIGNED -HEX -holdScope sresp0[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sresp1[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sresp2[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope sresp3[1:0]
+addSignal -h 15 -holdScope ssel0
+addSignal -h 15 -holdScope ssel1
+addSignal -h 15 -holdScope ssel2
+addSignal -h 15 -holdScope ssel3
+addSignal -h 15 -UNSIGNED -HEX -holdScope ssize0[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ssize1[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ssize2[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ssize3[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ssplit0[15:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ssplit1[15:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ssplit2[15:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ssplit3[15:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope strans0[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope strans1[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope strans2[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope strans3[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope swdata0[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope swdata1[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope swdata2[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope swdata3[31:0]
+addSignal -h 15 -holdScope swrite0
+addSignal -h 15 -holdScope swrite1
+addSignal -h 15 -holdScope swrite2
+addSignal -h 15 -holdScope swrite3
+addGroup "G3"
+
+; getSignalForm Scope Hierarchy Status
+; active file of getSignalForm
+activeDirFile "" "/mrvl2g/socp4s/usbdev0/usbdev0/wa/huanght/usbdev0/MAIN/lab0/ahb_bus/ahb_master/dump.fsdb"
+
+GETSIGNALFORM_SCOPE_HIERARCHY_BEGIN
+getSignalForm close
+
+"/top"
+"/top/slave_if"
+
+SCOPE_LIST_BEGIN
+"/top"
+"/top/master_if"
+"/top/bus0"
+"/top/slave_if"
+SCOPE_LIST_END
+
+GETSIGNALFORM_SCOPE_HIERARCHY_END
+
+
