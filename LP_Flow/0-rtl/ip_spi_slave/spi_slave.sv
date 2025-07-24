@@ -6,7 +6,10 @@ module spi_slave(
     input               spi_csn     ,
     input               spi_mosi    ,
     output logic        spi_miso    ,
-    output logic        cmd_xx      ,   // todo
+    output logic        cmd_idle    ,  
+    output logic        cmd_img     ,  
+    output logic        cmd_sleep   ,  
+    output logic        cmd_wakeup  ,  
     output logic        reg_wr      ,
     output logic        reg_rd      ,
     output logic [15:0] reg_addr    ,
@@ -15,6 +18,10 @@ module spi_slave(
 );
 parameter WRITE = 8'hf0;
 parameter READ = 8'hf1;
+parameter IDLE = 8'hf2;
+parameter IMG = 8'hf3;
+parameter SLP = 8'hf4;
+parameter WAKE = 8'hf5;
 logic rstn_spi_csn;
 logic cmd_done;
 logic addr_done;
@@ -28,6 +35,10 @@ logic reg_wr_pre;
 logic reg_rd_pre;
 logic [15:0] reg_addr_pre;
 logic [15:0] reg_wdata_pre;
+logic cmd_idle_pre;  
+logic cmd_img_pre;    
+logic cmd_sleep_pre;  
+logic cmd_wakeup_pre; 
 
 sync_reset rstn_spi_csn_inst(.clk(clk_spi), .async_reset(spi_csn), .sync_rstn(rstn_spi_csn));
 
@@ -206,5 +217,38 @@ always_ff@(posedge clk_spi or negedge rstn_spi_csn) begin
     else if(rd_flag && (state_c == DATA))
         {spi_miso, miso_shift} <= {miso_shift, 1'b0};
 end
+
+always_ff@(posedge clk_spi or negedge rstn_spi) begin
+    if(~rstn_spi)
+        cmd_idle_pre <= 1'b0;
+    else if(cmd_done) 
+        cmd_idle_pre <= (cmd_sin == IDLE)?  1'b1 : 1'b0;
+end
+
+always_ff@(posedge clk_spi or negedge rstn_spi) begin
+    if(~rstn_spi)
+        cmd_img_pre <= 1'b0;
+    else if(cmd_done) 
+        cmd_img_pre <= (cmd_sin == IMG)?  1'b1 : 1'b0;
+end
+
+always_ff@(posedge clk_spi or negedge rstn_spi) begin
+    if(~rstn_spi)
+        cmd_sleep_pre <= 1'b0;
+    else if(cmd_done) 
+        cmd_sleep_pre <= (cmd_sin == SLEEP)?  1'b1 : 1'b0;
+end
+
+always_ff@(posedge clk_spi or negedge rstn_spi) begin
+    if(~rstn_spi)
+        cmd_wakeup_pre <= 1'b0;
+    else if(cmd_done) 
+        cmd_wakeup_pre <= (cmd_sin == WAKE)?  1'b1 : 1'b0;
+end
+
+sync_level cmd_idle_sync(.clk(clk_sys), .rstn(rstn_sys), .level_in(cmd_idle_pre), .level_out(cmd_idle));
+sync_level cmd_img_sync(.clk(clk_sys), .rstn(rstn_sys), .level_in(cmd_img_pre), .level_out(cmd_img));
+sync_level cmd_sleep_sync(.clk(clk_sys), .rstn(rstn_sys), .level_in(cmd_sleep_pre), .level_out(cmd_sleep));
+sync_level cmd_wakeup_sync(.clk(clk_sys), .rstn(rstn_sys), .level_in(cmd_wakeup_pre), .level_out(cmd_wakeup));
 
 endmodule
