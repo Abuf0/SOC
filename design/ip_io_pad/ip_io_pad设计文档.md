@@ -138,3 +138,12 @@ assign {PAD_INT_toe,PAD_INT_tie,PAD_INT_tout} = //pinmux.v中产生的送给tmux
   - 正常工作时：如果ds设高，肯定能正常工作，但功耗增加；如果设低，可能驱动不够
 - I2C的pull down enable
   - 复用为sda的PAD，需要根据sda_oe来mux(作为输出时tie0，作为输入时根据寄存器控制)
+
+## TSMC系列IO PAD
+前缀        功能特性        案例
+​TPA​        通用模拟I/O（Analog-Compatible）支持混合信号设计        tpan65gpgv2od3
+​TPB​        基础Bond Pad库（Pad物理结构定义，不含驱动电路）        tpbn65v
+​TPD​        标准数字I/O（Universal Standard I/O）        tpdn65gpgv2od3_sd
+​TPF​        Fail-Safe型I/O（支持电压域隔离与容错）        tpfn65gpgv2od3
+​TPH​        混合型I/O（Hybrid，同时集成数字和模拟接口）        tphn65gpgv2od3_sl
+​TPZ​        5V耐压型I/O（5V-tolerant，兼容高压信号）        tpzn65gpgv2od3

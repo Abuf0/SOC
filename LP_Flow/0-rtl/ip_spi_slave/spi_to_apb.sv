@@ -17,7 +17,7 @@ module spi_to_apb(
 );
 
 assign psel = reg_rd | reg_wr;
-assign pwdata = reg_wr;
+assign pwrite = reg_wr;
 assign paddr = reg_addr;
 assign pwdata = reg_wdata;
 assign reg_rdata = prdata;

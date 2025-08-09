@@ -1,0 +1,152 @@
+# upf2.0-> supply add PST using supply set, but must [-attribute enable_state_propagation_in_add_power_state]
+upf_version 2.1
+set_design_attributes -elements {.} -attribute enable_state_propagation_in_add_power_state true
+
+##------------------------
+## Power Port and Net, avoid supply net name == port name !!!!!
+##------------------------
+## VDD1 AON ##
+create_supply_net VVDD1 -resolve parallel
+connect_supply_net VVDD1 -ports VDD1
+
+## VDD2 FIFO ##
+create_supply_net VVDD2 -resolve parallel
+connect_supply_net VVDD2 -ports VDD2
+
+## VDD3 SHUT ##
+create_supply_net VVDD3 -resolve parallel
+connect_supply_net VVDD3 -ports VDD3
+
+## VSS AON ##
+create_supply_net VVSS -resolve parallel
+connect_supply_net VVSS -ports VSS 
+
+##------------------------
+## Supply Set
+##------------------------
+create_supply_set SS_VDD1 \
+    -function {power VVDD1} \
+    -function {ground VVSS}
+
+create_supply_set SS_VDD2 \
+    -function {power VVDD2} \
+    -function {ground VVSS}
+
+create_supply_set SS_VDD3 \
+    -function {power VVDD3} \
+    -function {ground VVSS}
+
+##------------------------
+## Set Port Attributes
+##------------------------
+
+##------------------------
+## Connect Macro Supply
+##------------------------
+#set pad_list {\
+#    u_digital_top/u_pad_top/PAD_CSN_inst \
+#    u_digital_top/u_pad_top/PAD_SCK_inst \
+#    u_digital_top/u_pad_top/PAD_MISO_inst \
+#    u_digital_top/u_pad_top/PAD_MOSI_inst \
+#    u_digital_top/u_pad_top/PAD_INT_inst \
+#    u_digital_top/u_pad_top/PAD_MPX_inst \
+#}
+#
+#foreach pad $pad_list {
+#    connect_supply_net VVDD1 -ports $pad/VDD1
+#    connect_supply_net VVSS -ports $pad/VSS
+#}
+
+##------------------------
+## Power Domain
+##------------------------
+create_power_domain PD_AON \
+    -supply {primary        SS_VDD1} \
+    -supply {pad_io_supply  SS_VDD1} \
+    -include_scope \
+    -elements { \
+        u_digital_top/u_pad_top \
+        u_digital_top/u_crgu \
+        u_digital_top/u_pmu \
+        u_digital_top/u_int_ctrl \
+        u_digital_top/u_spi_slave \
+        u_digital_top/u_bus_mux \
+        u_digital_top/u_spi_to_apb \
+        u_digital_top/u_reg_top_apb_cfg \
+        u_da_top \
+        }
+
+create_power_domain PD_FIFO \
+    -supply {primary        SS_VDD2} \
+    -elements { \
+        u_digital_top/u_sync_fifo \
+        }
+
+create_power_domain PD_SHUT \
+    -supply {primary        SS_VDD3} \
+    -elements { \
+        u_digital_top/u_time_ctrl \
+        u_digital_top/u_afe_ctrl \
+        u_digital_top/u_isp_ctrl \
+        }
+
+##------------------------
+## Set Isolation
+##------------------------
+set_isolation ISO_O_PD_SHUT_to_PD_AON \
+    -domain PD_SHUT \
+    -source SS_VDD3 \
+    -sink   SS_VDD1 \
+    -isolation_supply_set SS_VDD1 \
+    -clamp_value 0  \
+    -isolation_sense high \
+    -location fanout \
+    -isolation_signal u_digital_top/u_pmu/shut_iso_en \
+    -applies_to outputs
+
+set_isolation ISO_O_PD_SHUT_to_PD_FIFO \
+    -domain PD_SHUT \
+    -source SS_VDD3 \
+    -sink   SS_VDD2 \
+    -isolation_supply_set SS_VDD2 \
+    -clamp_value 0  \
+    -isolation_sense high \
+    -location fanout \
+    -isolation_signal u_digital_top/u_pmu/shut_iso_en \
+    -applies_to outputs
+
+## if want to except iso
+#set_isolation NO_ISO_PD_SHUT_to_ANA \
+#    -domain PD_SHUT \
+#    -no_isolation \
+#    -elements { }
+
+set_isolation ISO_O_PD_FIFO_to_PD_AON \
+    -domain PD_FIFO \
+    -source SS_VDD2 \
+    -sink   SS_VDD1 \
+    -isolation_supply_set SS_VDD1 \
+    -clamp_value 0  \
+    -isolation_sense high \
+    -location fanout \
+    -isolation_signal u_digital_top/u_pmu/shut_iso_en \
+    -applies_to outputs
+
+##------------------------
+## Power State Table
+##------------------------
+add_power_state SS_VDD1 -state ST_VDD1_ON {-supply_expr {power == {FULL_ON 0.81}}}
+
+add_power_state SS_VDD2 -state ST_VDD2_ON {-supply_expr {power == {FULL_ON 0.81}}}
+add_power_state SS_VDD2 -state ST_VDD2_OFF {-supply_expr {power == {OFF}}}
+
+add_power_state SS_VDD3 -state ST_VDD3_ON {-supply_expr {power == {FULL_ON 0.81}}}
+add_power_state SS_VDD3 -state ST_VDD3_OFF {-supply_expr {power == {OFF}}}
+
+add_power_state SS_VDD1 -state ST_VSS_ON {-supply_expr {ground == {FULL_ON 0}}}
+
+create_pst TOP_PST -supplies {SS_VDD1.power SS_VDD2.power SS_VDD3.power SS_VDD1.ground}
+add_pst_state PM_1 -pst TOP_PST -state {ST_VDD1_ON ST_VDD2_ON ST_VDD3_ON ST_VSS_ON}
+add_pst_state PM_2 -pst TOP_PST -state {ST_VDD1_ON ST_VDD2_OFF ST_VDD3_ON ST_VSS_ON}
+add_pst_state PM_3 -pst TOP_PST -state {ST_VDD1_ON ST_VDD2_ON ST_VDD3_OFF ST_VSS_ON}
+add_pst_state PM_4 -pst TOP_PST -state {ST_VDD1_ON ST_VDD2_OFF ST_VDD3_OFF ST_VSS_ON}

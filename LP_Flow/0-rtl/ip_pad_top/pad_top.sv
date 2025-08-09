@@ -14,13 +14,13 @@ module pad_top(
     inout   PAD_INT,
     inout   PAD_MPX,
     inout   VDD,
-    inout   GND
+    inout   VSS
 );
 
 pad_s1 PAD_SCK_inst(
     .I      (1'b0       ),
-    .OEN    (1'b1       ),
-    .IEN    (1'b0       ),
+    .OEN    (1'b0       ),
+    .IEN    (1'b1       ),
     .PUE    (1'b0       ),
     .PDE    (1'b1       ),
     .POR_N  (ad_por_n   ),
@@ -30,8 +30,8 @@ pad_s1 PAD_SCK_inst(
 
 pad_s1 PAD_CSN_inst(
     .I      (1'b0       ),
-    .OEN    (1'b1       ),
-    .IEN    (1'b0       ),
+    .OEN    (1'b0       ),
+    .IEN    (1'b1       ),
     .PUE    (1'b1       ),
     .PDE    (1'b0       ),
     .POR_N  (ad_por_n   ),
@@ -41,8 +41,8 @@ pad_s1 PAD_CSN_inst(
 
 pad_s1 PAD_MISO_inst(
     .I      (miso_out   ),
-    .OEN    (1'b0       ),
-    .IEN    (1'b1       ),
+    .OEN    (1'b1       ),
+    .IEN    (1'b0       ),
     .PUE    (1'b0       ),
     .PDE    (1'b1       ),
     .POR_N  (ad_por_n   ),
@@ -52,24 +52,35 @@ pad_s1 PAD_MISO_inst(
 
 pad_s1 PAD_MOSI_inst(
     .I      (1'b0       ),
-    .OEN    (1'b1       ),
-    .IEN    (1'b0       ),
-    .PUE    (1'b0       ),
-    .PDE    (1'b1       ),
-    .POR_N  (ad_por_n   ),
-    .O      (mosi_out   ),
-    .IO     (PAD_MOSI   )
-);
-
-pad_s1 PAD_INT_inst(
-    .I      (int_out    ),
     .OEN    (1'b0       ),
     .IEN    (1'b1       ),
     .PUE    (1'b0       ),
     .PDE    (1'b1       ),
     .POR_N  (ad_por_n   ),
+    .O      (mosi_in    ),
+    .IO     (PAD_MOSI   )
+);
+
+pad_s1 PAD_INT_inst(
+    .I      (int_out    ),
+    .OEN    (1'b1       ),
+    .IEN    (1'b0       ),
+    .PUE    (1'b0       ),
+    .PDE    (1'b1       ),
+    .POR_N  (ad_por_n   ),
     .O      (           ),
     .IO     (PAD_INT    )
+);
+
+pad_s1 PAD_MPX_inst(
+    .I      (mpx_out    ),
+    .OEN    (1'b1       ),
+    .IEN    (1'b0       ),
+    .PUE    (1'b0       ),
+    .PDE    (1'b1       ),
+    .POR_N  (ad_por_n   ),
+    .O      (           ),
+    .IO     (PAD_MPX    )
 );
 
 endmodule

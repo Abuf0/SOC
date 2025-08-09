@@ -70,7 +70,7 @@ module  isp_ctrl# (
     // ISP output //
     output logic [DW-1:0] pixel_data_out        ,
     output logic pixel_data_out_vld             ,
-    output logic one_frame_done                     // isp_done
+    output logic isp_one_frame_done                     // isp_done
 );
 
 localparam CSC_FIFO_DEEPTH = 16 * H ;
@@ -95,6 +95,7 @@ parameter BCC = 4'd15  ;
 logic  [BW-1:0]  pixel_data_bayer[0:16];
 logic  [DW-1:0]  pixel_data_rgb[0:16];
 logic            pixel_data_vld[0:16];
+logic            one_frame_done[0:16];
 
 logic  [23:0]    buffer_data_rgb_csc;
 
@@ -118,13 +119,15 @@ dpc #(
     .pixel_data_in_vld  (pixel_data_vld[DPC]     ), // TODO
     .pixel_data_in      (pixel_data_bayer[DPC]   ),
     .pixel_data_out_vld (pixel_data_vld[DPC+1]   ),
-    .pixel_data_out     (pixel_data_bayer[DPC+1] )
+    .pixel_data_out     (pixel_data_bayer[DPC+1] ),
+    .one_frame_done     (one_frame_done[DPC]     )
 );
 assign pixel_data_rgb[DPC] = pixel_data_in;
 assign pixel_data_bayer[DPC] = pixel_data_rgb[DPC][BW-1:0];
 assign pixel_data_vld[DPC] = pixel_data_in_vld;
 
-assign pixel_data_out = pixel_data_bayer[DPC];
-assign pixel_data_out_vld = pixel_data_vld[DPC];
+assign pixel_data_out = pixel_data_bayer[DPC+1];
+assign pixel_data_out_vld = pixel_data_vld[DPC+1];
+assign isp_one_frame_done = one_frame_done[DPC];
 
 endmodule

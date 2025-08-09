@@ -5,9 +5,29 @@ module lp_soc_top(
     inout          PAD_MOSI                 ,
     inout          PAD_INT                  ,
     inout          PAD_MPX                  ,
-    inout          VDD                      ,
-    inout          GND                      
+    inout          VDD1                     ,
+    inout          VDD2                     ,
+    inout          VDD3                     ,
+    inout          VSS                      
 );
+
+    logic scan_mode             ;
+    logic da_pixel_bias_en      ;
+    logic da_pixel_vref_en      ;
+    logic da_pixadc_ck          ;
+    logic da_stb_en             ;
+    logic da_pmu_fifocut        ;
+    logic da_vcm_pow            ;
+    logic da_vcm_qc_en          ;
+    logic da_ib_pow             ;
+    logic da_ldovref_pow        ;
+    logic da_osc13m_pow         ;
+    logic da_vcm_pulsemode      ;
+    logic ad_osc400m            ;
+    logic ad_pll100m            ;
+    logic ad_wdt32k             ;
+    logic ad_por_n              ;
+    logic [7:0] ad_pixadc_data  ;
 
 da_top  u_da_top (
     .scan_mode               ( scan_mode               ),
@@ -48,6 +68,7 @@ digital_top u_digital_top (
     .da_ldovref_pow    ( da_ldovref_pow          ),
     .da_osc13m_pow     ( da_osc13m_pow           ),
     .da_vcm_pulsemode  ( da_vcm_pulsemode        ),
+    .scan_mode         ( scan_mode               ),
 
     .PAD_SCK           ( PAD_SCK                 ),
     .PAD_CSN           ( PAD_CSN                 ),
@@ -55,8 +76,10 @@ digital_top u_digital_top (
     .PAD_MOSI          ( PAD_MOSI                ),
     .PAD_INT           ( PAD_INT                 ),
     .PAD_MPX           ( PAD_MPX                 ),
-    .VDD               ( VDD                     ),
-    .GND               ( GND                     )
+    .VDD1              ( VDD1                    ),
+    .VDD2              ( VDD2                    ),
+    .VDD3              ( VDD3                    ),
+    .VSS               ( VSS                     )
 );
 
 endmodule

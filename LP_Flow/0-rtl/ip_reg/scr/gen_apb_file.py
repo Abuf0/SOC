@@ -414,6 +414,7 @@ def gen_reg_hdl(p_sheet,ModuleName):
         reg_name  = nullUp2Valid(p_sheet,row,reg_col)
         fld_name  = p_sheet.cell(row,fld_col).value.lower()
         rst_value = p_sheet.cell(row,rst_col).value
+        print(reg_name)
         rst_value = re.search('[bodh][a-f0-9]+$',rst_value).group()
         bit       = p_sheet.cell(row,bit_col).value
         fld_type  = nullUp2Valid(p_sheet,row,access_col)

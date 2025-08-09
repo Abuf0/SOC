@@ -15,7 +15,7 @@ module pmu(
     input           rg_nosleep              ,
     input [1:0]     rg_sync_mode            ,
     input           rg_frame_trigger_start  ,
-    input [6:0]     rg_syncin_t1_set        ,
+    input [5:0]     rg_syncin_t1_set        ,
     input [5:0]     rg_pmu_wkup_time        ,
     input           rg_syncin_polar_sel     ,
     input           rg_int_pwrup            ,
@@ -71,7 +71,7 @@ logic cmd_sleep_real_latch;
 
 assign efuse_done = 1'b1;
 assign efuse_time_out = 1'b1;
-sync_level u_work_start (.clk(clk), .rstn(rstn), .data_in(rg_cardiff_start), .data_out(work_start));
+sync_level u_work_start (.clk(clk), .rstn(rstn), .level_in(rg_cardiff_start), .level_out(work_start));
 assign sync_in_sleep_mode = (rg_sync_mode[1] && ~rg_nosleep);
 assign syncin_wakeup = (rg_sync_mode == 2'd3)?  (rg_frame_trigger_start && work_start) : (t1_gt_pmu_wkup?   (syncin_timer == (rg_syncin_t1_set - rg_pmu_wkup_time)) : sync_in_pos);
 assign t1_gt_pmu_wkup = rg_syncin_t1_set > rg_pmu_wkup_time;
@@ -81,7 +81,7 @@ assign wakeup_time_mux = t1_gt_pmu_wkup?    rg_syncin_t1_set : rg_pmu_wkup_time;
 assign syncin_timer_done = (syncin_timer == wakeup_time_mux);
 
 assign sync_polar_sel = rg_syncin_polar_sel?    ~SYNC : SYNC;
-sync_level u_sync_in_s (.clk(clk), .rstn(rstn), .data_in(sync_polar_sel), .data_out(sync_in_s));
+sync_level u_sync_in_s (.clk(clk), .rstn(rstn), .level_in(sync_polar_sel), .level_out(sync_in_s));
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -121,10 +121,58 @@ logic nosleep_case;
 logic wakeup_case_latch;
 logic pulse2always;
 logic awon_wakeup_done;
+logic [5:0] ldo_timer;
+logic wakeup_done;
+logic [3:0] stb_en_neg_thd;
+logic [2:0] vcm_tmr_thd;
+logic [3:0] ldo_tmr_thd;
+logic pulse2always_rise;
+logic pulse2always_trig;
+logic rg_vcm_pulsemode_sync;
+logic enter_sleep;
+logic da_stb_en_d;
+logic rg_ldo_manual_mode_sync;
+logic rg_da_lnvref_pow_sync;
+logic pmu_pd_en;
+logic shut_iso_en_pre;
+logic shut_iso_en_scan;
+logic da_osc13m_pow_d;
+logic osc13m_clk_en_fast_wakeup;
+logic efuse_busy_32k_d;
+
+typedef enum logic [3:0] {INIT_PWUP, EFUSE_LOAD, IDLE, WORK, SLEEP, WAKE_UP, AWON_WAKEUP, TO_SLEEP} state_t;
+state_t pmu_cs, pmu_ns;
+always_ff @( posedge clk or negedge rstn ) begin
+    if(~rstn)
+        pmu_cs <= INIT_PWUP;
+    else
+        pmu_cs <= pmu_ns;
+end
+always @(*) begin
+    case(pmu_cs)
+        INIT_PWUP:  pmu_ns = pwr_up_done?   EFUSE_LOAD : INIT_PWUP;
+        EFUSE_LOAD: pmu_ns = (efuse_done || efuse_time_out)?    IDLE : EFUSE_LOAD;
+        IDLE:       pmu_ns = (work_start && ~sync_in_sleep_mode)?   WORK :
+                             syncin_wakeup? WORK :
+                             ((cmd_sleep_real || cmd_sleep_real_latch) && ~idle_nosleep_case)?  SLEEP : IDLE;
+        WORK:       pmu_ns = ~work_start?   IDLE :
+                             (frame_done_real && ~nosleep_case)?    TO_SLEEP : WORK;
+        TO_SLEEP:   pmu_ns = (wakeup_case && pulse2always)?     AWON_WAKEUP : 
+                             wakeup_case?   WAKE_UP :
+                             da_stb_en?     SLEEP : TO_SLEEP;
+        SLEEP:      pmu_ns = ((wakeup_case || wakeup_case_latch) && pulse2always)?   AWON_WAKEUP : 
+                             (wakeup_case || wakeup_case_latch)?    WAKE_UP : SLEEP;
+        WAKE_UP:    pmu_ns = (wakeup_done && no_sync_in_phase && ~syncin_wakeup)?   IDLE :
+                             wakeup_done?   WORK : WAKE_UP;
+        AWON_WAKEUP:pmu_ns = (awon_wakeup_done && no_sync_in_phase)?   IDLE :
+                              awon_wakeup_done? WORK : AWON_WAKEUP;
+        default:    pmu_ns = INIT_PWUP;
+    endcase
+end
 
 assign int_req_real = int_req && rg_int_pwrup;
 assign cmd_sleep_real = cmd_sleep_d && (~wait_int_ready || (wait_int_ready && int_ack && ~int_req_real)) && ~cmd_wakeup_real;
-sync_level u_fast_wakeup (.clk(clk), .rstn(rstn), .data_in(rg_pmu_fast_wakeup), .data_out(rg_pmu_fast_wakeup_sync));
+sync_level u_fast_wakeup (.clk(clk), .rstn(rstn), .level_in(rg_pmu_fast_wakeup), .level_out(rg_pmu_fast_wakeup_sync));
 assign frame_done_real = ((cmd_sleep_real && sleep_phase) || (data2fifo_done && ~wait_int_ready && (~master_access || cmd_sleep_real)));
 
 assign cmd_fast_wakeup = cmd_wakeup_real & rg_pmu_fast_wakeup_sync;
@@ -172,7 +220,7 @@ always_ff @( posedge clk or negedge rstn ) begin
 end
 
 assign idle_nosleep_case = rg_nosleep || efuse_busy_32k_d || wakeup_case;
-sync_level u_efuse_busy (.clk(clk), .rstn(rstn), .data_in(efuse_busy_13m), .data_out(efuse_busy_32k_d));
+sync_level u_efuse_busy (.clk(clk), .rstn(rstn), .level_in(efuse_busy_13m), .level_out(efuse_busy_32k_d));
 assign wakeup_case = cmd_wakeup_real || tmr_wakeup || syncin_wakeup || int_req_real;
 
 always_ff @( posedge clk or negedge rstn ) begin
@@ -206,14 +254,9 @@ always_ff @( posedge clk or negedge rstn ) begin
         wakeup_case_latch <= 1'b0;
 end
 
-logic pulse2always_rise;
-logic pulse2always_trig;
-logic rg_vcm_pulsemode_sync;
-logic enter_sleep;
-logic da_stb_en_d;
-sync_level u_vcm_pulsemode (.clk(clk), .rstn(rstn), .data_in(rg_vcm_pulsemode), .data_out(rg_vcm_pulsemode_sync));
+sync_level u_vcm_pulsemode (.clk(clk), .rstn(rstn), .level_in(rg_vcm_pulsemode), .level_out(rg_vcm_pulsemode_sync));
 
-assign pulse2always_trig = (da_vcm_pulse_mode & ~rg_vcm_pulsemode_sync);
+assign pulse2always_trig = (da_vcm_pulsemode & ~rg_vcm_pulsemode_sync);
 assign pulse2always_rise = enter_sleep & pulse2always_trig;
 assign enter_sleep = ~da_stb_en_d && da_stb_en && (pmu_cs == TO_SLEEP) && ~wakeup_case;
 always_ff @( posedge clk or negedge rstn ) begin
@@ -231,19 +274,11 @@ always_ff @( posedge clk or negedge rstn ) begin
     else 
         da_stb_en_d <= da_stb_en;
 end
-logic [5:0] ldo_timer;
-logic pwr_up_done;
-logic wakeup_done;
-logic [3:0] stb_en_neg_thd;
-logic [2:0] vcm_tmr_thd;
-logic [3:0] ldo_tmr_thd;
-logic cmd_fast_wakeup;
 
 assign pwr_up_done = (ldo_timer == 6'd40) && (pmu_cs == INIT_PWUP);
 assign wakeup_done = (ldo_timer == {2'h0, stb_en_neg_thd} + 6'd2) && (pmu_cs == WAKE_UP);
 assign awon_wakeup_done = (ldo_timer == 6'd21) && (pmu_cs == AWON_WAKEUP);
 assign stb_en_neg_thd = {1'b0, vcm_tmr_thd} + ldo_tmr_thd;
-assign cmd_fast_wakeup = cmd_wakeup_real & rg_pmu_fast_wakeup_sync;
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -259,8 +294,6 @@ always_ff @( posedge clk or negedge rstn ) begin
     else
         ldo_timer <= 'd0;
 end
-
-assign awon_wakeup_done = (ldo_timer == 6'd21) && (pmu_cs == AWON_WAKEUP);
 
 always@(*) begin
     case(rg_timing_ldo)
@@ -284,36 +317,6 @@ always@(*) begin
 end
 
 assign timer_pmu_start = work_start && ((rg_sync_mode == 2'd3)?  rg_frame_trigger_start : syncin_timer_done);
-
-typedef enum logic [3:0] {INIT_PWUP, EFUSE_LOAD, IDLE, WORK, SLEEP, WAKE_UP, AWON_WAKEUP, TO_SLEEP} state_t;
-state_t pmu_cs, pmu_ns;
-always_ff @( posedge clk or negedge rstn ) begin
-    if(~rstn)
-        pmu_cs <= INIT_PWUP;
-    else
-        pmu_cs <= pmu_ns;
-end
-always @(*) begin
-    case(pmu_cs)
-        INIT_PWUP:  pmu_ns = pwr_up_done?   EFUSE_LOAD : INIT_PWUP;
-        EFUSE_LOAD: pmu_ns = (efuse_done || efuse_time_out)?    IDLE : EFUSE_LOAD;
-        IDLE:       pmu_ns = (work_start && ~sync_in_sleep_mode)?   WORK :
-                             syncin_wakeup? WORK :
-                             ((cmd_sleep_real || cmd_sleep_real_latch) && ~idle_nosleep_case)?  SLEEP : IDLE;
-        WORK:       pmu_ns = ~work_start?   IDLE :
-                             (frame_done_real && ~nosleep_case)?    TO_SLEEP : WORK;
-        TO_SLEEP:   pmu_ns = (wakeup_case && pulse2always)?     AWON_WAKEUP : 
-                             wakeup_case?   WAKE_UP :
-                             da_stb_en?     SLEEP : TO_SLEEP;
-        SLEEP:      pmu_ns = ((wakeup_case || wakeup_case_latch) && pulse2always)?   AWON_WAKEUP : 
-                             (wakeup_case || wakeup_case_latch)?    WAKE_UP : SLEEP;
-        WAKE_UP:    pmu_ns = (wakeup_done && no_sync_in_phase && ~syncin_wakeup)?   IDLE :
-                             wakeup_done?   WORK : WAKE_UP;
-        AWON_WAKEUP:pmu_ns = (awon_wakeup_done && no_sync_in_phase)?   IDLE :
-                              awon_wakeup_done? WORK : AWON_WAKEUP;
-        default:    pmu_ns = INIT_PWUP;
-    endcase
-end
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -369,10 +372,8 @@ always_ff @( posedge clk or negedge rstn ) begin
         da_ib_pow <= 1'b0;
 end
 
-logic rg_ldo_manual_mode_sync;
-logic rg_da_lnvref_pow_sync;
-sync_level u_ldo_manual_mode_sync (.clk(clk), .rstn(rstn), .data_in(rg_ldo_manual_mode), .data_out(rg_ldo_manual_mode_sync));
-sync_level u_da_lnvref_pow_syn (.clk(clk), .rstn(rstn), .data_in(rg_da_lnvref_pow), .data_out(rg_da_lnvref_pow_sync));
+sync_level u_ldo_manual_mode_sync (.clk(clk), .rstn(rstn), .level_in(rg_ldo_manual_mode), .level_out(rg_ldo_manual_mode_sync));
+sync_level u_da_lnvref_pow_syn (.clk(clk), .rstn(rstn), .level_in(rg_da_lnvref_pow), .level_out(rg_da_lnvref_pow_sync));
 
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -390,7 +391,7 @@ always_ff @( posedge clk or negedge rstn ) begin
     else if((pmu_cs == WAKE_UP) && (ldo_timer == vcm_tmr_thd))
         da_ldovref_pow <= 1'b1;
 end
-logic pmu_pd_en;
+
 assign pmu_pd_en = shut_iso_en;
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
@@ -416,8 +417,6 @@ always_ff @( posedge clk or negedge rstn ) begin
     end
 end
 
-logic shut_iso_en_pre;
-logic shut_iso_en_scan;
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         shut_iso_en_pre <= 1'b0;
@@ -455,8 +454,7 @@ always_ff @( posedge clk or negedge rstn ) begin
     else
         tm_clk_en_32k <= (pmu_ns == WORK && work_start);
 end
-logic da_osc13m_pow_d;
-logic osc13m_clk_en_fast_wakeup;
+
 always_ff @( posedge clk or negedge rstn ) begin
     if(~rstn)
         da_osc13m_pow_d <= 1'b0;
@@ -480,4 +478,7 @@ always_ff @( posedge clk or negedge rstn ) begin
         osc13m_clk_en_32k <= 1'b0;
 end
 
+// todo
+assign efuse_load_done = 1'b1;
+assign da_pmu_fifocut = 1'b0;
 endmodule

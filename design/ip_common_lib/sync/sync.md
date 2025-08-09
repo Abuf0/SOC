@@ -56,3 +56,8 @@
   - 适用于非alon时钟域到alon时钟域的同步；
   - 一起同步的pul1[i]互相之间的脉冲有间隔要求，需要满足clk2的3-edge要求；
   
+## sync reset
+- `vdd -> DFF0 -> DFF1 -> rstn，复位是rst_in`
+- 方式和sync level的两级DFF类似，但实际上是用于阻隔remove/recovery亚稳态，保证同步释放后的rstn具有干净的复位释放行为即可（0→1）
+- 当T1复位释放时，假设DFF0有亚稳态输出X，此时DFF1无论是否亚稳态，都稳定输出0；T2时满足时序，DFF0输出1，DFF1输出0或1（X）；T3时DFF0和DFF1都输出1；此时rstn是个干净的0->1，区别在于复位释放后几拍完成同步；
+- 一般sync reset的DFF0/Q会写入tfile，个人认为DFF1/Q也应该写入tfile；

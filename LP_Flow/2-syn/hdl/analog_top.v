@@ -16,24 +16,6 @@ module analog_top(
     output  reg ad_por_n            ,
     output  reg [7:0] ad_pixadc_data 
 );
-parameter OSC400M_PRD = 2.5;
-parameter PLL100M_PRD = 10;
-parameter WDT32K_PRD = 31250;
-always #(OSC400M_PRD/2)  ad_osc400m = ~ad_osc400m;
-always #(PLL100M_PRD/2)  ad_pll100m = ~ad_pll100m;
-always #(WDT32K_PRD/2)  ad_wdt32k = ~ad_wdt32k;
 
-initial begin
-    ad_osc400m = 0;
-    ad_pll100m = 0;
-    ad_wdt32k = 0;
-    ad_por_n = 0;
-    #10000
-    ad_por_n = 1;
-end
-
-always@(posedge da_pixadc_ck) begin
-    ad_pixadc_data <= $random();
-end
 
 endmodule

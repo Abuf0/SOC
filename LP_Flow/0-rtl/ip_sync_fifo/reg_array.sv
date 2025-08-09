@@ -9,7 +9,7 @@ module reg_array #(
     input           we            ,
     input [AW-1:0]  addr          ,
     input [DW-1:0]  wdata         ,
-    output [DW-1:0] rdata
+    output logic [DW-1:0] rdata
 );
 
 logic [DW-1:0] mem [0:N-1];
@@ -21,6 +21,7 @@ always @(posedge clk or negedge rstn) begin
         mem[addr] <= wdata;
         `ifdef MEM_INFO
             $display("[W]MEM[%d]=%d\n", addr, wdata);
+        `endif
     end
 end
 
@@ -30,7 +31,8 @@ always @(posedge clk or negedge rstn) begin
     else if(~cen && ~we) begin
         rdata <= mem[addr];
         `ifdef MEM_INFO
-            $display("[R]MEM[%d]=%d\n", addr, rdata);
+            $display("[R]MEM[%d]=%d\n", addr, mem[addr]);
+        `endif
     end
 end
 endmodule

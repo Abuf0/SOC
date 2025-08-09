@@ -1,0 +1,305 @@
+#write below command in Makefile
+#ralgen:
+#    ralgen -l sv  -uvm  -t  reg_top_regmodel  reg_top.ralf
+#use 'source reg_top.ralf' in top.ralf
+#}
+
+register ISP_DPC_CFG {
+#  ToDo
+  field rg_dpc_clip {
+    bits 8;
+    access rw;
+    reset 'h0;
+  }
+  field rg_dpc_thres {
+    bits 8;
+    access rw;
+    reset 'h0;
+  }
+}
+
+register ISP_PATTERN_CFG {
+#  ToDo
+  field rg_bayer_pattern {
+    bits 2;
+    access rw;
+    reset 'h0;
+  }
+  field reserved1 {
+    bits 14;
+    access ro;
+    reset 'h0;
+  }
+}
+
+register PAD_CTRL {
+#  ToDo
+  field reserved2 {
+    bits 16;
+    access ro;
+    reset 'h0;
+  }
+}
+
+register PMU_CFG1 {
+#  ToDo
+  field rg_int_pwrup {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_syncin_polar_sel {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_pmu_wkup_time {
+    bits 6;
+    access rw;
+    reset 'h08;
+  }
+  field rg_syncin_t1_set {
+    bits 6;
+    access rw;
+    reset 'h08;
+  }
+  field reserved3 {
+    bits 2;
+    access ro;
+    reset 'h0;
+  }
+}
+
+register PMU_CFG0 {
+#  ToDo
+  field rg_sync_mode {
+    bits 2;
+    access rw;
+    reset 'h0;
+  }
+  field rg_nosleep {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_cardiff_start {
+    bits 1;
+    access wo;
+    reset 'h0;
+  }
+  field rg_pmu_fifocut {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_timing_vcm {
+    bits 2;
+    access rw;
+    reset 'h0;
+  }
+  field rg_timing_ldo {
+    bits 3;
+    access rw;
+    reset 'h0;
+  }
+  field rg_vcm_pulsemode {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_pmu_fast_wakeup {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_faster_sr_nosleep {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_da_lnvref_pow {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_ldo_manual_mode {
+    bits 1;
+    access rw;
+    reset 'h0;
+  }
+  field rg_frame_trigger_start {
+    bits 1;
+    access wo;
+    reset 'h0;
+  }
+}
+
+register INT_STATUS {
+#  ToDo
+  field ro_int_status {
+    bits 5;
+    access ro;
+    reset 'h0;
+  }
+  field reserved4 {
+    bits 11;
+    access ro;
+    reset 'h0;
+  }
+}
+
+register INT_CLEAR {
+#  ToDo
+  field rg_int_clr {
+    bits 5;
+    access wo;
+    reset 'h0;
+  }
+  field reserved5 {
+    bits 11;
+    access ro;
+    reset 'h0;
+  }
+}
+
+register CTRL_REG {
+#  ToDo
+  field rg_setup_time {
+    bits 8;
+    access rw;
+    reset 'h10;
+  }
+  field rg_multi_frame_num {
+    bits 4;
+    access rw;
+    reset 'h4;
+  }
+  field rg_frame_mode {
+    bits 1;
+    access rw;
+    reset 'h1;
+  }
+  field rg_fifo_chk_en {
+    bits 1;
+    access rw;
+    reset 'b0;
+  }
+  field reserved6 {
+    bits 2;
+    access ro;
+    reset 'h0;
+  }
+}
+
+register ADC_CFG {
+#  ToDo
+  field rg_adc_sample_prd {
+    bits 8;
+    access rw;
+    reset 'hf;
+  }
+  field reserved7 {
+    bits 8;
+    access ro;
+    reset 'b0;
+  }
+}
+
+register FIFO_USED {
+#  ToDo
+  field ro_fifo_used {
+    bits 16;
+    access ro;
+    reset 'h0;
+  }
+}
+
+register FIFO_THRESHOLD {
+#  ToDo
+  field rg_fifo_enough_th {
+    bits 16;
+    access rw;
+    reset 'h100;
+  }
+}
+
+register PIXEL_SIZE {
+#  ToDo
+  field rg_pixel_width {
+    bits 8;
+    access rw;
+    reset 'h10;
+  }
+  field rg_pixel_height {
+    bits 8;
+    access rw;
+    reset 'h10;
+  }
+}
+
+register CRGU_CTRL {
+#  ToDo
+  field rg_fifo_ckgt_en {
+    bits 1;
+    access rw;
+    reset 'b0;
+  }
+  field rg_afe_ckgt_en {
+    bits 1;
+    access rw;
+    reset 'b0;
+  }
+  field rg_isp_ckgt_en {
+    bits 1;
+    access rw;
+    reset 'b0;
+  }
+  field rg_fifo_reset {
+    bits 1;
+    access rw;
+    reset 'b0;
+  }
+  field reserved8 {
+    bits 12;
+    access ro;
+    reset 'b0;
+  }
+}
+
+register CHIP_INFO {
+#  ToDo
+  field chip_id {
+    bits 8;
+    access ro;
+    reset 'b0;
+  }
+  field chip_version {
+    bits 8;
+    access ro;
+    reset 'b0;
+  }
+  field reserved9 {
+    bits 16;
+    access ro;
+    reset 'b0;
+  }
+}
+
+block reg_top_regmodel {
+  bytes 4.0;
+  register ISP_DPC_CFG   (isp_dpc_cfg)   @'h20;
+  register ISP_PATTERN_CFG (isp_pattern_cfg) @'h18;
+  register PAD_CTRL      (pad_ctrl)      @'h16;
+  register PMU_CFG1      (pmu_cfg1)      @'h14;
+  register PMU_CFG0      (pmu_cfg0)      @'h12;
+  register INT_STATUS    (int_status)    @'h10;
+  register INT_CLEAR     (int_clear)     @'h0e;
+  register CTRL_REG      (ctrl_reg)      @'h0c;
+  register ADC_CFG       (adc_cfg)       @'h0a;
+  register FIFO_USED     (fifo_used)     @'h08;
+  register FIFO_THRESHOLD (fifo_threshold) @'h06;
+  register PIXEL_SIZE    (pixel_size)    @'h04;
+  register CRGU_CTRL     (crgu_ctrl)     @'h02;
+  register CHIP_INFO     (chip_info)     @'h00;
+}
+

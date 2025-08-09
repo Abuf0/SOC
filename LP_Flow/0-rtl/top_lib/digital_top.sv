@@ -5,8 +5,10 @@ module digital_top(
     inout          PAD_MOSI                 ,
     inout          PAD_INT                  ,
     inout          PAD_MPX                  ,
-    inout          VDD                      ,
-    inout          GND                      ,
+    inout          VDD1                     ,
+    inout          VDD2                     ,
+    inout          VDD3                     ,
+    inout          VSS                      ,
     input          ad_osc400m               ,
     input          ad_pll100m               ,
     input          ad_wdt32k                ,
@@ -22,28 +24,27 @@ module digital_top(
     output logic   da_ib_pow                ,
     output logic   da_ldovref_pow           ,
     output logic   da_osc13m_pow            ,
-    output logic   da_vcm_pulsemode         
+    output logic   da_vcm_pulsemode         ,
+    output logic   scan_mode
 
 );
 
-parameter INN = 5;
-parameter AW = 16;
+parameter INN = 6;
+parameter AW = 9;
 parameter DW = 16;
 parameter PDW = 8;
 parameter BW = 8;
 parameter FIFO_DEEPTH = 256;
 parameter H  = 16;
 parameter V  = 16;
-parameter HW = 4;
-parameter VW = 4;
+parameter HW = $clog2(H);
+parameter VW = $clog2(V);
 // pad_top Inputs
 logic   mpx_out                              ;
-logic   ad_por_n                             ;
 
 
 // crgu Inputs
 logic   spi_ck                              ;
-logic   cmd_idle                            ;
 logic   shut_rstn                           ;
 logic   rg_fifo_reset                       ;
 logic   rg_fifo_ckgt_en                     ;
@@ -61,6 +62,7 @@ logic    clk_afe                     ;
 logic    clk_isp                     ;
 logic    clk_32k                     ;
 logic    clk_spi                     ;
+logic    clk_spi_inv                 ;
 logic    rstn_reg                    ;
 logic    rstn_fifo                   ;
 logic    rstn_tim                    ;
@@ -69,27 +71,9 @@ logic    rstn_isp                    ;
 logic    rstn_32k                    ;
 logic    rstn_spi                    ;
 
-logic   rg_ldo_manual_mode           ;
-logic   rg_da_lnvref_pow             ;
-logic   rg_faster_sr_nosleep         ;
-logic   rg_pmu_fast_wakeup           ;
-logic   rg_vcm_pulsemode             ;
-logic   [2:0]  rg_timing_ldo         ;
-logic   [1:0]  rg_timing_vcm         ;
-logic   rg_pmu_fifocut               ;
-logic   rg_cardiff_start             ;
-logic   rg_nosleep                   ;
-logic   [1:0]  rg_sync_mode          ;
-logic   rg_frame_trigger_start       ;
-logic   [6:0]  rg_syncin_t1_set      ;
-logic   [5:0]  rg_pmu_wkup_time      ;
-logic   rg_syncin_polar_sel          ;
-logic   rg_int_pwrup                 ;
 logic   timeslot_start               ;
 logic   data2fifo_done               ;
 logic   tmr_wakeup                   ;
-logic   cmd_wakeup                   ;
-logic   cmd_sleep                    ;
 logic   int_ack                      ;
 
 // pmu Outputs
@@ -103,22 +87,10 @@ logic    wakeup_ready_pulse          ;
 logic    int_pwrup_ready             ;
 logic    tm_clk_en_32k               ;
 logic    osc13m_clk_en_32k           ;
-logic    da_stb_en                   ;
-logic    da_pmu_fifocut              ;
-logic    da_vcm_pow                  ;
-logic    da_vcm_qc_en                ;
-logic    da_ib_pow                   ;
-logic    da_ldovref_pow              ;
-logic    da_osc13m_pow               ;
-logic    da_vcm_pulsemode            ;
 logic    pmu_fifo_rstn               ;
 logic    shut_iso_en                 ;
 
 // spi_slave Inputs
-logic   clk_spi                      ;
-logic   rstn_spi                     ;
-logic   clk_sys                      ;
-logic   rstn_sys                     ;
 logic   spi_csn                      ;
 logic   spi_mosi                     ;
 logic   [15:0]  reg_rdata            ;
@@ -135,85 +107,92 @@ logic [15:0] reg_addr                ;
 logic [15:0] reg_wdata               ;
 
 // time_ctrl Inputs
-logic   clk_tim                      ;
-logic   rstn_tim                     ;
-logic   clk_afe                      ;
-logic   rstn_afe                     ;
-logic   cmd_img                      ;
-logic   rg_fifo_chk_en               ;
-logic   [15:0]  rg_fifo_enough_th    ;
 logic   [AW-1:0]  fifo_used          ;
-logic   [7:0]  rg_setup_time         ;
-logic   rg_frame_mode                ;
-logic   [3:0]  rg_multi_frame_num    ;
 logic   isp_done                     ;
-logic   afe_adc_read_done            ;
 
 // time_ctrl Outputs
 logic isp_sta_trig                   ;
-logic adc_sta_trig                   ;
-logic da_pixel_bias_en               ;
-logic da_pixel_vref_en               ;
 
 // afe_ctrl Inputs
-logic  clk_afe                       ;
-logic  rstn_afe                      ;
-logic  clk_tim                       ;
-logic  rstn_tim                      ;
-logic  clk_fifo                      ;
-logic  rstn_fifo                     ;
-logic  [7:0]  rg_pixel_width         ;
-logic  [7:0]  rg_pixel_height        ;
-logic  [2:0]  rg_adc_sample_prd      ;
-logic  [7:0]  ad_data                ;
 logic  adc_sta_trig                  ;
 
 // afe_ctrl Outputs
 logic [7:0] data_out                 ;
 logic data_out_vld                   ;
-logic da_pixadc_ck                   ;
 logic   afe_adc_read_done            ;
 
 // sync_fifo Inputs
-logic   clk_fifo                     ;
-logic   rstn_fifo                    ;
-logic   i_wr                         ;
-logic   i_rd                         ;
-logic   [AW-1:0]  i_addr             ;
-logic   [DW-1:0]  i_wdata            ;
+logic   fifo_wr                         ;
+logic   fifo_rd                         ;
+logic   [AW-1:0]  fifo_addr             ;
+logic   [DW-1:0]  fifo_wdata            ;
 
 // sync_fifo Outputs
-logic [DW-1:0] o_rdata               ;
-logic [AW-1:0] o_used                ;
+logic [DW-1:0] fifo_rdata               ;
+
+logic          m_wr ;
+logic          m_rd ;
+logic [15:0]   m_addr;
+logic [15:0]   m_wdata;
+logic [15:0]   m_rdata;
+logic    bus_error;
 
 // isp_ctrl Inputs
-logic   clk                           ;
-logic   rstn                          ;
 logic   [15:0]  isp_enable            ;
-logic   [1:0]  bayer_pattern          ;
-logic   [BW-1:0]  dpc_thres           ;
-logic   [BW-1:0]  dpc_clip            ;
 logic   [PDW-1:0]  pixel_data_in       ;
 logic   pixel_data_in_vld             ;
 
 // isp_ctrl Outputs
 logic [PDW-1:0] pixel_data_out        ;
 logic pixel_data_out_vld             ;
-logic one_frame_done                 ;
 
 
-logic   [INN-1:0]  rg_int_clr        ;
-logic   reset_irq                    ;
 logic   one_frame_done               ;
-logic   fifo_waterline_flag          ;
+logic   fifo_spaceov_flag          ;
 logic   fifo_upov_flag               ;
 logic   fifo_downov_flag             ;
 
 // int_ctrl Outputs
 logic int_req                        ;
 logic [INN-1:0] ro_int_status        ;
+logic [INN-1:0] rg_int_enable        ;
 
-logic scan_mode;
+logic [7:0]  chip_version                  ;
+logic [7:0]  chip_id                       ;
+logic [AW-1:0]  ro_fifo_used                 ;
+
+// reg_top_apb_cfg Outputs
+logic [7:0]  rg_pixel_height               ;
+logic [7:0]  rg_pixel_width                ;
+logic [15:0]  rg_fifo_enough_th            ;
+logic [7:0]  rg_adc_sample_prd             ;
+logic rg_fifo_chk_en                       ;
+logic rg_frame_mode                        ;
+logic [3:0]  rg_multi_frame_num            ;
+logic [7:0]  rg_setup_time                 ;
+logic [INN-1:0]  rg_int_clr                    ;
+logic rg_frame_trigger_start               ;
+logic rg_ldo_manual_mode                   ;
+logic rg_da_lnvref_pow                     ;
+logic rg_faster_sr_nosleep                 ;
+logic rg_pmu_fast_wakeup                   ;
+logic rg_vcm_pulsemode                     ;
+logic [2:0]  rg_timing_ldo                 ;
+logic [1:0]  rg_timing_vcm                 ;
+logic rg_pmu_fifocut                       ;
+logic rg_cardiff_start                     ;
+logic rg_nosleep                           ;
+logic [1:0]  rg_sync_mode                  ;
+logic [5:0]  rg_syncin_t1_set              ;
+logic [5:0]  rg_pmu_wkup_time              ;
+logic rg_syncin_polar_sel                  ;
+logic rg_int_pwrup                         ;
+logic [1:0]  rg_bayer_pattern              ;
+logic [7:0]  rg_dpc_thres                  ;
+logic [7:0]  rg_dpc_clip                   ;
+
+logic [15:0] tmp_16b;
+
 logic scan_enable;
 logic scan_clk;
 logic scan_rstn;
@@ -235,6 +214,9 @@ assign afe_icg_en = rg_afe_ckgt_en;
 assign isp_icg_en = rg_isp_ckgt_en;
 assign isp_enable[0] = ~rg_isp_ckgt_en;
 assign mpx_out = 0;
+assign int_ack = 0;
+assign chip_version = 0;
+assign chip_id      = 0;
 
 pad_top  u_pad_top (
     .miso_out                ( spi_miso   ),
@@ -252,8 +234,8 @@ pad_top  u_pad_top (
     .PAD_MOSI                ( PAD_MOSI   ),
     .PAD_INT                 ( PAD_INT    ),
     .PAD_MPX                 ( PAD_MPX    ),
-    .VDD                     ( VDD        ),
-    .GND                     ( GND        )
+    .VDD                     ( VDD1       ),
+    .VSS                     ( VSS        )
 );
 
 crgu  u_crgu (
@@ -284,6 +266,7 @@ crgu  u_crgu (
     .clk_isp        ( clk_isp              ),
     .clk_32k        ( clk_32k              ),
     .clk_spi        ( clk_spi              ),
+    .clk_spi_inv    ( clk_spi_inv          ),
     .rstn_reg       ( rstn_reg             ),
     .rstn_fifo      ( rstn_fifo            ),
     .rstn_tim       ( rstn_tim             ),
@@ -294,30 +277,32 @@ crgu  u_crgu (
 );
 
 spi_slave u_spi_slave (
+    .scan_mode  ( scan_mode         ),
     .clk_spi    ( clk_spi           ),
+    .clk_spi_inv( clk_spi_inv       ),
     .rstn_spi   ( rstn_spi          ),
-    .clk_sys    ( clk_sys           ),
-    .rstn_sys   ( rstn_sys          ),
+    .clk_sys    ( clk_reg           ),
+    .rstn_sys   ( rstn_reg          ),
     .spi_csn    ( spi_csn           ),
     .spi_mosi   ( spi_mosi          ),
-    .reg_rdata  ( reg_rdata         ),
+    .reg_rdata  ( m_rdata           ),
 
     .spi_miso   ( spi_miso          ),
     .cmd_idle   ( cmd_idle          ),
     .cmd_img    ( cmd_img           ),
     .cmd_sleep  ( cmd_sleep         ),
     .cmd_wakeup ( cmd_wakeup        ),
-    .reg_wr     ( reg_wr            ),  
-    .reg_rd     ( reg_rd            ),  
-    .reg_addr   ( reg_addr          ),  
-    .reg_wdata  ( reg_wdata         )     
+    .reg_wr     ( m_wr              ),  
+    .reg_rd     ( m_rd              ),  
+    .reg_addr   ( m_addr            ),  
+    .reg_wdata  ( m_wdata           )     
 );
 
 spi_to_apb  u_spi_to_apb (
     .clk_spi    ( clk_spi           ),
     .rstn_spi   ( rstn_spi          ),
-    .clk_sys    ( clk_sys           ),
-    .rstn_sys   ( rstn_sys          ),
+    .clk_sys    ( clk_reg           ),
+    .rstn_sys   ( rstn_reg          ),
     .reg_wr     ( reg_wr            ),
     .reg_rd     ( reg_rd            ),
     .reg_addr   ( reg_addr          ),
@@ -330,6 +315,25 @@ spi_to_apb  u_spi_to_apb (
     .penable    ( penable           ),
     .paddr      ( paddr             ),
     .pwdata     ( pwdata            )
+);
+
+bus_mux u_bus_mux(
+    .m_wr       ( m_wr                   ),
+    .m_rd       ( m_rd                   ),
+    .m_addr     ( m_addr                 ),
+    .m_wdata    ( m_wdata                ),    
+    .m_rdata    ( m_rdata                ),    
+    .s0_wr      ( fifo_wr                ),
+    .s0_rd      ( fifo_rd                ),
+    .s0_addr    ( tmp_16b                ),    
+    .s0_wdata   ( fifo_wdata             ),    
+    .s0_rdata   ( fifo_rdata             ), 
+    .s1_wr      ( reg_wr                 ),
+    .s1_rd      ( reg_rd                 ),
+    .s1_addr    ( reg_addr               ), 
+    .s1_wdata   ( reg_wdata              ), 
+    .s1_rdata   ( reg_rdata              ),    
+    .bus_error  ( bus_error              )  
 );
 
 pmu  u_pmu (
@@ -391,10 +395,13 @@ time_ctrl #(
     .AW          ( AW          ),
     .FIFO_DEEPTH ( FIFO_DEEPTH ))
  u_time_ctrl (
+    .scan_enable             ( scan_enable          ),
     .clk_tim                 ( clk_tim              ),
     .rstn_tim                ( rstn_tim             ),
     .clk_afe                 ( clk_afe              ),
     .rstn_afe                ( rstn_afe             ),
+    .clk_isp                 ( clk_isp              ),
+    .rstn_isp                ( rstn_isp             ),
     .cmd_img                 ( cmd_img              ),
     .rg_fifo_chk_en          ( rg_fifo_chk_en       ),
     .rg_fifo_enough_th       ( rg_fifo_enough_th    ),
@@ -404,6 +411,7 @@ time_ctrl #(
     .rg_multi_frame_num      ( rg_multi_frame_num   ),
     .isp_done                ( isp_done             ),
     .afe_adc_read_done       ( afe_adc_read_done    ),
+    .fifo_spaceov_flag       ( fifo_spaceov_flag    ),
 
     .isp_sta_trig      ( isp_sta_trig               ),
     .adc_sta_trig      ( adc_sta_trig               ),
@@ -412,16 +420,18 @@ time_ctrl #(
 );
 
 afe_ctrl  u_afe_ctrl (
+    .scan_enable                ( scan_enable         ),
     .clk_afe                    ( clk_afe             ),
     .rstn_afe                   ( rstn_afe            ),
     .clk_tim                    ( clk_tim             ),
     .rstn_tim                   ( rstn_tim            ),
     .clk_fifo                   ( clk_fifo            ),
     .rstn_fifo                  ( rstn_fifo           ),
+    .rg_pad_en                  ( 0 /* TODO */        ),
     .rg_pixel_width             ( rg_pixel_width      ),
     .rg_pixel_height            ( rg_pixel_height     ),
     .rg_adc_sample_prd          ( rg_adc_sample_prd   ),
-    .ad_data                    ( ad_data             ),
+    .ad_data                    ( ad_pixadc_data      ),
     .adc_sta_trig               ( adc_sta_trig        ),
 
     .data_out             ( data_out             ),
@@ -436,13 +446,14 @@ sync_fifo #(
  u_sync_fifo (
     .clk_fifo ( clk_fifo      ),
     .rstn_fifo( rstn_fifo     ),
-    .i_wr     ( i_wr          ),
-    .i_rd     ( i_rd          ),
-    .i_addr   ( i_addr        ),
-    .i_wdata  ( i_wdata       ),
+    .i_wr     ( pixel_data_out_vld  ),
+    .i_rd     ( fifo_rd       ),
+    .i_wdata  ( {8'd0, pixel_data_out} ),
 
-    .o_rdata  ( o_rdata       ),
-    .o_used   ( o_used        )
+    .o_rdata  ( fifo_rdata    ),
+    .o_used   ( ro_fifo_used  ),
+    .fifo_upov_flag     (fifo_upov_flag   ),
+    .fifo_downov_flag   (fifo_downov_flag )
 );
 
 isp_ctrl #(
@@ -459,76 +470,80 @@ isp_ctrl #(
     .bayer_pattern                  ( rg_bayer_pattern            ),
     .dpc_thres                      ( rg_dpc_thres                ),
     .dpc_clip                       ( rg_dpc_clip                 ),
-    .pixel_data_in                  ( pixel_data_in               ),
-    .pixel_data_in_vld              ( pixel_data_in_vld           ),
+    .pixel_data_in                  ( data_out                    ),
+    .pixel_data_in_vld              ( data_out_vld                ),
 
     .pixel_data_out           ( pixel_data_out           ),
     .pixel_data_out_vld       ( pixel_data_out_vld                ),
-    .one_frame_done           ( one_frame_done                    )
+    .isp_one_frame_done       ( isp_done                          )
 );
 
 int_ctrl #(
     .INN ( INN ))
  u_int_ctrl (
-    .clk                            ( clk                          ),
-    .rstn                           ( rstn                         ),
+    .scan_enable                    ( scan_enable                  ),
+    .clk_32k                        ( clk_32k                      ),
+    .rstn_32k                       ( rstn_32k                     ),
+    .clk_sys                        ( clk_fifo                     ),
+    .rstn_sys                       ( rstn_fifo                    ),
+    .rg_int_enable                  ( 6'h1F /* TODO */             ),
     .rg_int_clr                     ( rg_int_clr                   ),
-    .reset_irq                      ( reset_irq                    ),
-    .one_frame_done                 ( one_frame_done               ),
-    .fifo_waterline_flag            ( fifo_waterline_flag          ),
+    .one_frame_done                 ( isp_done                     ),
+    .fifo_spaceov_flag              ( fifo_spaceov_flag            ),
     .fifo_upov_flag                 ( fifo_upov_flag               ),
     .fifo_downov_flag               ( fifo_downov_flag             ),
+    .bus_error                      ( bus_error                    ),
 
     .int_req                  ( int_req                            ),
     .ro_int_status  ( ro_int_status            )
 );
 
 reg_top_apb_cfg  u_reg_top_apb_cfg (
-    .clk                     ( clk_reg                 ),
-    .rst_n                   ( rstn_reg                ),
-    .pwrite                  ( pwrite                  ),
-    .psel                    ( psel                    ),   // todo
-    .penable                 ( penable                 ),   // todo
-    .paddr                   ( paddr                   ),   // todo
-    .pwdata                  ( pwdata                  ),   // todo
-    .chip_version            ( chip_version            ),
-    .chip_id                 ( chip_id                 ),
-    .ro_fifo_used            ( ro_fifo_used            ),
-    .rg_fifo_chk_en          ( rg_fifo_chk_en          ),
-    .rg_frame_mode           ( rg_frame_mode           ),
-    .rg_multi_frame_num      ( rg_multi_frame_num      ),
-    .rg_setup_time           ( rg_setup_time           ),
-    .ro_int_status           ( ro_int_status           ),
+    .clk                     ( clk_reg               ),
+    .rst_n                   ( rstn_reg              ),
+    .pwrite                  ( pwrite                ),
+    .psel                    ( psel                  ),
+    .penable                 ( penable               ),
+    .paddr                   ( paddr                 ),
+    .pwdata                  ( pwdata                ),
+    .chip_version            ( chip_version          ),
+    .chip_id                 ( chip_id               ),
+    .ro_fifo_used            ( ro_fifo_used          ),
+    .ro_int_status           ( ro_int_status         ),
 
-    .prdata                  ( prdata                  ),   // todo
-    .rg_fifo_reset           ( rg_fifo_reset           ),
-    .rg_isp_ckgt_en          ( rg_isp_ckgt_en          ),
-    .rg_afe_ckgt_en          ( rg_afe_ckgt_en          ),
-    .rg_fifo_ckgt_en         ( rg_fifo_ckgt_en         ),
-    .rg_pixel_height         ( rg_pixel_height         ),
-    .rg_pixel_width          ( rg_pixel_width          ),
-    .rg_fifo_enough_th       ( rg_fifo_enough_th       ),
-    .rg_adc_sample_prd       ( rg_adc_sample_prd       ),
-    .rg_int_clr              ( rg_int_clr              ),
-    .rg_frame_trigger_start  ( rg_frame_trigger_start  ),
-    .rg_ldo_manual_mode      ( rg_ldo_manual_mode      ),
-    .rg_da_lnvref_pow        ( rg_da_lnvref_pow        ),
-    .rg_faster_sr_nosleep    ( rg_faster_sr_nosleep    ),
-    .rg_pmu_fast_wakeup      ( rg_pmu_fast_wakeup      ),
-    .rg_vcm_pulsemode        ( rg_vcm_pulsemode        ),
-    .rg_timing_ldo           ( rg_timing_ldo           ),
-    .rg_timing_vcm           ( rg_timing_vcm           ),
-    .rg_pmu_fifocut          ( rg_pmu_fifocut          ),
-    .rg_cardiff_start        ( rg_cardiff_start        ),
-    .rg_nosleep              ( rg_nosleep              ),
-    .rg_sync_mode            ( rg_sync_mode            ),
-    .rg_syncin_t1_set        ( rg_syncin_t1_set        ),
-    .rg_pmu_wkup_time        ( rg_pmu_wkup_time        ),
-    .rg_syncin_polar_sel     ( rg_syncin_polar_sel     ),
-    .rg_int_pwrup            ( rg_int_pwrup            ),
-    .rg_bayer_pattern        ( rg_bayer_pattern        ),
-    .rg_dpc_thres            ( rg_dpc_thres            ),
-    .rg_dpc_clip             ( rg_dpc_clip             )
+    .prdata                  ( prdata                ),
+    .rg_fifo_reset           ( rg_fifo_reset         ),
+    .rg_isp_ckgt_en          ( rg_isp_ckgt_en        ),
+    .rg_afe_ckgt_en          ( rg_afe_ckgt_en        ),
+    .rg_fifo_ckgt_en         ( rg_fifo_ckgt_en       ),
+    .rg_pixel_height         ( rg_pixel_height       ),
+    .rg_pixel_width          ( rg_pixel_width        ),
+    .rg_fifo_enough_th       ( rg_fifo_enough_th     ),
+    .rg_adc_sample_prd       ( rg_adc_sample_prd     ),
+    .rg_fifo_chk_en          ( rg_fifo_chk_en        ),
+    .rg_frame_mode           ( rg_frame_mode         ),
+    .rg_multi_frame_num      ( rg_multi_frame_num    ),
+    .rg_setup_time           ( rg_setup_time         ),
+    .rg_int_clr              ( rg_int_clr            ),
+    .rg_frame_trigger_start  ( rg_frame_trigger_start),
+    .rg_ldo_manual_mode      ( rg_ldo_manual_mode    ),
+    .rg_da_lnvref_pow        ( rg_da_lnvref_pow      ),
+    .rg_faster_sr_nosleep    ( rg_faster_sr_nosleep  ),
+    .rg_pmu_fast_wakeup      ( rg_pmu_fast_wakeup    ),
+    .rg_vcm_pulsemode        ( rg_vcm_pulsemode      ),
+    .rg_timing_ldo           ( rg_timing_ldo         ),
+    .rg_timing_vcm           ( rg_timing_vcm         ),
+    .rg_pmu_fifocut          ( rg_pmu_fifocut        ),
+    .rg_cardiff_start        ( rg_cardiff_start      ),
+    .rg_nosleep              ( rg_nosleep            ),
+    .rg_sync_mode            ( rg_sync_mode          ),
+    .rg_syncin_t1_set        ( rg_syncin_t1_set      ),
+    .rg_pmu_wkup_time        ( rg_pmu_wkup_time      ),
+    .rg_syncin_polar_sel     ( rg_syncin_polar_sel   ),
+    .rg_int_pwrup            ( rg_int_pwrup          ),
+    .rg_bayer_pattern        ( rg_bayer_pattern      ),
+    .rg_dpc_thres            ( rg_dpc_thres          ),
+    .rg_dpc_clip             ( rg_dpc_clip           )
 );
 
 

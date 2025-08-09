@@ -15,7 +15,8 @@ module dpc#(
     input                   pixel_data_in_vld   ,
     input        [DW-1:0]   pixel_data_in       ,
     output logic [DW-1:0]   pixel_data_out      ,
-    output logic            pixel_data_out_vld
+    output logic            pixel_data_out_vld  ,
+    output logic            one_frame_done      
 );
 logic [DW-1:0]shift_reg [0:4*H+4];
 logic [DW-1:0] mac_arr[0:8];
@@ -29,6 +30,7 @@ logic [VW-1:0] v_cnt;
 logic [DW-1:0] abs_delta [0:7];
 
 logic init;
+logic tail;
 
 genvar i;
 generate
@@ -37,7 +39,7 @@ generate
             always_ff @( posedge clk or negedge rstn ) begin
                 if(~rstn)
                     shift_reg[i] <= 'd0;
-                else if(dpc_en && pixel_data_in_vld)
+                else if(dpc_en && (pixel_data_in_vld | tail))
                     shift_reg[i] <= pixel_data_in;
             end
         end
@@ -54,7 +56,7 @@ generate
             always_ff @( posedge clk or negedge rstn ) begin
                 if(~rstn)
                     shift_reg[i] <= 'd0;
-                else if(dpc_en && pixel_data_in_vld)
+                else if(dpc_en && (pixel_data_in_vld | tail))
                     shift_reg[i] <= shift_reg[i-1];
             end
         end
@@ -77,7 +79,7 @@ always_ff@(posedge clk or negedge rstn) begin
         pixel_data_out_vld <= 1'b0;
     else if(dpc_en)
         //pixel_data_out_vld <= pixel_data_in_vld_ff[4*H+3];
-        pixel_data_out_vld <= ~init && pixel_data_in_vld;
+        pixel_data_out_vld <= (~init && pixel_data_in_vld) | tail;
     else 
         pixel_data_out_vld <= pixel_data_in_vld;
 end
@@ -89,7 +91,7 @@ always_ff@(posedge clk or negedge rstn) begin
         h_cnt <= 'd0;
     else if(init && v_cnt==2 && h_cnt==2)
         h_cnt <= 'd0;
-    else if(dpc_en && pixel_data_in_vld)
+    else if(dpc_en && (pixel_data_in_vld | tail))
         h_cnt <= (h_cnt==H-1)?  'd0:(h_cnt+1'b1);
 end
 always_ff@(posedge clk or negedge rstn) begin
@@ -97,7 +99,7 @@ always_ff@(posedge clk or negedge rstn) begin
         v_cnt <= 'd0;
     else if(init && v_cnt==2 && h_cnt==2)
         v_cnt <= 'd0;
-    else if(dpc_en && pixel_data_in_vld && h_cnt==H-1)
+    else if(dpc_en && (pixel_data_in_vld | tail) && h_cnt==H-1)
         v_cnt <= (v_cnt==V-1)?  'd0:(v_cnt+1'b1);
 end
    
@@ -108,6 +110,23 @@ always_ff@(posedge clk or negedge rstn) begin
         init <= 1'b0;
 end
 
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)   
+        tail <= 1'b0;
+    else if(v_cnt==V-3 && h_cnt==H-2)
+        tail <= 1'b1;
+    else if(v_cnt==V-1 && h_cnt==H-1)
+        tail <= 1'b0;
+end
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)   
+        one_frame_done <= 1'b0;
+    else if(v_cnt==V-1 && h_cnt==H-1)
+        one_frame_done <= 1'b1;
+    else if(one_frame_done)
+        one_frame_done <= 1'b0;
+end
 
 assign mac_arr[0] = (v_cnt > 'd1 && h_cnt > 'd1)? shift_reg[4*H+4]          : 'd0 ;
 assign mac_arr[1] = (v_cnt > 'd1)?                shift_reg[4*H+2]          : 'd0 ;
@@ -163,8 +182,8 @@ always @(posedge clk) begin
     end
 end
 always @(negedge clk) begin
-    if (pixel_data_in_vld && ~init) begin
-        $fwrite(filep,"(%d,%d):%d\t%d,%d\n",v_cnt,h_cnt,,pixel_data_dpc,correct_flag,mac_arr[4]);
+    if ((pixel_data_in_vld && ~init) | tail) begin
+        $fwrite(file_p,"(%d,%d):%d\t%d,%d\n",v_cnt,h_cnt,pixel_data_dpc,correct_flag,mac_arr[4]);
     end
 end
 `endif
