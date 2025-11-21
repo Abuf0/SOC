@@ -23,6 +23,11 @@ if (-e ${DATE}) then
 else mkdir ${DATE}${VER}
 endif
 
+cd ../sdf/
+if (-e ${DATE}) then
+else mkdir ${DATE}${VER}
+endif
+
 ### run script
 cd ../run/
 /home/jjt/install/synopsys/dc/syn/T-2022.03-SP2/bin/dc_shell-xg-t -f ../scr/compile.tcl |tee ../log/${TOP}_${VER}_${DATE}_compile.log

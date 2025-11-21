@@ -28,6 +28,7 @@
         int32_t nZP;
         int32_t nMuliSc;
         uint8_t uchShift;
+        int32_t nCStep;
 
         void *  pData;
     } mocnn_tensor;
@@ -45,19 +46,24 @@
         uint8_t uchPadX;
         uint8_t uchPadY;
 
-        int32_t usGroupNum;  // 卷积分组数量
-        int32_t uchActValue;  // 卷积之后是否跟着激活函数
+        uint16_t usGroupNum;  // 卷积分组数量
+        uint16_t usChPerGroup;
+        uint8_t uchActValue;  // 卷积之后是否跟着激活函数
 
         int64_t *plnMulBzp;
         int64_t *plnMultSc;
-        int32_t *puchShift;
+        uint8_t *puchShift;
 
     } mocnn_conv_param;
 
     typedef struct
     {
+        int32_t nBatchNum;
         int32_t nInFeatures;    // = C*H*W
         int32_t nOutFeatures;
+        int32_t nInFeaStep;     // = H*W
+        int32_t nOutFeaStep;
+
         uint8_t uchActValue;  // 0-1
 
         int64_t *plnMulBzp;
