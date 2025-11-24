@@ -162,19 +162,19 @@ void print_bin(const int32_t *arr, int row, int colunm) {
     printf("]\n\n");
 }
 
-#define INUM 5
-#define JNUM 5
+#define INUM 10
+#define JNUM 10
 #define BITLEN 128
 #define BITQMODE 2
-#define NTH 4
+#define NTH 6
 
 #define TEMP_BASE 0
 #define SAMP_BASE 0
 #define DIST_BASE 0
 #define MIN_BASE 100
 
-#define ISEED 4
-#define JSEED 5
+#define ISEED 3
+#define JSEED 9
 
 #define DEBUG
 #define DES_LEN 12
@@ -238,7 +238,7 @@ int main(void) {
         MniDataArr[i] = 255;//8*32;
         MniPosArr[i] = 255;//-1;
     }
-    int32_t KeymapPara[4] = {56,164,280,576};
+    int32_t KeymapPara[4] = {56,114,280,576};
     uint16_t DisArr[INUM*NTH] = {0};
 
     // 64-1bit
@@ -261,10 +261,16 @@ int main(void) {
 
     FILE *file_temp_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/temp_data.txt", "w");
     FILE *file_samp_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/samp_data.txt", "w");
-    for (int i = 0; i < INUM * DES_LEN; i++) {
+    for (int i=0; i < IS * DES_LEN; i++) {
+        fprintf(file_temp_data, "%0x\n", 0);
+    }
+    for (int i = IS * DES_LEN; i < IE * DES_LEN; i++) {
 	    fprintf(file_temp_data, "%0x\n", DesArr1[i]);
     }
-    for (int i = 0; i < JNUM * DES_LEN; i++) {
+    for (int i = 0; i < JS * DES_LEN; i++) {
+    fprintf(file_samp_data, "%0x\n", 0);
+    }
+    for (int i = JS * DES_LEN; i < JE * DES_LEN; i++) {
         fprintf(file_samp_data, "%0x\n", DesArr2[i]);
     }
     fclose(file_temp_data);
@@ -275,15 +281,24 @@ int main(void) {
     FILE *file_min_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/mindata_res_ref.txt", "w");
     FILE *file_min_pos   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/minpos_res_ref.txt", "w");
 
-    for (int i = 0; i < INUM*NTH; i++) {
+    for (int i = 0; i < IS*NTH; i++) {
+	    fprintf(file_dist_res, "%d\n", 0);
+    }
+    for (int i = IS*NTH; i < IE*NTH; i++) {
 	    fprintf(file_dist_res, "%d\n", DisArr[i]);
     }
-    for (int i = 0; i < INUM * 2; i++) {
+    for (int i = 0; i < JS * 2; i++) {
+    fprintf(file_min_data, "%d\n", 255);
+    }
+    for (int i = JS*2; i < JE * 2; i++) {
         fprintf(file_min_data, "%d\n", MniDataArr[i]);
     }
-    for (int i = 0; i < INUM * 2; i++) {
+    for (int i = 0; i < JS * 2; i++) {
+    fprintf(file_min_pos, "%d\n", 255);
+    }
+    for (int i = JS*2; i < JE * 2; i++) {
     fprintf(file_min_pos, "%d\n", MniPosArr[i]);
-}
+    }
     fclose(file_dist_res);
     fclose(file_min_data);
     fclose(file_min_pos);

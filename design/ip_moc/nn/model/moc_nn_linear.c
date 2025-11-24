@@ -136,6 +136,19 @@ void print_array_signed(int8_t *arr, int row, int colunm) {
     printf("]\n\n");
 }
 
+void print_array_3_signed(int8_t *arr, int batch, int row, int colunm) {
+    for (int n = 0; n < batch; n++){
+        printf("[%d] = [\n", n);
+        for (int i = 0; i < row; ++i) {          // 行
+                for (int j = 0; j < colunm; ++j) {     // 列
+                    printf("%5d ", arr[n*(row*colunm) + i * colunm + j]);  // 下标 = 行*列数 + 列
+                }
+                printf("\n");
+            }
+        printf("]\n\n");
+    }
+}
+
 void print_bin(int32_t *arr, int row, int colunm) {
     printf("[\n");
     for (int i = 0; i < row; ++i) {          // 行
@@ -145,6 +158,13 @@ void print_bin(int32_t *arr, int row, int colunm) {
         }
     printf("]\n\n");
 }
+
+#define IN_BASE 0
+#define K_BASE 0
+#define SC_BASE 200
+#define BZP_BASE 300
+#define SHIFT_BASE 400
+#define OUT_BASE 0
 
 #define BATCH 2
 #define IN_N BATCH
@@ -170,8 +190,8 @@ void print_bin(int32_t *arr, int row, int colunm) {
 uint8_t pData_in[IN_N*IN_STEP] = {0};
 uint8_t pData_out[OUT_N*OUT_STEP]  = {0};
 int8_t pKernel[K_N*OUT_NUM*IN_STEP]  = {0};
-uint64_t plnMulBzp[OUT_STEP]  = {0};
-uint64_t plnMultSc[OUT_STEP]  = {0};
+int64_t plnMulBzp[OUT_STEP]  = {0};
+int64_t plnMultSc[OUT_STEP]  = {0};
 uint32_t puchShift[OUT_STEP]  = {0};
 
 
@@ -224,24 +244,61 @@ void run_nn_linear(){
     const mocnn_tensor *out_tensor = &my_out_tensor;
     const mocnn_tensor *kernel_tensor = &my_kernel_tensor;
     const mocnn_linear_param *linear_param = &my_linear_param;
-    //generate_fixed_random_input(pData_in, IN_N * IN_STEP, 1);
-    //generate_fixed_random_input(pKernel, OUT_NUM * IN_STEP, 2);
-    generate_fixed_random_input_int8(pKernel, pData_in, OUT_NUM * IN_STEP, IN_N * IN_STEP, 2, 1);
-    printf("pData_in = ");
-    print_array(pData_in, IN_N, IN_STEP);
-    for(int i=0;i<K_N;i++){
-        printf("pKernel[%d] = ", i);
-        print_array_signed(pKernel, IN_STEP, OUT_NUM);
-    }
+    printf("start nn linear\n");
+    printf("BATCH = %d, IN_STEP = %d, OUT_NUM = %d\n", BATCH, IN_STEP, OUT_NUM);
+    generate_fixed_random_input_int8(pKernel, pData_in, OUT_NUM * IN_STEP * K_N, IN_N * IN_STEP, 2, 1);
+    //printf("pData_in = ");
+    //print_array(pData_in, IN_N, IN_STEP);
+    //printf("pKernel[n] = \n");
+    //print_array_3_signed(pKernel, K_N, IN_STEP, OUT_NUM);
 
-    for(int i=0;i<OUT_STEP;i++){
+    for(int i=0;i<OUT_NUM;i++){
         plnMulBzp[i] = 0;
         plnMultSc[i] = 1;
         puchShift[i] = 8;
     }
+
+    printf("loading source data into files\n");
+    FILE *file_infeat_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/nn_linear/infeat_data.txt", "w");
+    FILE *file_weight_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/nn_linear/weight_data.txt", "w");
+    for (int i=0; i < IN_BASE/8; i++) {
+        fprintf(file_infeat_data, "%0x\n", 0);
+    }
+    for (int i = 0; i < (IN_STEP * IN_N)/8; i++) {
+	    fprintf(file_temp_data, "%0x\n", pData_in[i]);
+    }
+    for (int i = 0; i < K_BASE/8; i++) {
+        fprintf(file_weight_data, "%0x\n", 0);
+    }
+    for (int i = 0; i < (IN_STEP * OUT_NUM * BATCH)/8; i++) {
+        fprintf(file_weight_data, "%0x\n", pKernel[i]);
+    }
+    for (int i = (IN_STEP * OUT_NUM * BATCH)/8; i < SC_BASE/8; i++) {
+        fprintf(file_weight_data, "%0x\n", 0);
+    }
+    for (int i = 0; i < OUT_NUM; i++) {
+        fprintf(file_weight_data, "%0x\n", plnMultSc[i]);
+    }
+    for (int i = (SC_BASE/8 + OUT_NUM); i < BZP_BASE/8; i++) {
+        fprintf(file_weight_data, "%0x\n", 0);
+    }
+    for (int i = 0; i < OUT_NUM; i++) {
+        fprintf(file_weight_data, "%0x\n", plnMulBzp[i]);
+    }
+    for (int i = (BZP_BASE/8 + OUT_NUM); i < SHIFT_BASE/8; i++) {
+        fprintf(file_weight_data, "%0x\n", 0);
+    }
+    for (int i = 0; i < OUT_STEP; i++) {
+        fprintf(file_weight_data, "%0x\n", puchShift[i]);
+    }
+    fclose(file_infeat_data);
+    fclose(file_weight_data);
+
+
+
     MOCNN_Linear(in_tensor, out_tensor, kernel_tensor, linear_param);
-    printf("pData_out = ");
-    print_array(pData_out, OUT_N, OUT_NUM);
+    //printf("pData_out = ");
+    //print_array(pData_out, OUT_N, OUT_NUM);
 }
 
 int main()
