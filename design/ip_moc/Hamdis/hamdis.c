@@ -162,19 +162,24 @@ void print_bin(const int32_t *arr, int row, int colunm) {
     printf("]\n\n");
 }
 
-#define INUM 10
-#define JNUM 10
-#define BITLEN 128
+#define INUM 37
+#define JNUM 128
+#define BITLEN 192
 #define BITQMODE 2
-#define NTH 6
+#define NTH 20
 
 #define TEMP_BASE 0
 #define SAMP_BASE 0
 #define DIST_BASE 0
-#define MIN_BASE 100
+#define MIN_BASE 2000
 
-#define ISEED 3
-#define JSEED 9
+#define PARAM_0 58   //96    
+#define PARAM_1 164 //384 
+#define PARAM_2 230   //480
+#define PARAM_3 376   //576
+
+#define ISEED 875
+#define JSEED 3421
 
 #define DEBUG
 #define DES_LEN 12
@@ -238,7 +243,7 @@ int main(void) {
         MniDataArr[i] = 255;//8*32;
         MniPosArr[i] = 255;//-1;
     }
-    int32_t KeymapPara[4] = {56,114,280,576};
+    int32_t KeymapPara[4] = {PARAM_0,PARAM_1,PARAM_2,PARAM_3};
     uint16_t DisArr[INUM*NTH] = {0};
 
     // 64-1bit
@@ -259,8 +264,8 @@ int main(void) {
     printf("]\n\n");
     
 
-    FILE *file_temp_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/temp_data.txt", "w");
-    FILE *file_samp_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/samp_data.txt", "w");
+    FILE *file_temp_data   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/temp_data.txt", "w");
+    FILE *file_samp_data   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/samp_data.txt", "w");
     for (int i=0; i < IS * DES_LEN; i++) {
         fprintf(file_temp_data, "%0x\n", 0);
     }
@@ -268,7 +273,7 @@ int main(void) {
 	    fprintf(file_temp_data, "%0x\n", DesArr1[i]);
     }
     for (int i = 0; i < JS * DES_LEN; i++) {
-    fprintf(file_samp_data, "%0x\n", 0);
+        fprintf(file_samp_data, "%0x\n", 0);
     }
     for (int i = JS * DES_LEN; i < JE * DES_LEN; i++) {
         fprintf(file_samp_data, "%0x\n", DesArr2[i]);
@@ -277,27 +282,27 @@ int main(void) {
     fclose(file_samp_data);
 
 
-    FILE *file_dist_res   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/dist_res_ref.txt", "w");
-    FILE *file_min_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/mindata_res_ref.txt", "w");
-    FILE *file_min_pos   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/minpos_res_ref.txt", "w");
+    FILE *file_dist_res   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/dist_res_ref.txt", "w");
+    FILE *file_min_data   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/mindata_res_ref.txt", "w");
+    FILE *file_min_pos   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/minpos_res_ref.txt", "w");
 
     for (int i = 0; i < IS*NTH; i++) {
 	    fprintf(file_dist_res, "%d\n", 0);
     }
     for (int i = IS*NTH; i < IE*NTH; i++) {
-	    fprintf(file_dist_res, "%d\n", DisArr[i]);
+	    fprintf(file_dist_res, "%d\n", DisArr[i-IS*NTH]);
     }
-    for (int i = 0; i < JS * 2; i++) {
-    fprintf(file_min_data, "%d\n", 255);
+    for (int i = 0; i < IS * 2; i++) {
+        fprintf(file_min_data, "%d\n", 255);
     }
-    for (int i = JS*2; i < JE * 2; i++) {
-        fprintf(file_min_data, "%d\n", MniDataArr[i]);
+    for (int i = IS*2; i < IE * 2; i++) {
+        fprintf(file_min_data, "%d\n", MniDataArr[i-IS*2]);
     }
-    for (int i = 0; i < JS * 2; i++) {
-    fprintf(file_min_pos, "%d\n", 255);
+    for (int i = 0; i < IS * 2; i++) {
+        fprintf(file_min_pos, "%d\n", 255);
     }
-    for (int i = JS*2; i < JE * 2; i++) {
-    fprintf(file_min_pos, "%d\n", MniPosArr[i]);
+    for (int i = IS*2; i < IE * 2; i++) {
+        fprintf(file_min_pos, "%d\n", MniPosArr[i-IS*2]);
     }
     fclose(file_dist_res);
     fclose(file_min_data);
