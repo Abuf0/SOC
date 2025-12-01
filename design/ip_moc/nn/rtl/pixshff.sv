@@ -140,6 +140,8 @@ logic need_t2_d1;
 logic need_t2_d2;
 logic fetch_cnt_d1;
 logic fetch_cnt_d2;
+logic fetch_vld_d1;
+logic fetch_vld_d2;
 logic rdata_need_t2;
 logic rdata_fetch_cnt;
 logic first_ldb_loop_d1;
@@ -257,7 +259,7 @@ always_ff @(posedge clk or negedge rstn) begin
         pixshff_rd_on <= 1'b0;
     else if(pixshff_init_done)
         pixshff_rd_on <= 1'b1;
-    else if(pixshff_rd_done)
+    else if(batch_end)//(pixshff_rd_done)
         pixshff_rd_on <= 1'b0;
 end
 
@@ -281,7 +283,7 @@ always_ff@(posedge clk or negedge rstn) begin
             ldc_num <= rg_outc[15:ARR_OFFSET] + (|rg_outc[ARR_OFFSET-1:0]);
     end
 end
-assign ldr_num = (rf_pow2 <= DATA_WB && (rf_pow2 > (DATA_WB >> 1)))?   'd1 : 'd2;  // 只考虑1和2，有需要再拓展
+assign ldr_num = (rf_pow2 <= DATA_WB /*&& (rf_pow2 > (DATA_WB >> 1))*/)?   'd1 : 'd2;  // 只考虑1和2，有需要再拓展
 assign addr_ldb_num = (last_load_loop && rg_outc[ARR_OFFSET-1:0] != 0)?    last_loop_ldb_num : 
                                                                       ((rf_pow2 < DATA_WB)?   rf_pow2 : DATA_WB);  // todo 
 assign ldb_num = ((rf_pow2 < DATA_WB)?   rf_pow2 : DATA_WB); // considering data out
@@ -360,8 +362,17 @@ assign fetch_vld = ~(need_t2 && ~fetch_cnt) && pixshff_on;  // special for last 
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
+        {fetch_vld_d2, fetch_cnt_d1} <= 2'd0;
+    else if(pixshff_done)
+        {fetch_vld_d2, fetch_cnt_d1} <= 2'd0;
+    else
+        {fetch_vld_d2, fetch_cnt_d1} <= {fetch_vld_d1, fetch_cnt};
+end
+
+always_ff@(posedge clk or negedge rstn) begin
+    if(~rstn)
         fetch_cnt <= 1'b0;
-    else if(pixshff_init_done)
+    else if(pixshff_init_done || pixshff_done)
         fetch_cnt <= 1'b0;
     else if(pixshff_on) begin
         if(need_t2)
@@ -369,8 +380,6 @@ always_ff@(posedge clk or negedge rstn) begin
         else
             fetch_cnt <= 1'b0;
     end
-    else if(pixshff_done)
-        fetch_cnt <= 1'b0;
 end
 
 // source memory interface //
@@ -482,12 +491,16 @@ assign rdata_fetch_cnt = fetch_cnt_d2;
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         {addr_offset_d1,addr_offset_d2} <= 'd0;
+    else if(pixshff_done)
+        {addr_offset_d1,addr_offset_d2} <= 'd0;
     else if(pixshff_on)
         {addr_offset_d1,addr_offset_d2} <= {pixel_index_p[OFFSET-1:0], addr_offset_d1};
 end
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
+        {xy_flag_d2, xy_flag_d1} <= 'd0;
+    else if(pixshff_done)
         {xy_flag_d2, xy_flag_d1} <= 'd0;
     else if(pixshff_on)
         {xy_flag_d2, xy_flag_d1} <= {xy_flag_d1, xy_flag};
@@ -496,12 +509,16 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         {ldb_cnt_d2, ldb_cnt_d1} <= 'd0;
+    else if(pixshff_done)
+        {ldb_cnt_d2, ldb_cnt_d1} <= 'd0;
     else if(pixshff_on)
         {ldb_cnt_d2, ldb_cnt_d1} <= {ldb_cnt_d1, ldb_cnt};
 end
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
+        {first_ldb_loop_d1,first_ldb_loop_d2} <= 'd0;
+    else if(pixshff_done)
         {first_ldb_loop_d1,first_ldb_loop_d2} <= 'd0;
     else
         {first_ldb_loop_d1,first_ldb_loop_d2} <= {first_ldb_loop, first_ldb_loop_d1};
@@ -510,12 +527,16 @@ end
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         {need_t2_d2, need_t2_d1} <= 'd0;
+    else if(pixshff_done)
+        {need_t2_d2, need_t2_d1} <= 'd0;
     else if(pixshff_on)
         {need_t2_d2, need_t2_d1} <= {need_t2_d1, need_t2};
 end
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
+        {fetch_cnt_d2, fetch_cnt_d1} <= 'd0;
+    else if(pixshff_done)
         {fetch_cnt_d2, fetch_cnt_d1} <= 'd0;
     else if(pixshff_on)
         {fetch_cnt_d2, fetch_cnt_d1} <= {fetch_cnt_d1, fetch_cnt};
@@ -597,14 +618,17 @@ generate
 
 endgenerate
 
-assign data_out_vld_pre =  (fetch_vld && ~(first_ldb_loop || first_ldb_loop_d2) && ~out_batch_end && ~pixshff_done) && (data_out_cnt < rf_pow2);    // todo with last ldb loop
+assign data_out_vld_pre =  (/*fetch_vld*/fetch_vld_d2 && ~(first_ldb_loop || first_ldb_loop_d2) && ~out_batch_end && ~pixshff_done) && (data_out_cnt < rf_pow2);    // todo with last ldb loop
+
+logic data_out_cnt_vld_pre;
+assign data_out_cnt_vld_pre = (/*fetch_vld*/fetch_vld_d2 && ~(first_ldb_loop || first_ldb_loop_d2) && ~out_batch_end && ~pixshff_done);
 
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
         data_out_cnt <= 'd0;
     else if(pixshff_init_done || pixshff_done)
         data_out_cnt <= 'd0;
-    else if((ldb_cnt_d2 == ldb_num-1) && (data_out_cnt >= rf_pow2-1) && fetch_vld)
+    else if((ldb_cnt_d2 == ldb_num-1) && (data_out_cnt >= rf_pow2-1) && /*fetch_vld*/data_out_cnt_vld_pre)
         data_out_cnt <= 'd0;
     else if(data_out_vld_pre) begin 
         data_out_cnt <= (data_out_cnt >= rf_pow2)?     data_out_cnt : data_out_cnt+1;
@@ -761,14 +785,14 @@ end
 assign wmask_offset = rg_outc[ARR_OFFSET-1:0];
 always_ff@(posedge clk or negedge rstn) begin
     if(~rstn)
-        mem_dest_wmask <= {DATA_WD{1'b1}};
+        mem_dest_wmask <= {DATA_WB{1'b1}};
     else if(out_ldc_num == 1)
         mem_dest_wmask <= {{(DATA_WB-wmask_offset){1'b0}},{wmask_offset{1'b1}}} ;
     else if(out_rx_end && out_ry_end) begin
         if(out_c_cnt == out_ldc_num-2)
             mem_dest_wmask <= {{(DATA_WB-wmask_offset){1'b0}},{wmask_offset{1'b1}}} ;
         else
-            mem_dest_wmask <= {DATA_WD{1'b1}};
+            mem_dest_wmask <= {DATA_WB{1'b1}};
     end
 end
 

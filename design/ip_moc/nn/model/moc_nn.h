@@ -2,7 +2,7 @@
 //#define _MOC_NN_H_
 
 #include <stdint.h>
-
+#include <string.h>
 //#ifdef __cplusplus
 //extern "C" {
 //#endif
@@ -20,10 +20,10 @@
 
     typedef struct
     {
-        int32_t nN;
-        int32_t nC;
+        int32_t nN; // 1~128
+        int32_t nC; // max 512?(128)
         int32_t nH; // 包括padding
-        int32_t nW;
+        int32_t nW; // max 256
         int32_t nScale;
         int32_t nZP;
         int32_t nMuliSc;

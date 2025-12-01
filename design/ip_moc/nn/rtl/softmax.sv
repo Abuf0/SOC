@@ -28,21 +28,21 @@ module softmax #(
     output logic                mem_src_wr      ,
     output logic [DATA_WB-1:0]  mem_src_wmask   ,
     output logic [ADDR_WD-1:0]  mem_src_addr    ,
-    output logic [DATA_WD-1:0] mem_src_wdata   ,
+    output logic [DATA_WD-1:0]  mem_src_wdata   ,
     input [DATA_WD-1:0]         mem_src_rdata   ,
     /* Dest memory interface */
     output logic                mem_dest_rd     ,
     output logic                mem_dest_wr     ,
     output logic [DATA_WB-1:0]  mem_dest_wmask  ,
     output logic [ADDR_WD-1:0]  mem_dest_addr   ,
-    output logic [DATA_WD-1:0] mem_dest_wdata  ,
+    output logic [DATA_WD-1:0]  mem_dest_wdata  ,
     input [DATA_WD-1:0]         mem_dest_rdata  ,
     `else
     output logic                mem_rd      ,
     output logic                mem_wr      ,
     output logic [DATA_WB-1:0]  mem_wmask   ,
     output logic [ADDR_WD-1:0]  mem_addr    ,
-    output logic [DATA_WD-1:0] mem_wdata   ,
+    output logic [DATA_WD-1:0]  mem_wdata   ,
     input [DATA_WD-1:0]         mem_rdata   ,
     `endif
     /* control */

@@ -78,12 +78,16 @@ int32_t MOCNN_Linear(const mocnn_tensor * pstInTensor, const mocnn_tensor * pstO
             {
                 nSum += (int32_t)puchIn[j] *pchKerPt[j];
                 //printf("nSum += (puchIn[%d]*pchKerPt[%d]\n",j + nIb*nInFeaNumStep,j + i*nInFeaNumStep);
+                //printf("multres[%d][%d] = %d x %d = %d\n",i,j,puchIn[j] ,pchKerPt[j],puchIn[j] *pchKerPt[j]);
             }
+            //printf("acc = %d\n", nSum);
 
             nSum = (int32_t)((plnOutMult[i] * nSum + plnOutMultBzp[i]) >> puchOutShift[i]);
+            //printf("qu_res = %d\n", nSum);
             nSum = MAX(nSum, uchActMin);
             nSum = MIN(nSum, uchActMax);
             puchOut[i] = (uint8_t)nSum;
+            //printf("puchOut[%d] = %d\n", i*nIb+i, puchOut[i]);
             //printf("\n");
         }
         puchOut += nOutFeaNumStep;
@@ -103,15 +107,56 @@ void generate_fixed_random_input(uint8_t *dest, int n, int32_t seed) {
     }
 }
 
-void generate_fixed_random_input_int8(int8_t *di, uint8_t *du, int ni, int nu, int32_t seedi, int32_t seedu) {
+void generate_fixed_random_input_int8(int8_t *di, uint8_t *du, int ni, int nu, int li, int lu, int32_t seedi, int32_t seedu, uint64_t *di_64b, uint64_t *du_64b) {
+    int di_64_len = (ni + 7) / 8;
+    int du_64_len = (nu + 7) / 8;
+    int ni_64 = di_64_len * 8;
+    int nu_64 = du_64_len * 8;
+
     srand(seedi); // 或者放到外面，只初始化一次
-    for (int i = 0; i < ni; i++) {
-        di[i] = (int8_t)((rand() % 256) - 128);
+    for (int k = 0; k < li; k++){
+        for (int i = 0; i < ni_64; i++) {
+            if(i >= ni){
+                di[k*ni_64 + i] = 0;
+            } else {
+                di[k*ni_64 + i] = (int8_t)((rand() % 256) - 128);
+            }
+        }
     }
     srand(seedu);
-    for (int i = 0; i < nu; i++) {
-        du[i] = (uint8_t)(rand() % 256);
+    for (int k = 0; k < lu; k++){
+        for (int i = 0; i < nu_64; i++) {
+            if(i >= nu){
+                du[k*nu_64 + i] = 0;
+            } else {
+                du[k*nu_64 + i] = (uint8_t)(rand() % 256);
+            }
+        }
     }
+// 2. 计算64位数组长度（向上取整）
+
+    // 3. di拼接：8个int8_t → 1个64位值（小端：低索引→低字节）
+    memset(di_64b, 0, (di_64_len * li) * sizeof(uint64_t));
+    for(int k=0; k < li; k++){
+        for (int i = 0; i < ni_64; i++) {
+            int group = i / 8;
+            int byte_pos = i % 8;
+            uint8_t raw_byte = (uint8_t)di[k*ni_64 + i];  // 保留int8_t原始二进制位
+            di_64b[group+k*di_64_len] |= (uint64_t)raw_byte << (byte_pos * 8);
+        }
+    }
+
+    // 4. du拼接：8个uint8_t → 1个64位值（小端）
+    memset(du_64b, 0, (du_64_len * lu) * sizeof(uint64_t));
+    for(int k=0; k < lu; k++){
+        for (int i = 0; i < nu_64; i++) {
+            int group = i / 8;
+            int byte_pos = i % 8;
+            du_64b[group+k*du_64_len] |= (uint64_t)du[k*nu_64 + i] << (byte_pos * 8);
+            //printf("du[%d]=%d, byte_pos = %d, du_64b[%d] = %llx\n", i, du[i], byte_pos, group, du_64b[group]);
+        }
+    }
+
 }
 
 void print_array(uint8_t *arr, int row, int colunm) {
@@ -161,26 +206,27 @@ void print_bin(int32_t *arr, int row, int colunm) {
 
 #define IN_BASE 0
 #define K_BASE 0
-#define SC_BASE 200
-#define BZP_BASE 300
-#define SHIFT_BASE 400
+#define SC_BASE 200*8
+#define BZP_BASE 300*8
+#define SHIFT_BASE 400*8
 #define OUT_BASE 0
 
 #define BATCH 2
+
 #define IN_N BATCH
-#define IN_H 2
-#define IN_W 2
-#define IN_C 4
+#define IN_H 3
+#define IN_W 3
+#define IN_C 2
 
 #define OUT_N BATCH
-#define OUT_H 4
-#define OUT_W 4
-#define OUT_C 2
+#define OUT_H 5
+#define OUT_W 5
+#define OUT_C 1
 
 #define IN_NUM IN_H*IN_W*IN_C
 #define OUT_NUM OUT_H*OUT_W*OUT_C
-#define IN_STEP IN_NUM      // todo
-#define OUT_STEP OUT_NUM    // todo
+#define IN_STEP  (((IN_NUM) + 7U) & (~7U))    // todo
+#define OUT_STEP (((OUT_NUM) + 7U) & (~7U))   // todo
 
 #define K_N BATCH
 #define K_H IN_STEP
@@ -189,10 +235,14 @@ void print_bin(int32_t *arr, int row, int colunm) {
 
 uint8_t pData_in[IN_N*IN_STEP] = {0};
 uint8_t pData_out[OUT_N*OUT_STEP]  = {0};
-int8_t pKernel[K_N*OUT_NUM*IN_STEP]  = {0};
+int8_t pKernel[OUT_NUM*IN_STEP]  = {0};
 int64_t plnMulBzp[OUT_STEP]  = {0};
 int64_t plnMultSc[OUT_STEP]  = {0};
 uint32_t puchShift[OUT_STEP]  = {0};
+
+uint64_t pData_in_64b[IN_N*IN_STEP/8] = {0};
+uint64_t pKernel_64b[OUT_NUM*IN_STEP/8]  = {0};
+uint64_t pData_out_64b[OUT_N*OUT_STEP/8] = {0};
 
 
 const mocnn_tensor my_in_tensor = {
@@ -245,12 +295,13 @@ void run_nn_linear(){
     const mocnn_tensor *kernel_tensor = &my_kernel_tensor;
     const mocnn_linear_param *linear_param = &my_linear_param;
     printf("start nn linear\n");
-    printf("BATCH = %d, IN_STEP = %d, OUT_NUM = %d\n", BATCH, IN_STEP, OUT_NUM);
-    generate_fixed_random_input_int8(pKernel, pData_in, OUT_NUM * IN_STEP * K_N, IN_N * IN_STEP, 2, 1);
-    //printf("pData_in = ");
-    //print_array(pData_in, IN_N, IN_STEP);
-    //printf("pKernel[n] = \n");
-    //print_array_3_signed(pKernel, K_N, IN_STEP, OUT_NUM);
+    printf("BATCH = %d, IN_NUM = %d, IN_STEP = %d, OUT_NUM = %d\n", BATCH, IN_NUM, IN_STEP, OUT_NUM);
+    generate_fixed_random_input_int8(pKernel, pData_in, IN_NUM , IN_NUM, OUT_NUM, IN_N,2, 1, pKernel_64b, pData_in_64b);
+    printf("pData_in = ");
+    print_array(pData_in, IN_N, IN_STEP);
+
+    printf("pKernel[n] = \n");
+    print_array_signed(pKernel, IN_STEP, OUT_NUM);
 
     for(int i=0;i<OUT_NUM;i++){
         plnMulBzp[i] = 0;
@@ -258,38 +309,40 @@ void run_nn_linear(){
         puchShift[i] = 8;
     }
 
-    printf("loading source data into files\n");
+    printf("loading source data into files...\n");
     FILE *file_infeat_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/nn_linear/infeat_data.txt", "w");
     FILE *file_weight_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/nn_linear/weight_data.txt", "w");
     for (int i=0; i < IN_BASE/8; i++) {
-        fprintf(file_infeat_data, "%0x\n", 0);
+        fprintf(file_infeat_data, "%016llx\n", 0);
     }
     for (int i = 0; i < (IN_STEP * IN_N)/8; i++) {
-	    fprintf(file_temp_data, "%0x\n", pData_in[i]);
+	    //fprintf(file_infeat_data, "%0x\n", pData_in[i]);
+        fprintf(file_infeat_data, "%016llx\n", pData_in_64b[i]);
     }
     for (int i = 0; i < K_BASE/8; i++) {
-        fprintf(file_weight_data, "%0x\n", 0);
+        fprintf(file_weight_data, "%016llx\n", 0);
     }
-    for (int i = 0; i < (IN_STEP * OUT_NUM * BATCH)/8; i++) {
-        fprintf(file_weight_data, "%0x\n", pKernel[i]);
+    for (int i = 0; i < (IN_STEP * OUT_NUM)/8; i++) {
+        //fprintf(file_weight_data, "%0x\n", pKernel[i]);
+        fprintf(file_weight_data, "%016llx\n", pKernel_64b[i]);
     }
-    for (int i = (IN_STEP * OUT_NUM * BATCH)/8; i < SC_BASE/8; i++) {
-        fprintf(file_weight_data, "%0x\n", 0);
+    for (int i = (IN_STEP * OUT_NUM )/8; i < SC_BASE/8; i++) {
+        fprintf(file_weight_data, "%016llx\n", 0);
     }
     for (int i = 0; i < OUT_NUM; i++) {
-        fprintf(file_weight_data, "%0x\n", plnMultSc[i]);
+        fprintf(file_weight_data, "%016llx\n", plnMultSc[i]);
     }
     for (int i = (SC_BASE/8 + OUT_NUM); i < BZP_BASE/8; i++) {
-        fprintf(file_weight_data, "%0x\n", 0);
+        fprintf(file_weight_data, "%016llx\n", 0);
     }
     for (int i = 0; i < OUT_NUM; i++) {
-        fprintf(file_weight_data, "%0x\n", plnMulBzp[i]);
+        fprintf(file_weight_data, "%016llx\n", plnMulBzp[i]);
     }
     for (int i = (BZP_BASE/8 + OUT_NUM); i < SHIFT_BASE/8; i++) {
-        fprintf(file_weight_data, "%0x\n", 0);
+        fprintf(file_weight_data, "%016llx\n", 0);
     }
-    for (int i = 0; i < OUT_STEP; i++) {
-        fprintf(file_weight_data, "%0x\n", puchShift[i]);
+    for (int i = 0; i < OUT_STEP/2; i++) {
+        fprintf(file_weight_data, "%08llx%08llx\n", puchShift[i], puchShift[i+1]);
     }
     fclose(file_infeat_data);
     fclose(file_weight_data);
@@ -297,8 +350,28 @@ void run_nn_linear(){
 
 
     MOCNN_Linear(in_tensor, out_tensor, kernel_tensor, linear_param);
-    //printf("pData_out = ");
-    //print_array(pData_out, OUT_N, OUT_NUM);
+    printf("pData_out = ");
+    print_array(pData_out, OUT_N, OUT_STEP);
+
+    int out_64_len = (OUT_STEP * OUT_N) / 8;
+    memset(pData_out_64b, 0, (out_64_len) * sizeof(uint64_t));
+    for (int i = 0; i < OUT_STEP * OUT_N; i++) {
+        int group = i / 8;
+        int byte_pos = i % 8;
+        pData_out_64b[group] |= (uint64_t)pData_out[i] << (byte_pos * 8);
+        //printf("du[%d]=%d, byte_pos = %d, du_64b[%d] = %016llx\n", i, pData_out[i], byte_pos, group, pData_out_64b[group]);
+    }
+
+    printf("loading dest data into files...\n");
+    FILE *file_outfeat_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/nn_linear/outfeat_data.txt", "w");
+    for (int i=0; i < OUT_BASE/8; i++) {
+        fprintf(file_outfeat_data, "%016llx\n", 0);
+    }
+    for (int i = 0; i < (OUT_STEP * OUT_N)/8; i++) {
+        fprintf(file_outfeat_data, "%016llx\n", pData_out_64b[i]);
+    }
+    fclose(file_outfeat_data);
+
 }
 
 int main()
