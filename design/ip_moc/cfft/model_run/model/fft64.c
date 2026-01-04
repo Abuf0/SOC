@@ -419,15 +419,22 @@ void arm_cfft_radix4by2_inverse_q31(
     {
         cosVal = pCoef[2*ia];
         sinVal = pCoef[2*ia + 1];
+		printf("cosVal[%d]: %d\tsinVal[%d]: %d\n",2*ia,cosVal,2*ia+1,sinVal);
         ia++;
 
         l = i + n2;
+		printf("pSrc[%d] = %d\t",2*i,pSrc[2 * i]);
+		printf("pSrc[%d] = %d\t",2*i+1,pSrc[2 * i+1]);
+
+		printf("pSrc[%d] = %d\t",2*l,pSrc[2 * l]);
+		printf("pSrc[%d] = %d\t\n",2*l+1,pSrc[2 * l+1]);
+
         xt = (pSrc[2 * i] >> 2) - (pSrc[2 * l] >> 2);
         pSrc[2 * i] = (pSrc[2 * i] >> 2) + (pSrc[2 * l] >> 2);
-
+		printf("pSrc[%d] = %d\n",2*i,pSrc[2 * i]);
         yt = (pSrc[2 * i + 1] >> 2) - (pSrc[2 * l + 1] >> 2);
         pSrc[2 * i + 1] = (pSrc[2 * l + 1] >> 2) + (pSrc[2 * i + 1] >> 2);
-
+		printf("pSrc[%d] = %d\n",2*i+1,pSrc[2 * i+1]);
         mult_32x32_keep32_R(p0, xt, cosVal);
         mult_32x32_keep32_R(p1, yt, cosVal);
         multSub_32x32_keep32_R(p0, yt, sinVal);
@@ -435,7 +442,8 @@ void arm_cfft_radix4by2_inverse_q31(
 
         pSrc[2u * l] = p0 << 1;
         pSrc[2u * l + 1u] = p1 << 1;
-
+		printf("pSrc[%d] = %d\n",2*l,pSrc[2 * l]);
+		printf("pSrc[%d] = %d\n\n",2*l+1,pSrc[2 * l+1]);
     }
 
     // first col
@@ -602,10 +610,16 @@ static void arm_radix4_butterfly_q31(
       pSrc[2u * i1] = (((int32_t) (((q63_t) r1 * co2) >> 32)) +
                        ((int32_t) (((q63_t) s1 * si2) >> 32))) << 1u;
 
+		//printf("xccos:%d\n",((q63_t) r1 * co2) >> 32);
+		//printf("xcsin:%d\n",((q63_t) s1 * si2) >> 32);
+		//printf("xc':%d\n\n",pSrc[2u * i1] >> 1);
+
       /* yc' = (ya-yb+yc-yd)co2 - (xa-xb+xc-xd)(si2) */
       pSrc[(2u * i1) + 1u] = (((int32_t) (((q63_t) s1 * co2) >> 32)) -
                               ((int32_t) (((q63_t) r1 * si2) >> 32))) << 1u;
-
+//printf("yccos:%d\n",((q63_t) s1 * co2) >> 32);
+//printf("ycsin:%d\n",((q63_t) r1 * si2) >> 32);
+//printf("yc':%d\n\n",pSrc[(2u * i1) + 1u] >> 1);
       /* (xa - xc) + (yb - yd) */
       r1 = r2 + t1;
       /* (xa - xc) - (yb - yd) */
@@ -622,27 +636,38 @@ static void arm_radix4_butterfly_q31(
       /* xb' = (xa+yb-xc-yd)co1 + (ya-xb-yc+xd)(si1) */
       pSrc[2u * i2] = (((int32_t) (((q63_t) r1 * co1) >> 32)) +
                        ((int32_t) (((q63_t) s1 * si1) >> 32))) << 1u;
+		//printf("xbcos:%d\n",((q63_t) r1 * co1) >> 32);
+		//printf("xbsin:%d\n",((q63_t) s1 * si1) >> 32);
+		//printf("xb':%d\n",pSrc[2u * i2] >> 1);
 
       /* yb' = (ya-xb-yc+xd)co1 - (xa+yb-xc-yd)(si1) */
       pSrc[(2u * i2) + 1u] = (((int32_t) (((q63_t) s1 * co1) >> 32)) -
                               ((int32_t) (((q63_t) r1 * si1) >> 32))) << 1u;
-
+		//printf("ybcos:%d\n",((q63_t) s1 * co1) >> 32);
+		//printf("ybsin:%d\n",((q63_t) r1 * si1) >> 32);
+		//printf("yb':%d\n\n",pSrc[(2u * i2) + 1u] >> 1);
       /*  index calculation for the coefficients */
       ia3 = 3u * ia1;
       co3 = pCoef[ia3 * 2u];
       si3 = pCoef[(ia3 * 2u) + 1u];
-      printf("coefficients : wn1[%d], wn2[%d], wn3[%d]\n",ia1, ia2, ia3);
-      printf("wn: %d,%d\t %d,%d\t %d,%d\n", co1,si1,co2,si2,co3,si3);
+      
+      
 
       /* xd' = (xa-yb-xc+yd)co3 + (ya+xb-yc-xd)(si3) */
       pSrc[2u * i3] = (((int32_t) (((q63_t) r2 * co3) >> 32)) +
                        ((int32_t) (((q63_t) s2 * si3) >> 32))) << 1u;
-
+//printf("xdcos:%d\n",((q63_t) r2 * co3) >> 32);
+//printf("xdsin:%d\n",((q63_t) s2 * si3) >> 32);
+//printf("xd':%d\n\n",pSrc[2u * i3] >> 1);
       /* yd' = (ya+xb-yc-xd)co3 - (xa-yb-xc+yd)(si3) */
       pSrc[(2u * i3) + 1u] = (((int32_t) (((q63_t) s2 * co3) >> 32)) -
                               ((int32_t) (((q63_t) r2 * si3) >> 32))) << 1u;
-
+//printf("ydcos:%d\n",((q63_t) s2 * co3) >> 32);
+//printf("ydsin:%d\n",((q63_t) r2 * si3) >> 32);
+//printf("yd':%d\n\n",pSrc[(2u * i3) + 1u] >> 1);
       /*  Twiddle coefficients index modifier */
+	  printf("coefficients : wn1[%d], wn2[%d], wn3[%d]\n",ia1, ia2, ia3);
+	  printf("wn: %d,%d\t %d,%d\t %d,%d\n", co1,si1,co2,si2,co3,si3);
       ia1 = ia1 + twidCoefModifier;
 
       /*  Updating input index */
@@ -847,7 +872,7 @@ static void arm_radix4_butterfly_q31(
       /* writing xd' and yd' */
       *ptr1++ = xd_out;
       *ptr1++ = yd_out;
-      printf("Loop %d: %d,%d,\t%d,%d,\t%d,%d,\t%d,%d,\t\n\n",j,xa_out,ya_out,xc_out,yc_out,xb_out,yb_out,xd_out,yd_out);
+      //printf("Loop %d: %d,%d,\t%d,%d,\t%d,%d,\t%d,%d,\t\n\n",j,xa_out,ya_out,xc_out,yc_out,xb_out,yb_out,xd_out,yd_out);
 
     } while(--j);
 
@@ -894,6 +919,7 @@ void arm_cfft_radix4by2_q31(
 
         //printf("p0 = (xt*cos + L) >> 32\n");
         //printf("p1 = (yt*cos + L) >> 32\n");
+		printf("xt:%d, yt:%d\n",xt,yt);
         mult_32x32_keep32_R(p0, xt, cosVal);
         mult_32x32_keep32_R(p1, yt, cosVal);
         //printf("p0=%d, p1=%d\n",p0,p1);
@@ -957,13 +983,13 @@ void arm_bitreversal_32(
         b = pBitRevTab[i+1] >> 2;
 
         //real
-        printf("Loop: %d\n",i);
+        //printf("Loop: %d\n",i);
         printf("pSrc[%d]:%d <-> pSrc[%d]:%d\n\n",a,pSrc[a],b,pSrc[b]);
         tmp = pSrc[a];
         pSrc[a] = pSrc[b];
         pSrc[b] = tmp;
 
-        printf("Loop: %d\n",i+1);
+        //printf("Loop: %d\n",i+1);
 
         //complex
         printf("pSrc[%d]:%d <-> pSrc[%d]:%d\n\n",a+1,pSrc[a+1],b+1,pSrc[b+1]);
@@ -1065,6 +1091,10 @@ const q31_t fixed_random_input_no_zero[128] = {
 
 
 #define FFT_LEN 128  // FFT 长度
+#define REV_LEN 112
+#define TWID_LEN 192
+#define SRC_BASE 0
+#define DEST_BASE 0
 
 const q31_t twiddleCoef_256_q31[384] = {
 	(q31_t)0x7FFFFFFF, (q31_t)0x00000000, (q31_t)0x7FF62182,
@@ -2291,7 +2321,7 @@ const q31_t twiddleCoef_2048_q31[3072] = {
 	(q31_t)0x80009DE9, (q31_t)0xFF9B781D, (q31_t)0x8000277A
 };
 
-const q31_t twiddleCoef_64_q31[128] = {
+const q31_t twiddleCoef_64_q31[96] = {
     -2147483648, 0,
     2137142927, -210490206,
     2106220351, -418953276,
@@ -2452,9 +2482,30 @@ void generate_fixed_random_input_no_zero(q31_t *pSrc) {
 // **自己定义的 64 点 FFT 结构体**
 const arm_cfft_instance_q31 my_arm_cfft_sR_q31_len64 = {
     .fftLen = FFT_LEN,
-    .pTwiddle = twiddleCoef_128_q31,
-    .bitRevLength = 112,  // **64 点 FFT 的 Bit Reverse 长度**
-    .pBitRevTable = bitRevIndexTable_128
+    .pTwiddle = twiddleCoef_64_q31,	// todo
+    .bitRevLength = REV_LEN,// 112,  // todo// **64 点 FFT 的 Bit Reverse 长度**
+    .pBitRevTable = bitRevIndexTable_64	// todo
+};
+
+const arm_cfft_instance_q31 my_arm_cfft_sR_q31_len128 = {
+    .fftLen = FFT_LEN,
+    .pTwiddle = twiddleCoef_128_q31,	// todo
+    .bitRevLength = REV_LEN,// 112,  // todo// **64 点 FFT 的 Bit Reverse 长度**
+    .pBitRevTable = bitRevIndexTable_128	// todo
+};
+
+const arm_cfft_instance_q31 my_arm_cfft_sR_q31_len16 = {
+    .fftLen = FFT_LEN,
+    .pTwiddle = twiddleCoef_16_q31,	// todo
+    .bitRevLength = REV_LEN,// 112,  // todo// **64 点 FFT 的 Bit Reverse 长度**
+    .pBitRevTable = bitRevIndexTable_128	// todo
+};
+
+const arm_cfft_instance_q31 my_arm_cfft_sR_q31_len256 = {
+    .fftLen = FFT_LEN,
+    .pTwiddle = twiddleCoef_256_q31,	// todo
+    //.bitRevLength = REV_LEN,// 112,  // todo// **64 点 FFT 的 Bit Reverse 长度**
+    //.pBitRevTable = bitRevIndexTable_128	// todo
 };
 
 int32_t get_random_number() {
@@ -2481,7 +2532,7 @@ void int_to_binary(int32_t num, char *binary_str) {
 }
 
 void run_fft() {
-    const arm_cfft_instance_q31 *S = &my_arm_cfft_sR_q31_len64;
+    const arm_cfft_instance_q31 *S = &my_arm_cfft_sR_q31_len128;
 
     q31_t pSrc[2 * FFT_LEN];
     q31_t pSrc_copy[2 * FFT_LEN];
@@ -2505,15 +2556,16 @@ void run_fft() {
     //pSrc[2048] = 28500178;
     //pSrc[1] = -1491784357;
     //pSrc[2049] = -161989045;
-    arm_cfft_q31(S, pSrc, 0, 1);
+	// main
+    arm_cfft_q31(S, pSrc, 1, 1);
 
     // **打开文件**
-    FILE *file_input_dec   = fopen("fft128r/fft_input_decimal.txt", "w");
-    FILE *file_input_bin   = fopen("fft128r/fft_input_binary.txt", "w");
-    FILE *file_output_dec  = fopen("fft128r/fft_output_decimal.txt", "w");
-    FILE *file_output_bin  = fopen("fft128r/fft_output_binary.txt", "w");
-    FILE *file_twiddle_dec = fopen("fft128r/fft_twiddle_decimal.txt", "w");
-    FILE *file_twiddle_bin = fopen("fft128r/fft_twiddle_binary.txt", "w");
+    FILE *file_input_dec   = fopen("ifft128r/fft_input_decimal.txt", "w");
+    FILE *file_input_bin   = fopen("ifft128r/fft_input_binary.txt", "w");
+    FILE *file_output_dec  = fopen("ifft128r/fft_output_decimal.txt", "w");
+    FILE *file_output_bin  = fopen("ifft128r/fft_output_binary.txt", "w");
+    FILE *file_twiddle_dec = fopen("ifft128r/fft_twiddle_decimal.txt", "w");
+    FILE *file_twiddle_bin = fopen("ifft128r/fft_twiddle_binary.txt", "w");
 
     if (!file_input_dec || !file_input_bin || !file_output_dec || !file_output_bin || !file_twiddle_dec || !file_twiddle_bin) {
         printf("Error opening file for writing.\n");
@@ -2523,6 +2575,11 @@ void run_fft() {
     char binary_str[33];
 
     // **写入输入数据**
+	for (int i = 0; i < SRC_BASE; i++) {
+    	fprintf(file_input_dec, "%d\n", 0);  
+    	int_to_binary(0, binary_str);
+    	fprintf(file_input_bin, "%s\n", binary_str);
+	}
     for (int i = 0; i < FFT_LEN; i++) {
         fprintf(file_input_dec, "%d\n", pSrc_copy[2 * i]);  // 实部
         fprintf(file_input_dec, "%d\n", pSrc_copy[2 * i + 1]);  // 虚部
@@ -2535,17 +2592,17 @@ void run_fft() {
 
     // **写入 FFT 输出数据**
     for (int i = 0; i < FFT_LEN; i++) {
-        fprintf(file_output_dec, "%d\n", pSrc[2 * i]);  // 实部
-        fprintf(file_output_dec, "%d\n", pSrc[2 * i + 1]);  // 虚部
+        fprintf(file_output_dec, "%d\n", pSrc[2 * i + DEST_BASE]);  // 实部
+        fprintf(file_output_dec, "%d\n", pSrc[2 * i + 1 + DEST_BASE]);  // 虚部
 
-        int_to_binary(pSrc[2 * i], binary_str);
+        int_to_binary(pSrc[2 * i + DEST_BASE], binary_str);
         fprintf(file_output_bin, "%s\n", binary_str);
-        int_to_binary(pSrc[2 * i + 1], binary_str);
+        int_to_binary(pSrc[2 * i + 1 + DEST_BASE], binary_str);
         fprintf(file_output_bin, "%s\n", binary_str);
     }
 
     // **写入 Twiddle 因子数据**
-    for (int i = 0; i < 384; i += 2) {
+    for (int i = 0; i < TWID_LEN*2; i += 2) {
         fprintf(file_twiddle_dec, "%d\n", twiddleCoef_128_q31[i]);  // 实部
         fprintf(file_twiddle_dec, "%d\n", twiddleCoef_128_q31[i + 1]);  // 虚部
 
@@ -2554,7 +2611,7 @@ void run_fft() {
         int_to_binary(twiddleCoef_128_q31[i + 1], binary_str);
         fprintf(file_twiddle_bin, "%s\n", binary_str);
     }
-    for (int i = 0; i < 112; i += 1) {
+    for (int i = 0; i < REV_LEN; i += 1) {
         fprintf(file_twiddle_dec, "%d\n", bitRevIndexTable_128[i]);  
         int_to_binary(bitRevIndexTable_128[i], binary_str);
         fprintf(file_twiddle_bin, "%s\n", binary_str);

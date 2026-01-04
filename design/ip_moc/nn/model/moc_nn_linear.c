@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "moc_nn.h"
+#include <inttypes.h>
 
 /***************************************
 Prototype   : MOCNN_Conv
@@ -31,16 +32,26 @@ int32_t MOCNN_Linear(const mocnn_tensor * pstInTensor, const mocnn_tensor * pstO
     {
         uchActMin = uchOutZP;
     }
+    #if FLOAT32_QUANT
+        float *pfBzpPt = pstLinearParam->pfBzp;
+        float *pfScaleSumPt = pstLinearParam->pfScaleSum;
+        if (NULL == pfBzpPt || NULL == pfScaleSumPt)
+        {
+            return MOCNN_NULL_PTR;
+        }
+    #else
 
         //量化系数顶点数据
     int64_t *plnOutMultBzp = pstLinearParam ->plnMulBzp;
     int64_t *plnOutMult = pstLinearParam ->plnMultSc;
-    int32_t *puchOutShift = pstLinearParam ->puchShift;
+    uint8_t *puchOutShift = pstLinearParam ->puchShift;
 
     if (NULL == plnOutMultBzp || NULL == plnOutMult || NULL == puchOutShift)
     {
         return MOCNN_NULL_PTR;
     }
+
+    #endif
 
     uint8_t *puchInData = (uint8_t *)pstInTensor-> pData;
     uint8_t *puchOutData = (uint8_t *)pstOutTensor-> pData;
@@ -81,9 +92,14 @@ int32_t MOCNN_Linear(const mocnn_tensor * pstInTensor, const mocnn_tensor * pstO
                 //printf("multres[%d][%d] = %d x %d = %d\n",i,j,puchIn[j] ,pchKerPt[j],puchIn[j] *pchKerPt[j]);
             }
             //printf("acc = %d\n", nSum);
+            #if FLOAT32_QUANT
+                nSum = (int32_t)(pfScaleSumPt[i] * nSum + pfBzpPt[i]);
+                printf("scale = %f, bzp = %f\n", pfScaleSumPt[i], pfBzpPt[i]);
+            #else
 
             nSum = (int32_t)((plnOutMult[i] * nSum + plnOutMultBzp[i]) >> puchOutShift[i]);
             //printf("qu_res = %d\n", nSum);
+            #endif
             nSum = MAX(nSum, uchActMin);
             nSum = MIN(nSum, uchActMax);
             puchOut[i] = (uint8_t)nSum;
@@ -236,9 +252,13 @@ void print_bin(int32_t *arr, int row, int colunm) {
 uint8_t pData_in[IN_N*IN_STEP] = {0};
 uint8_t pData_out[OUT_N*OUT_STEP]  = {0};
 int8_t pKernel[OUT_NUM*IN_STEP]  = {0};
+
+float pfBzp[OUT_STEP]  = {0};
+float pfScaleSum[OUT_STEP]  = {0};
+
 int64_t plnMulBzp[OUT_STEP]  = {0};
 int64_t plnMultSc[OUT_STEP]  = {0};
-uint32_t puchShift[OUT_STEP]  = {0};
+uint8_t puchShift[OUT_STEP]  = {0};
 
 uint64_t pData_in_64b[IN_N*IN_STEP/8] = {0};
 uint64_t pKernel_64b[OUT_NUM*IN_STEP/8]  = {0};
@@ -282,11 +302,32 @@ const mocnn_linear_param my_linear_param = {
     .nInFeaStep     = IN_STEP  ,
     .nOutFeaStep    = OUT_STEP ,
     .uchActValue    = 0     ,
+#if FLOAT32_QUANT
+    .pfScaleSum     = pfScaleSum,
+    .pfBzp          = pfBzp     
+#else
     .plnMulBzp      = plnMulBzp ,
     .plnMultSc      = plnMultSc ,
     .puchShift      = puchShift
+#endif
 };
 
+static inline uint32_t f32_to_u32bits(float x){
+    uint32_t u;
+    memcpy(&u, &x, sizeof(u));
+    return u;
+}
+
+static inline uint64_t pack2f32_to_u64(float a, float b){
+    uint64_t ua = (uint64_t)f32_to_u32bits(a);
+    uint64_t ub = (uint64_t)f32_to_u32bits(b);
+    return (ua << 32) | ub;   // 高32位=a，低32位=b（你也可以反过来，但要和读端一致）
+}
+
+void write_two_f32_hexline(FILE *fp, float a, float b){
+    uint64_t w = pack2f32_to_u64(a, b);
+    fprintf(fp, "%016" PRIx64 "\n", w);
+}
 
 void run_nn_linear(){
 
@@ -303,10 +344,13 @@ void run_nn_linear(){
     printf("pKernel[n] = \n");
     print_array_signed(pKernel, IN_STEP, OUT_NUM);
 
+    #define RAND_MAX 1024*1024*1
     for(int i=0;i<OUT_NUM;i++){
         plnMulBzp[i] = 0;
         plnMultSc[i] = 1;
         puchShift[i] = 8;
+        pfScaleSum[i]   = ((float)rand() / ((float)RAND_MAX + 1.0f));
+        pfBzp[i]        = 2.0f * ((float)rand() / ((float)RAND_MAX + 1.0f)) - 1.0f;
     }
 
     printf("loading source data into files...\n");
@@ -326,6 +370,16 @@ void run_nn_linear(){
         //fprintf(file_weight_data, "%0x\n", pKernel[i]);
         fprintf(file_weight_data, "%016llx\n", pKernel_64b[i]);
     }
+#if FLOAT32_QUANT
+    for (int i = (IN_STEP * OUT_NUM )/8; i < SC_BASE/8; i++) {
+        fprintf(file_weight_data, "%016llx\n", 0);
+    }
+    for (int i = 0; i < OUT_NUM; i++) {
+        //uint64_t w = pack2f32_to_u64(a, b);
+        fprintf(file_weight_data, "%016" PRIx64 "\n", pack2f32_to_u64(pfScaleSum[i], pfBzp[i]));
+        //fprintf(file_weight_data, "%08x%08x\n", pfScaleSum[i], pfBzp[i]);
+    }
+#else
     for (int i = (IN_STEP * OUT_NUM )/8; i < SC_BASE/8; i++) {
         fprintf(file_weight_data, "%016llx\n", 0);
     }
@@ -341,9 +395,10 @@ void run_nn_linear(){
     for (int i = (BZP_BASE/8 + OUT_NUM); i < SHIFT_BASE/8; i++) {
         fprintf(file_weight_data, "%016llx\n", 0);
     }
-    for (int i = 0; i < OUT_STEP/2; i++) {
-        fprintf(file_weight_data, "%08llx%08llx\n", puchShift[i], puchShift[i+1]);
+    for (int i = 0; i < OUT_STEP/8; i++) {
+        fprintf(file_weight_data, "%02x%02x%02x%02x%02x%02x%02x%02x\n", puchShift[i*8+7], puchShift[i*8+6], puchShift[i*8+5], puchShift[i*8+4], puchShift[i*8+3], puchShift[i*8+2], puchShift[i*8+1], puchShift[i*8+0]);
     }
+#endif
     fclose(file_infeat_data);
     fclose(file_weight_data);
 

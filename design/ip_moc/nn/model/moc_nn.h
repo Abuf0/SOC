@@ -18,6 +18,8 @@
 #define MIN(a,b)    (a<b ? a : b)
 #define MAX(a,b)    (a>b ? a : b)
 
+#define FLOAT32_QUANT 0
+
     typedef struct
     {
         int32_t nN; // 1~128
@@ -50,9 +52,14 @@
         uint16_t usChPerGroup;
         uint8_t uchActValue;  // 卷积之后是否跟着激活函数
 
+    #if FLOAT32_QUANT
+        float *pfScaleSum;
+        float *pfBzp;
+    #else
         int64_t *plnMulBzp;
         int64_t *plnMultSc;
         uint8_t *puchShift;
+    #endif
 
     } mocnn_conv_param;
 
@@ -66,9 +73,15 @@
 
         uint8_t uchActValue;  // 0-1
 
+    #if FLOAT32_QUANT
+        float *pfScaleSum;
+        float *pfBzp;
+    #else
+
         int64_t *plnMulBzp;
         int64_t *plnMultSc;
-        int32_t *puchShift;
+        uint8_t *puchShift;
+    #endif
 
     } mocnn_linear_param;
 
@@ -97,9 +110,15 @@
     {
         uint8_t uchActValue; // 范围0-1
         int32_t nNormShape; // 最大是C*H*W
+
+    #if FLOAT32_QUANT
+        float *pfScaleSum;
+        float *pfBzp;
+    #else
         int64_t *plnMulBzp;
         int64_t *plnMultSc;   
         uint8_t *puchShift; // 0-64
+    #endif
 
     } mocnn_layernorm_param;
 

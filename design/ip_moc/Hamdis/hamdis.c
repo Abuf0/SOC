@@ -264,8 +264,8 @@ int main(void) {
     printf("]\n\n");
     
 
-    FILE *file_temp_data   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/temp_data.txt", "w");
-    FILE *file_samp_data   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/samp_data.txt", "w");
+    FILE *file_temp_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/temp_data.txt", "w");
+    FILE *file_samp_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/samp_data.txt", "w");
     for (int i=0; i < IS * DES_LEN; i++) {
         fprintf(file_temp_data, "%0x\n", 0);
     }
@@ -282,9 +282,9 @@ int main(void) {
     fclose(file_samp_data);
 
 
-    FILE *file_dist_res   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/dist_res_ref.txt", "w");
-    FILE *file_min_data   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/mindata_res_ref.txt", "w");
-    FILE *file_min_pos   = fopen("D:/Learn/2-DESIGN/Spinalhdl/NPU/NPU/src/main/scala/minpos_res_ref.txt", "w");
+    FILE *file_dist_res   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/dist_res_ref.txt", "w");
+    FILE *file_min_data   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/mindata_res_ref.txt", "w");
+    FILE *file_min_pos   = fopen("D:/Learn/IC/project/Spinalhdl/NPU/src/main/scala/minpos_res_ref.txt", "w");
 
     for (int i = 0; i < IS*NTH; i++) {
 	    fprintf(file_dist_res, "%d\n", 0);

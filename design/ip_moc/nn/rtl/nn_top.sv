@@ -14,25 +14,37 @@ module nn_top #(
     input                       clk                 ,
     input                       rstn                ,  
     /* DATA Interface todo need 2 data bank, replaced by BUS */
-    output logic                data_rd             ,
-    output logic                data_wr             ,
-    output logic [DADDR_WD-1:0] data_raddr          ,
-    output logic [DADDR_WD-1:0] data_waddr          ,
-    output logic [DDATA_WD-1:0] data_wdata          ,
-    input [DDATA_WD-1:0]        data_rdata          ,
-    input                       data_wvalid         ,
-    input                       data_rvalid         ,
     input [DADDR_WD-1:0]        rg_src_data_base    ,   // bank for read
     input [DADDR_WD-1:0]        rg_dest_data_base   ,   // bank for write
+    input [DADDR_WD-1:0]        rg_coef_base        ,
+    input [DADDR_WD-1:0]        rg_param_base       ,
+    /* SRC MEMORY */
+    output logic                src_mem_rd             ,
+    output logic                src_mem_wr             ,
+    output logic [DADDR_WD-1:0] src_mem_addr           ,
+    input [DDATA_WD-1:0]        src_mem_rdata          ,
+    output logic [DDATA_WD-1:0] src_mem_wdata          ,
+    output logic [DDATA_WD/8-1:0] src_mem_wmask        ,
+    /* DEST MEMORY */
+    output logic                dest_mem_rd            ,
+    output logic                dest_mem_wr            ,
+    output logic [DADDR_WD-1:0] dest_mem_addr          ,
+    input [DDATA_WD-1:0]        dest_mem_rdata         ,
+    output logic [DDATA_WD-1:0] dest_mem_wdata         ,
+    output logic [DDATA_WD/8-1:0] dest_mem_wmask       ,
+
     /* WGT Interface todo replaced by BUS */
-    output logic                wgt_rd              ,
-    output logic                wgt_wr              ,
-    output logic [DADDR_WD-1:0] wgt_raddr           ,
-    output logic [DADDR_WD-1:0] wgt_waddr           ,
-    output logic [DDATA_WD-1:0] wgt_wdata           ,
-    input [DDATA_WD-1:0]        wgt_rdata           ,
-    input                       wgt_wvalid          ,
-    input                       wgt_rvalid          ,
+    /* WGT MEMORY */
+    output logic                wgt_mem_rd             ,
+    output logic                wgt_mem_wr             ,
+    output logic [DADDR_WD-1:0] wgt_mem_addr           ,
+    input [DDATA_WD-1:0]        wgt_mem_rdata          ,
+    output logic [DDATA_WD-1:0] wgt_mem_wdata          ,
+    output logic [DDATA_WD/8-1:0] wgt_mem_wmask        ,
+    /* PARAM MEMORY */
+    output logic                param_mem_rd           ,
+    output logic [DADDR_WD-1:0] param_mem_addr         ,
+    input [DDATA_WD-1:0]        param_mem_rdata        ,
     /* config todo width */
     input [9:0]                 rg_batch_num        ,
     input [9:0]                 rg_in_w             ,   // input
@@ -59,9 +71,9 @@ module nn_top #(
     input [3:0]                 rg_wgt_type         ,   // type
     input [9:0]                 rg_strip_len        ,   // stripe
     /* Interface with top top */
-    input                       mac_init            ,
-    input                       mac_start           ,
-    output logic                mac_done     
+    input                       conv_init           ,
+    input                       conv_start          ,
+    output logic                conv_done     
 );
 
 logic [DDATA_WD-1:0] data_to_mac         ;
@@ -96,24 +108,31 @@ mac_control #(
 ) mac_control_inst(
     .clk                (clk               ) ,
     .rstn               (rstn              ) ,  
-    .data_rd            (data_rd           ) ,
-    .data_wr            (data_wr           ) ,
-    .data_raddr         (data_raddr        ) ,
-    .data_waddr         (data_waddr        ) ,
-    .data_wdata         (data_wdata        ) ,
-    .data_rdata         (data_rdata        ) ,
-    .data_wvalid        (data_wvalid       ) ,
-    .data_rvalid        (data_rvalid       ) ,
-    .rg_src_data_base   (rg_src_data_base  ) ,   // bank for read
-    .rg_dest_data_base  (rg_dest_data_base ) ,   // bank for write
-    .wgt_rd             (wgt_rd            ) ,
-    .wgt_wr             (wgt_wr            ) ,
-    .wgt_raddr          (wgt_raddr         ) ,
-    .wgt_waddr          (wgt_waddr         ) ,
-    .wgt_wdata          (wgt_wdata         ) ,
-    .wgt_rdata          (wgt_rdata         ) ,
-    .wgt_wvalid         (wgt_wvalid        ) ,
-    .wgt_rvalid         (wgt_rvalid        ) ,
+    .rg_src_data_base   (rg_src_data_base  ) ,
+    .rg_dest_data_base  (rg_dest_data_base ) ,
+    .rg_coef_base       (rg_coef_base      ) ,
+    .rg_param_base      (rg_param_base     ) ,
+    .src_mem_rd         (src_mem_rd        ) ,
+    .src_mem_wr         (src_mem_wr        ) ,
+    .src_mem_addr       (src_mem_addr      ) ,
+    .src_mem_rdata      (src_mem_rdata     ) ,
+    .src_mem_wdata      (src_mem_wdata     ) ,
+    .src_mem_wmask      (src_mem_wmask     ) ,  
+    .dest_mem_rd        (dest_mem_rd       ) ,
+    .dest_mem_wr        (dest_mem_wr       ) ,
+    .dest_mem_addr      (dest_mem_addr     ) ,
+    .dest_mem_rdata     (dest_mem_rdata    ) ,
+    .dest_mem_wdata     (dest_mem_wdata    ) ,
+    .dest_mem_wmask     (dest_mem_wmask    ) ,
+    .wgt_mem_rd         (wgt_mem_rd        ) ,
+    .wgt_mem_wr         (wgt_mem_wr        ) ,
+    .wgt_mem_addr       (wgt_mem_addr      ) ,
+    .wgt_mem_rdata      (wgt_mem_rdata     ) ,
+    .wgt_mem_wdata      (wgt_mem_wdata     ) ,
+    .wgt_mem_wmask      (wgt_mem_wmask     ) ,
+    .param_mem_rd       (param_mem_rd      ) ,
+    .param_mem_addr     (param_mem_addr    ) ,
+    .param_mem_rdata    (param_mem_rdata   ) ,
     .rg_batch_num       (rg_batch_num      ) ,
     .rg_in_w            (rg_in_w           ) ,   // input
     .rg_in_h            (rg_in_h           ) ,   // input
@@ -154,9 +173,9 @@ mac_control #(
     .mac_chn_slice_num  (mac_chn_slice_num ) ,
     .data_from_mac      (data_from_mac     ) ,
     .data_from_mac_vld  (data_from_mac_vld ) ,
-    .mac_init           (mac_init          ) ,
-    .mac_start          (mac_start         ) ,
-    .mac_done           (mac_done          )     
+    .mac_init           (conv_init         ) ,
+    .mac_start          (conv_start        ) ,
+    .mac_done           (conv_done         )     
 );
 
 mac_array #(
