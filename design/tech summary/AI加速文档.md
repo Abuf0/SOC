@@ -95,11 +95,26 @@
   - 假设TPU阵列size为`M × N`，那么阵列排满并满转时，每周期最多能收集到`min(M,N)`个计算结果；
 - Array Size决定了tile的切片尺寸；根据OutFeature Size来决定tile的切片方式；
   - 假设TPU阵列为3×3， GEMM的InFeaSize为4×5，WeightSize为5×6，那么（不考虑padding，strip=1）OutFeaSize为4×6；为了划分到TPU阵列中，会根据OutFeaSize划分出4个tile，分别为3×3、3×3、1×3、1×3，其中1×3会通过补0填充到3×3；此时使用率会有所降低；
+  - 估算conv->TPU的计算cycles：以conv=16x16x3 kernel=3x3 outch=8 stride=1为例
+    - 考虑padding后，输出size为16x16x8（256x8），根据8x8的TPU阵列，分成32(256/8)个tile，每个tile的patch为27（3x3x3），总共需要计算864（27x32）个cycle，加上头load
+  /尾排空需要7个cyle，总共需要871 cycle。（计算与scale-sim一致）
+    - 转成GEMM时，M=256，N=8，K=27。
 
 ### NVDLA MAC Array
 PK & PC并行
 
-### SIMD + Tensor core
+### SIMD + Tensor core（合成一个SM）
+- Tensor core
+  - 包含很多register，用于存储从cache中读到（重排？）的IF和Weight数据，以及PSUM；
+  - 包含矩阵乘计算阵列；
+  - 包含很多乘法器；
+  - 包含很多LD/ST单元；
+  - 包含很多SFU？
+- SIMD
+  - 统一管理指令到tensor core的分配？
+
+## input/weight/output stationary(数据流调度策略)
+TODO:
 
 ## 常用架构模拟器
 ### TimeLoop + Acc
@@ -116,3 +131,25 @@ PK & PC并行
   ![alt text](image-11.png)
 - v3升级版：
   ![alt text](image-12.png)
+
+
+## NPU和Core之间的交互（以ARM为例）
+- 编译
+  - pytorch release网络，吐出tfile；
+  - vela编译器根据tfile，分辨该计算通过NPU/CPU执行，分割tile，分配数据搬运，解析算子配置，生成bin文件；
+  - 和CPU生成的bin(elf->bin)一起，静态/动态存放在某个地址空间；
+- 运行
+  - CPU执行到某段代码后，根据config配置NPU运行环境，包括command stream的base addr，size、数据类型和量化精度等；
+  - NPU内部start被触发后，从config配置中解析CMD存放位置，读取地址中的CMD，并完成指令解析；CMD stream中包含DMA搬运信息、卷积参数等；
+  - DMA会将数据从SRAM中搬运到缓冲区（BRAM），卷积还涉及im2col的隐式搬运；
+  - NPU启动算子进行计算；
+  - NPU完成计算后，会返回中断和中断信息给CPU；
+  - CPU接受到中断后，进入服务程序，根据所需处理NPU的计算结果，并且下发下一个config，启动NPU；
+- 双缓冲机制
+  - CPU会将NPU要用的数据通过DMA从外部存储器（FLASH/DRAM）搬运到SRAM_A中；
+  - NPU使用SRAM_A时，CPU会将下一次NPU要用的数据从外部RAM搬运到SRAM_B中；
+  - 通过这种乒乓式的双缓冲，可以隐藏一部分搬运数据开销；
+- Scale-Sim中的DRAM bandwidth/利用率和SRAM bandwidth/利用率
+  - 前者评估的是从外部储存器搬运数据到片上SRAM；受限于带宽、delay、总线频率、功耗；
+  - 后者评估的是从片上SRAM中读数据到TPU阵列的缓冲区；着重数据的复用；
+  - TODO;
